@@ -1,6 +1,54 @@
-import { useT } from './lib/i18n.jsx';
+import { Outlet } from 'react-router-dom';
+import { RequireAuth, RequireRole } from './auth/guards.jsx';
+import { ServerWakeBanner } from './components/layout/ServerWakeBanner.jsx';
+import LoginPage from './pages/LoginPage.jsx';
 
-export default function App() {
-  const t = useT();
-  return <main className="p-6 text-2xl font-semibold">{t('app.name')}</main>;
+function RootLayout() {
+  return (
+    <>
+      <ServerWakeBanner />
+      <Outlet />
+    </>
+  );
 }
+
+const Placeholder = ({ name }) => <main className="p-6 text-2xl font-semibold">{name}</main>;
+
+export const routes = [
+  {
+    element: <RootLayout />,
+    children: [
+      { path: '/login', element: <LoginPage /> },
+      {
+        element: (
+          <RequireAuth>
+            <Outlet />
+          </RequireAuth>
+        ),
+        children: [
+          {
+            element: (
+              <RequireRole role="contractor">
+                <Outlet />
+              </RequireRole>
+            ),
+            children: [
+              { path: '/', element: <Placeholder name="Dashboard" /> },
+              { path: '/workers', element: <Placeholder name="Workers" /> },
+              { path: '/payments', element: <Placeholder name="Payments" /> },
+            ],
+          },
+          {
+            path: '/admin/*',
+            element: (
+              <RequireRole role="admin">
+                <Placeholder name="Admin" />
+              </RequireRole>
+            ),
+          },
+        ],
+      },
+      { path: '*', element: <Placeholder name="Not found" /> },
+    ],
+  },
+];

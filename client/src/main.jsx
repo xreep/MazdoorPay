@@ -1,13 +1,29 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { MotionConfig } from 'framer-motion';
+import { Toaster } from 'sonner';
 import { I18nProvider } from './lib/i18n.jsx';
-import App from './App.jsx';
+import { createQueryClient } from './lib/queryClient.js';
+import { AuthProvider } from './auth/AuthProvider.jsx';
+import { routes } from './App.jsx';
 import './index.css';
+
+const queryClient = createQueryClient();
+const router = createBrowserRouter(routes);
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <I18nProvider lang="en">
-      <App />
-    </I18nProvider>
+    <QueryClientProvider client={queryClient}>
+      <I18nProvider lang="en">
+        <AuthProvider>
+          <MotionConfig reducedMotion="user">
+            <RouterProvider router={router} />
+            <Toaster position="top-center" richColors closeButton />
+          </MotionConfig>
+        </AuthProvider>
+      </I18nProvider>
+    </QueryClientProvider>
   </StrictMode>
 );
