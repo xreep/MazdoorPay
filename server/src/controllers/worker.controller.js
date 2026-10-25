@@ -25,6 +25,10 @@ export async function deactivate(req, res) {
   res.json({ worker: await workers.setActive(contextOf(req), req.params.id, false) });
 }
 
+export async function slip(req, res) {
+  res.json(await workers.getWageSlip(req.user.id, req.params.id, req.query));
+}
+
 export async function reactivate(req, res) {
   res.json({ worker: await workers.setActive(contextOf(req), req.params.id, true) });
 }

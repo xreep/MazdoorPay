@@ -1,15 +1,15 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
-import { HandCoins, IndianRupee, Pencil, Phone, Power, UserX } from 'lucide-react';
-import { formatINR, todayIST } from '@mazdoorpay/shared';
+import { FileText, HandCoins, IndianRupee, Pencil, Phone, Power, UserX } from 'lucide-react';
+import { formatINR, todayIST, weekStart } from '@mazdoorpay/shared';
 import { useT } from '../lib/i18n.jsx';
 import { useAuth } from '../auth/AuthProvider.jsx';
 import { weeklySummaryMessage } from '../lib/whatsapp.js';
 import { WhatsAppLink } from '../components/ui/WhatsAppLink.jsx';
 import { formatDay, initials } from '../lib/format.js';
 import { PageHeader } from '../components/layout/PageHeader.jsx';
-import { Button } from '../components/ui/Button.jsx';
+import { Button, buttonClasses } from '../components/ui/Button.jsx';
 import { Card } from '../components/ui/Card.jsx';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog.jsx';
 import { EmptyState } from '../components/ui/EmptyState.jsx';
@@ -214,6 +214,13 @@ export default function WorkerProfilePage() {
               ))}
             </ul>
             <div className="mt-5 flex flex-wrap gap-2 border-t border-border pt-4">
+              <Link
+                to={`/print/wage-slip/${worker._id}?from=${weekStart(todayIST())}&to=${todayIST()}`}
+                className={buttonClasses({ variant: 'secondary', size: 'sm' })}
+              >
+                <FileText className="h-4 w-4" aria-hidden="true" />
+                {t('slip.link')}
+              </Link>
               <Button
                 variant="secondary"
                 size="sm"

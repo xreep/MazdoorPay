@@ -4,6 +4,7 @@ import { Worker } from '../models/Worker.js';
 import { Site } from '../models/Site.js';
 import { Attendance } from '../models/Attendance.js';
 import { Payment } from '../models/Payment.js';
+import { User } from '../models/User.js';
 import { httpError } from '../utils/httpError.js';
 import { pageResult, skipFor } from '../utils/pagination.js';
 import { pick, recordAudit } from './audit.service.js';
@@ -235,4 +236,69 @@ export async function getWorkerSummary(contractorId, workerId) {
       .lean(),
   ]);
   return { worker, site, balance, recentAttendance, recentPayments };
+}
+
+const sumOf = async (model, match, field) => {
+  const [row] = await model.aggregate([
+    { $match: match },
+    { $group: { _id: null, total: { $sum: `$${field}` } } },
+  ]);
+  return row?.total ?? 0;
+};
+
+// A wage slip: what the worker was owed before the period, what they earned and were paid in it
+// (voided payments left out), and what they are owed at its end.
+export async function getWageSlip(contractorId, workerId, { from, to }) {
+  const { worker, site } = await getWorker(contractorId, workerId);
+  const scope = {
+    contractorId: new mongoose.Types.ObjectId(String(contractorId)),
+    workerId: worker._id,
+  };
+  const before = { ...scope, day: { $lt: from } };
+  const during = { ...scope, day: { $gte: from, $lte: to } };
+  const [contractor, attendance, payments, earnedBefore, paidBefore] = await Promise.all([
+    User.findById(contractorId).select('name phone').lean(),
+    Attendance.find(during).sort({ day: 1 }).lean(),
+    Payment.find({ ...during, voidedAt: null })
+      .sort({ day: 1, createdAt: 1 })
+      .lean(),
+    sumOf(Attendance, before, 'earned'),
+    sumOf(Payment, { ...before, voidedAt: null }, 'amount'),
+  ]);
+  const count = (status) => attendance.filter((a) => a.status === status).length;
+  const paidOf = (type) =>
+    payments.filter((p) => p.type === type).reduce((t, p) => t + p.amount, 0);
+  const totals = {
+    present: count('present'),
+    halfDay: count('half-day'),
+    absent: count('absent'),
+    earned: attendance.reduce((t, a) => t + a.earned, 0),
+    wagesPaid: paidOf('wage'),
+    advancesPaid: paidOf('advance'),
+  };
+  const openingBalance = earnedBefore - paidBefore;
+  return {
+    worker,
+    site,
+    contractor: { name: contractor?.name, phone: contractor?.phone ?? null },
+    from,
+    to,
+    days: attendance.map((a) => ({
+      day: a.day,
+      status: a.status,
+      rate: a.rateSnapshot,
+      earned: a.earned,
+    })),
+    payments: payments.map((p) => ({
+      _id: p._id,
+      day: p.day,
+      amount: p.amount,
+      type: p.type,
+      method: p.method,
+      reference: p.reference ?? null,
+    })),
+    totals,
+    openingBalance,
+    closingBalance: openingBalance + totals.earned - totals.wagesPaid - totals.advancesPaid,
+  };
 }

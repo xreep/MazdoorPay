@@ -29,6 +29,13 @@ export function WageCards({ data }) {
             </span>
             <span className="shrink-0">{t('wages.earned')}</span>
           </div>
+          <Link
+            to={`/print/wage-slip/${w.workerId}?from=${data.from}&to=${data.to}`}
+            aria-label={t('slip.linkFor', { name: w.name })}
+            className="mt-1 inline-flex min-h-12 items-center text-sm font-semibold text-brand-ink hover:underline"
+          >
+            {t('slip.link')}
+          </Link>
           <dl className="mt-2 grid grid-cols-2 gap-2 text-sm">
             <div className="rounded-control bg-surface-2 px-3 py-2">
               <dt className="text-ink-muted">{t('wages.paid')}</dt>

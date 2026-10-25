@@ -84,17 +84,17 @@ All money is **integer paise** (₹1 = 100). All business days are **`YYYY-MM-DD
 
 Interactive reference: **https://mazdoorpay-api.onrender.com/api/v1/docs/** (raw OpenAPI 3.1 at `/api/v1/docs/openapi.json`). Request bodies and query parameters in it are generated from the same Zod schemas the routes validate with. The route list and each route's status codes are maintained by hand beside them, and a test fails if that list differs from the routes the API serves. Response bodies are described in words, not schemas.
 
-| Module     | Endpoints                                                                                                                                                              |
-| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Auth       | register, login, refresh, logout, `GET/PATCH /auth/me`                                                                                                                 |
-| Sites      | list with worker counts, create, read with stats, update, delete (only when unused)                                                                                    |
-| Workers    | search and paginate, create, read, summary (balance, 60-day attendance, recent payments), update, rate change, deactivate, reactivate                                  |
-| Attendance | bulk save for a day, history, site register for a day, month calendar                                                                                                  |
-| Wages      | daily or weekly summary with period payments and balances                                                                                                              |
-| Payments   | record (idempotent), history, dues and advances, receipt data, void                                                                                                    |
-| Reports    | attendance, muster roll, wage register, payments — JSON or CSV                                                                                                         |
-| Dashboard  | today's progress per site, money totals, 30-day trend                                                                                                                  |
-| Admin      | overview, weekly growth, daily activity, users, user detail, a contractor's workers (masked contacts), suspend, reactivate, audit log, data checks, KPIs (JSON or CSV) |
+| Module     | Endpoints                                                                                                                                                                                   |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Auth       | register, login, refresh, logout, `GET/PATCH /auth/me`                                                                                                                                      |
+| Sites      | list with worker counts, create, read with stats, update, delete (only when unused)                                                                                                         |
+| Workers    | search and paginate, create, read, summary (balance, 60-day attendance, recent payments), wage slip for a period (opening and closing balance), update, rate change, deactivate, reactivate |
+| Attendance | bulk save for a day, history, site register for a day, month calendar                                                                                                                       |
+| Wages      | daily or weekly summary with period payments and balances                                                                                                                                   |
+| Payments   | record (idempotent), history, dues and advances, receipt data, void                                                                                                                         |
+| Reports    | attendance, muster roll, wage register, payments — JSON or CSV                                                                                                                              |
+| Dashboard  | today's progress per site, money totals, 30-day trend                                                                                                                                       |
+| Admin      | overview, weekly growth, daily activity, users, user detail, a contractor's workers (masked contacts), suspend, reactivate, audit log, data checks, KPIs (JSON or CSV)                      |
 
 CSV exports start with a UTF-8 byte-order mark (so Excel shows ₹ correctly), use CRLF line endings and RFC 4180 quoting, and prefix cells that start with `= + - @` with an apostrophe so a spreadsheet never runs them as formulas (plain numbers, including negatives, stay numeric).
 

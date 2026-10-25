@@ -123,6 +123,13 @@ const ROUTES = [
     'Profile: balance, last 60 days of attendance, recent payments',
   ],
   [
+    'get',
+    '/workers/{id}/slip',
+    'Workers',
+    'Wage slip for a period: days, payments, opening and closing balance',
+    { query: s.wageSlipQuerySchema },
+  ],
+  [
     'patch',
     '/workers/{id}',
     'Workers',

@@ -19,6 +19,7 @@ const WagesPage = lazy(() => import('./pages/WagesPage.jsx'));
 const WageRegisterPrint = lazy(() => import('./pages/print/WageRegisterPrint.jsx'));
 const PaymentsPage = lazy(() => import('./pages/PaymentsPage.jsx'));
 const ReceiptPrint = lazy(() => import('./pages/print/ReceiptPrint.jsx'));
+const WageSlipPrint = lazy(() => import('./pages/print/WageSlipPrint.jsx'));
 const PaymentsReportPrint = lazy(() => import('./pages/print/PaymentsReportPrint.jsx'));
 const AdminPage = lazy(() => import('./pages/AdminPage.jsx'));
 const MusterRollPrint = lazy(() => import('./pages/print/MusterRollPrint.jsx'));
@@ -98,6 +99,7 @@ export const routes = [
           { path: 'attendance', element: <AttendanceReportPrint /> },
           { path: 'wage-register', element: <WageRegisterPrint /> },
           { path: 'receipt/:id', element: <ReceiptPrint /> },
+          { path: 'wage-slip/:id', element: <WageSlipPrint /> },
           { path: 'payments', element: <PaymentsReportPrint /> },
         ],
       },

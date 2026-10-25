@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { LANGUAGES, LIMITS, WORKER_ROLES } from '../constants.js';
 import {
+  dateRangeSchema,
   daySchema,
   objectIdSchema,
   paginationSchema,
@@ -49,3 +50,6 @@ export const workerListQuerySchema = paginationSchema.extend({
   role: z.enum(WORKER_ROLES).optional(),
   status: z.enum(['active', 'inactive', 'all']).default('active'),
 });
+
+// A wage slip covers one worker from `from` to `to`, both inclusive.
+export const wageSlipQuerySchema = dateRangeSchema;

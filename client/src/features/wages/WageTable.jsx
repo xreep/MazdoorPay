@@ -10,6 +10,8 @@ const bucketLabel = (bucket, groupBy) =>
     ? formatDay(bucket.start)
     : `${formatDay(bucket.start)} – ${formatDay(bucket.end)}`;
 
+const slipHref = (workerId, data) => `/print/wage-slip/${workerId}?from=${data.from}&to=${data.to}`;
+
 export function WageTable({ data }) {
   const t = useT();
   const [open, setOpen] = useState(() => new Set());
@@ -48,7 +50,16 @@ export function WageTable({ data }) {
                     <Link to={`/workers/${w.workerId}`} className="font-semibold hover:underline">
                       {w.name}
                     </Link>
-                    <p className="text-sm text-ink-muted">{t(`roles.${w.role}`)}</p>
+                    <p className="text-sm text-ink-muted">
+                      {t(`roles.${w.role}`)} ·{' '}
+                      <Link
+                        to={slipHref(w.workerId, data)}
+                        aria-label={t('slip.linkFor', { name: w.name })}
+                        className="font-medium text-brand-ink hover:underline"
+                      >
+                        {t('slip.link')}
+                      </Link>
+                    </p>
                   </td>
                   <td className={num}>{w.present}</td>
                   <td className={num}>{w.halfDay}</td>

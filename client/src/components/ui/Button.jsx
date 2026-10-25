@@ -13,6 +13,10 @@ const SIZES = {
   lg: 'h-14 px-6 text-base',
 };
 
+// For links that should look like buttons.
+export const buttonClasses = ({ variant = 'primary', size = 'md', className = '' } = {}) =>
+  `inline-flex items-center justify-center gap-2 rounded-control font-medium transition disabled:cursor-not-allowed disabled:opacity-60 ${VARIANTS[variant]} ${SIZES[size]} ${className}`;
+
 export const Button = forwardRef(function Button(
   {
     variant = 'primary',
@@ -32,7 +36,7 @@ export const Button = forwardRef(function Button(
       type={type}
       disabled={disabled || loading}
       aria-busy={loading || undefined}
-      className={`inline-flex items-center justify-center gap-2 rounded-control font-medium transition disabled:cursor-not-allowed disabled:opacity-60 ${VARIANTS[variant]} ${SIZES[size]} ${className}`}
+      className={buttonClasses({ variant, size, className })}
       {...rest}
     >
       {loading && (

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { todayIST, weekStart } from '@mazdoorpay/shared';
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { API, HttpResponse, http, server } from '../test/server.js';
@@ -81,6 +82,16 @@ describe('WorkerProfilePage', () => {
     expect(text).toMatch('बाकी: ₹1,400');
     expect(text).toMatch('— Ravi Kumar');
     expect(link).toHaveAttribute('target', '_blank');
+  });
+
+  it("links to this week's wage slip", async () => {
+    server.use(...base());
+    render();
+    const link = await screen.findByRole('link', { name: 'Wage slip' });
+    const url = new URL(link.getAttribute('href'), 'http://localhost');
+    expect(url.pathname).toBe('/print/wage-slip/w1');
+    expect(url.searchParams.get('from')).toBe(weekStart(todayIST()));
+    expect(url.searchParams.get('to')).toBe(todayIST());
   });
 
   it('says "advance outstanding" when the balance is negative', async () => {

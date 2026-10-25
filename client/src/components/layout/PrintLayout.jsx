@@ -4,14 +4,22 @@ import { useT } from '../../lib/i18n.jsx';
 import { Logo } from './Logo.jsx';
 
 // A plain sheet for printing or saving as PDF: no app chrome, black on white.
-export function PrintLayout({ title, subtitle, meta, landscape = false, actions, children }) {
+export function PrintLayout({
+  title,
+  subtitle,
+  meta,
+  landscape = false,
+  paper = 'A4',
+  actions,
+  children,
+}) {
   const t = useT();
   useEffect(() => {
     document.title = `${title} · MazdoorPay`;
   }, [title]);
   return (
     <div className="min-h-dvh bg-white text-black">
-      <style>{`@page { size: A4 ${landscape ? 'landscape' : 'portrait'}; margin: 12mm; }`}</style>
+      <style>{`@page { size: ${paper} ${landscape ? 'landscape' : 'portrait'}; margin: ${paper === 'A5' ? 8 : 12}mm; }`}</style>
       <div className="no-print sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-border bg-surface px-4 py-3">
         <button
           type="button"

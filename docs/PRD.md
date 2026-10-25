@@ -105,6 +105,7 @@ Construction contractors in India manage daily wage workers — masons, labourer
 | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | WhatsApp messages | One tap opens WhatsApp with a receipt (from the receipt page) or this week's summary (from the worker's profile) written in the worker's language; the contractor presses Send. No WhatsApp Business API.                                                                                                              |
 | UPI pay-assist    | With UPI chosen in Record payment, a phone opens the contractor's own UPI app with the worker's UPI ID and amount filled in; a computer shows the same request as a QR code. The contractor types the UTR back in. **Not a payment integration:** MazdoorPay never sees or moves money and cannot confirm the payment. |
+| Wage slip         | A printable, A5-sized slip for one worker and any period: previous balance + earned − paid = balance due, with each day's attendance and rate and each payment. Linked from every worker on the Wages page (for the period on screen) and from the worker's profile (this week).                                       |
 | **6**             | **Admin**                                                                                                                                                                                                                                                                                                              |                                                                                                                                                                       |
 | 6.1               | Manage users and contractors                                                                                                                                                                                                                                                                                           | Users list with search; read-only contractor detail; suspend (ends their sessions) and reactivate                                                                     |
 | 6.2               | Monitor system usage                                                                                                                                                                                                                                                                                                   | Overview totals, weekly sign-ups, activity per day, full activity log with filters                                                                                    |
@@ -162,13 +163,13 @@ All are computed live from the data on the admin **Analytics** page and exportab
 
 ## 11. Release
 
-| Phase       | Content                                                                 | Status      |
-| ----------- | ----------------------------------------------------------------------- | ----------- |
-| 1 — Backend | API, rules, security, tests                                             | Done        |
-| 2 — Web app | 8 pages, print views                                                    | Done        |
-| 3 — Quality | End-to-end tests, accessibility, performance, CI                        | Done        |
-| 4 — Launch  | Deployment, demo data, documentation                                    | Done        |
-| 5 — Extras  | WhatsApp messages, UPI pay-assist, then the rest of section 13 in order | In progress |
+| Phase       | Content                                                                            | Status      |
+| ----------- | ---------------------------------------------------------------------------------- | ----------- |
+| 1 — Backend | API, rules, security, tests                                                        | Done        |
+| 2 — Web app | 8 pages, print views                                                               | Done        |
+| 3 — Quality | End-to-end tests, accessibility, performance, CI                                   | Done        |
+| 4 — Launch  | Deployment, demo data, documentation                                               | Done        |
+| 5 — Extras  | WhatsApp messages, UPI pay-assist, wage slip, then the rest of section 13 in order | In progress |
 
 ## 12. Risks
 
