@@ -203,7 +203,8 @@ npm run restore -w server -- --file <file> --confirm  # replaces the collections
 
 - Render's free plan sleeps after 15 minutes without traffic; the first request then takes up to a minute (the app shows "Waking up the server…").
 - The demo admin's password is public on the login page for evaluation. It sees only the demo accounts (platform totals still count everyone) and cannot suspend them; rotate it afterwards.
-- Offline use and dark mode are designed but not built; see the PRD's future enhancements.
+- Offline marking and dark mode are designed but not built; see the PRD's future enhancements.
+- Installable app: `client/public/manifest.webmanifest` with regular and maskable icons, and a hand-written service worker (`client/public/sw.js`, about 60 lines) registered in production builds only. Pages are network-first with the cached shell as the offline fallback; content-hashed `/assets/` are cache-first, capped at 80 files; `/api/` is never cached. `sw.js` is served with `no-cache` so updates reach users on the next visit.
 - Statement links: a 32-byte random token, stored only as its SHA-256 hash (so the link is shown once, when made). `GET /api/v1/statements/:token` is public, held to the login rate limit, answers stopped and made-up tokens with the same 404, and records `lastViewedAt`. The page sends `noindex` and `no-referrer`.
 - Hindi: `client/src/lib/hi.js` mirrors `en.js` key for key, and a test fails if a key or `{placeholder}` is missing. The chosen language is kept on the device and in the account (`preferredLanguage`), and the account's choice wins after login. Dates use `hi-IN` formats through `useFormat()`; amounts keep Indian-English digits (₹1,23,450), as people write them. Server messages stay in English.
 - WhatsApp messages are click-to-send links (`wa.me`): MazdoorPay writes the text, and the contractor sends it from their own WhatsApp. Nothing is sent automatically.

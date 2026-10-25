@@ -27,3 +27,12 @@ createRoot(document.getElementById('root')).render(
     </QueryClientProvider>
   </StrictMode>
 );
+
+// Installable app: the service worker caches the app shell (never data). Production builds only.
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {
+      // Without it the app still works; it just cannot be installed or open offline.
+    });
+  });
+}

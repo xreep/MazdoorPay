@@ -109,6 +109,7 @@ Construction contractors in India manage daily wage workers — masons, labourer
 | QR attendance and ID cards | Printable credit-card-size ID cards (one worker, or every active worker on a site, ten to an A4 sheet). "Scan ID cards" on the Attendance page uses the phone camera: each card marks that worker present today, with a beep and buzz; a worker already marked keeps their mark. Cards carry a signed code (`MP1.<worker>.<version>.<signature>`), so they cannot be forged; "Replace lost card" makes the old card stop working.                                            |
 | Hindi                      | Every screen in simple, everyday Hindi, switched with one tap (sidebar, phone header or login page) and saved to the account so it follows the user to any device. Dates follow the language. Receipts and wage slips print in the worker's own language, whatever the contractor uses. The Devanagari font is self-hosted and downloads only when Hindi is on screen. Messages from the server (such as validation errors) stay in English.                                 |
 | Worker statement link      | From the worker's profile, the contractor makes a private link and sends it (copy or WhatsApp). The worker opens it without an account and sees, in their own language, their all-time balance (the same figure the contractor sees) and the last 90 days of attendance, earnings and payments. Nothing else is shown: no other workers, no contractor contact details. A new link replaces the old one, "Stop link" ends it, and the profile shows when it was last opened. |
+| Installable app            | "Add to home screen" on Android and iPhone opens MazdoorPay full-screen like an app, with its own icon. A service worker caches the app shell only: the app opens quickly, and without a connection it says it cannot reach the server instead of showing old figures. Nothing is saved offline.                                                                                                                                                                             |
 | **6**                      | **Admin**                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |                                                                                                                                                                       |
 | 6.1                        | Manage users and contractors                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Users list with search; read-only contractor detail; suspend (ends their sessions) and reactivate                                                                     |
 | 6.2                        | Monitor system usage                                                                                                                                                                                                                                                                                                                                                                                                                                                         | Overview totals, weekly sign-ups, activity per day, full activity log with filters                                                                                    |
@@ -166,13 +167,13 @@ All are computed live from the data on the admin **Analytics** page and exportab
 
 ## 11. Release
 
-| Phase       | Content                                                                                                                   | Status      |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------- | ----------- |
-| 1 — Backend | API, rules, security, tests                                                                                               | Done        |
-| 2 — Web app | 8 pages, print views                                                                                                      | Done        |
-| 3 — Quality | End-to-end tests, accessibility, performance, CI                                                                          | Done        |
-| 4 — Launch  | Deployment, demo data, documentation                                                                                      | Done        |
-| 5 — Extras  | WhatsApp messages, UPI pay-assist, wage slip, QR attendance, Hindi, statement links, then the rest of section 13 in order | In progress |
+| Phase       | Content                                                                                                              | Status      |
+| ----------- | -------------------------------------------------------------------------------------------------------------------- | ----------- |
+| 1 — Backend | API, rules, security, tests                                                                                          | Done        |
+| 2 — Web app | 8 pages, print views                                                                                                 | Done        |
+| 3 — Quality | End-to-end tests, accessibility, performance, CI                                                                     | Done        |
+| 4 — Launch  | Deployment, demo data, documentation                                                                                 | Done        |
+| 5 — Extras  | WhatsApp messages, UPI pay-assist, wage slip, QR attendance, Hindi, statement links, installable app; dark mode next | In progress |
 
 ## 12. Risks
 
@@ -188,7 +189,7 @@ All are computed live from the data on the admin **Analytics** page and exportab
 
 Designed but not built yet:
 
-1. **Installable app and offline marking** — add to home screen; mark attendance without signal and sync later.
+1. **Offline marking** — mark attendance without signal and sync later (the app already installs to the home screen).
 2. **Dark mode** — the colour system already has a dark palette.
 3. **Overtime hours and piece-rate work.**
 4. **Biometric or GPS attendance.**
