@@ -1,9 +1,12 @@
+import { lazy } from 'react';
 import { Outlet } from 'react-router-dom';
 import { RequireAuth, RequireRole } from './auth/guards.jsx';
 import { AppShell } from './components/layout/AppShell.jsx';
 import { ServerWakeBanner } from './components/layout/ServerWakeBanner.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import NotFoundPage from './pages/NotFoundPage.jsx';
+
+const DashboardPage = lazy(() => import('./pages/DashboardPage.jsx'));
 
 const Placeholder = ({ name }) => <h1 className="text-2xl font-bold">{name}</h1>;
 
@@ -38,7 +41,7 @@ export const routes = [
         ),
         children: [
           contractorOnly([
-            { path: '/', element: <Placeholder name="Home" /> },
+            { path: '/', element: <DashboardPage /> },
             { path: '/attendance', element: <Placeholder name="Attendance" /> },
             { path: '/workers', element: <Placeholder name="Workers" /> },
             { path: '/payments', element: <Placeholder name="Payments" /> },
