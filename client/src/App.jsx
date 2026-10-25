@@ -12,6 +12,8 @@ const SitesPage = lazy(() => import('./pages/SitesPage.jsx'));
 const WorkersPage = lazy(() => import('./pages/WorkersPage.jsx'));
 const WorkerProfilePage = lazy(() => import('./pages/WorkerProfilePage.jsx'));
 const AttendancePage = lazy(() => import('./pages/AttendancePage.jsx'));
+const WagesPage = lazy(() => import('./pages/WagesPage.jsx'));
+const WageRegisterPrint = lazy(() => import('./pages/print/WageRegisterPrint.jsx'));
 const MusterRollPrint = lazy(() => import('./pages/print/MusterRollPrint.jsx'));
 const AttendanceReportPrint = lazy(() => import('./pages/print/AttendanceReportPrint.jsx'));
 
@@ -53,7 +55,7 @@ export const routes = [
             { path: '/workers', element: <WorkersPage /> },
             { path: '/workers/:id', element: <WorkerProfilePage /> },
             { path: '/payments', element: <Placeholder name="Payments" /> },
-            { path: '/wages', element: <Placeholder name="Wages" /> },
+            { path: '/wages', element: <WagesPage /> },
             { path: '/sites', element: <SitesPage /> },
           ]),
           {
@@ -80,6 +82,7 @@ export const routes = [
         children: [
           { path: 'muster-roll', element: <MusterRollPrint /> },
           { path: 'attendance', element: <AttendanceReportPrint /> },
+          { path: 'wage-register', element: <WageRegisterPrint /> },
         ],
       },
       { path: '*', element: <NotFoundPage /> },
