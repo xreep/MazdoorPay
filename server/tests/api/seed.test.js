@@ -71,3 +71,17 @@ it('seedDemoIfMissing seeds once, even in production, and then leaves the data a
     config.isProd = wasProd;
   }
 }, 120000);
+
+it('seedDemoIfMissing redoes a seed that was interrupted part-way', async () => {
+  // A restart mid-seed leaves demo users behind without the "finished" marker.
+  await User.create({
+    name: 'Half Seeded',
+    email: 'ravi.kumar@mazdoorpay.in',
+    passwordHash: 'x',
+    role: 'contractor',
+    isDemo: true,
+  });
+  const counts = await seedDemoIfMissing({ now: NOW });
+  expect(counts).toMatchObject({ contractors: 2, workers: 30, attendance: 1350 });
+  expect(await seedDemoIfMissing({ now: NOW })).toBeNull();
+}, 120000);

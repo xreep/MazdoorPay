@@ -9,6 +9,7 @@ import { Payment } from '../models/Payment.js';
 import { AuditLog } from '../models/AuditLog.js';
 import { RefreshToken } from '../models/RefreshToken.js';
 import { LoginAttempt } from '../models/LoginAttempt.js';
+import mongoose from 'mongoose';
 import { recordAudit } from '../services/audit.service.js';
 import { createSite } from '../services/site.service.js';
 import { changeRate, createWorker } from '../services/worker.service.js';
@@ -57,7 +58,11 @@ async function removeDemoData() {
     LoginAttempt.deleteMany({ email: { $in: demo.map((u) => u.email) } }),
   ]);
   await User.deleteMany({ _id: { $in: ids } });
+  await seedMarker().deleteOne({ _id: 'demo-seed' });
 }
+
+// Written only when a seed run finishes, so an interrupted run is detected and redone.
+const seedMarker = () => mongoose.connection.collection('seedstate');
 
 /**
  * Replaces the demo accounts and their data. Real users are never touched.
@@ -261,13 +266,18 @@ export async function runSeed({ now = new Date(), log = () => {}, allowProd = fa
     attendance: await Attendance.countDocuments(scope),
     payments: await Payment.countDocuments(scope),
   };
+  await seedMarker().updateOne(
+    { _id: 'demo-seed' },
+    { $set: { completedAt: new Date(), counts } },
+    { upsert: true }
+  );
   log(`Seeded ${JSON.stringify(counts)}`);
   return counts;
 }
 
 // For hosts without a shell (Render free tier): create the demo accounts on first start only.
-// Returns the counts when it seeded, or null when demo data already exists.
+// Returns the counts when it seeded, or null when a completed demo seed already exists.
 export async function seedDemoIfMissing({ now = new Date(), log = () => {} } = {}) {
-  if (await User.exists({ isDemo: true })) return null;
+  if (await seedMarker().findOne({ _id: 'demo-seed' })) return null;
   return runSeed({ now, log, allowProd: true });
 }
