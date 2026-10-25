@@ -164,7 +164,9 @@ export function UserDrawer({ userId, onClose }) {
           )}
           {user.role === 'contractor' && (
             <div className="border-t border-border pt-4">
-              {user.status === 'active' ? (
+              {user.isDemo ? (
+                <p className="text-sm text-ink-muted">{t('admin.demoNotSuspendable')}</p>
+              ) : user.status === 'active' ? (
                 <Button variant="danger" onClick={() => setSuspending(true)}>
                   {t('admin.suspendContractor')}
                 </Button>

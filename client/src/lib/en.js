@@ -324,6 +324,7 @@ export const en = {
     none: 'None',
     maskedNote: 'Phone numbers and UPI IDs are partly hidden.',
     suspendContractor: 'Suspend contractor',
+    demoNotSuspendable: 'Demo accounts are shared with everyone, so they cannot be suspended.',
     suspendTitle: 'Suspend {name}?',
     suspendBody:
       'They are logged out everywhere and cannot log in until reactivated. Their data is kept.',

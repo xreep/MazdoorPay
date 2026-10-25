@@ -167,6 +167,35 @@ describe('Admin users', () => {
       await within(screen.getByRole('article', { name: /Ravi Kumar/ })).findByText('Suspended')
     ).toBeInTheDocument();
   });
+
+  it('explains instead of offering Suspend on a shared demo account', async () => {
+    const state = { searches: [] };
+    server.use(
+      http.get(API(`/admin/users/${C1}`), () =>
+        HttpResponse.json({
+          user: { ...users[0], isDemo: true },
+          sites: [],
+          stats: {
+            workers: 0,
+            activeWorkers: 0,
+            attendanceRecords: 0,
+            payments: 0,
+            totalPaid: 0,
+            pendingDues: 0,
+            advanceOutstanding: 0,
+          },
+        })
+      ),
+      ...handlers(state)
+    );
+    as(<UsersTab />, '/admin/users');
+    await userEvent.click(await screen.findByRole('button', { name: 'View Ravi Kumar' }));
+    const drawer = await screen.findByRole('dialog', { name: 'Ravi Kumar' });
+    expect(
+      await within(drawer).findByText(/Demo accounts are shared with everyone/)
+    ).toBeInTheDocument();
+    expect(within(drawer).queryByRole('button', { name: 'Suspend contractor' })).toBeNull();
+  });
 });
 
 describe('Admin activity', () => {
