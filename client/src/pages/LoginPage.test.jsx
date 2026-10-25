@@ -73,6 +73,22 @@ describe('LoginPage', () => {
     await waitFor(() => expect(screen.getByTestId('location')).toHaveTextContent('/admin'));
   });
 
+  it('logging out lands on a plain login page', async () => {
+    server.use(
+      http.post(API('/auth/refresh'), () =>
+        HttpResponse.json({
+          user: { _id: 'u1', name: 'Ravi Kumar', role: 'contractor' },
+          accessToken: 't',
+        })
+      ),
+      http.post(API('/auth/logout'), () => new HttpResponse(null, { status: 204 })),
+      http.get(API('/dashboard'), () => HttpResponse.json({ error: 'x' }, { status: 500 }))
+    );
+    renderApp('/');
+    await userEvent.click((await screen.findAllByRole('button', { name: 'Log out' }))[0]);
+    await waitFor(() => expect(screen.getByTestId('location')).toHaveTextContent(/^\/login$/));
+  });
+
   it('protected pages send anonymous users to login with next', async () => {
     server.use(noSession);
     renderApp('/payments');

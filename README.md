@@ -15,13 +15,14 @@ It digitises daily attendance, works out wages from that attendance, tracks paym
 - Database: MongoDB Atlas (transactions on a replica set)
 - Auth: 15-minute JWT access token + rotating httpOnly refresh cookie, bcrypt
 - Tests: Jest, supertest, mongodb-memory-server
-- Frontend: React 18 + Vite (Phase 2)
+- Frontend: React 18, Vite, React Router, TanStack Query, Tailwind CSS, Framer Motion, Recharts
+- Client tests: Vitest, Testing Library, MSW
 
 ## Repository layout
 
 - `shared/` — `@mazdoorpay/shared`: Zod schemas, constants, India-time (IST) day helpers, paise money helpers
 - `server/` — Express API under `/api/v1`
-- `client/` — React frontend (Phase 2)
+- `client/` — React app: dashboard, sites, workers, attendance, wages, payments, admin panel, print views
 - `docs/` — requirements, design and build plans
 
 ## Run locally
@@ -33,10 +34,11 @@ npm install
 cp server/.env.example server/.env   # then fill in MONGODB_URI and the two secrets
 ```
 
-Fastest start, no database needed — runs the API on an in-memory MongoDB filled with demo data:
+Fastest start, no database needed — the API on an in-memory MongoDB filled with demo data, plus the web app:
 
 ```bash
-npm run dev:memory -w server
+npm run dev:memory -w server   # API on http://localhost:5055 (terminal 1)
+npm run dev:client             # app on http://localhost:5173 (terminal 2)
 ```
 
 With a real database (local MongoDB replica set or Atlas):
@@ -65,7 +67,8 @@ The seed creates 30 workers, 45 days of attendance, Saturday wage payouts (cash 
 ## Scripts
 
 ```bash
-npm test                          # API test suite
+npm test                          # API and client test suites
+npm run build                     # production build of the client
 npm run test:coverage -w server   # with coverage gate (lines ≥ 80%, branches ≥ 70%)
 npm run lint                      # ESLint
 npm run audit                     # production dependency audit

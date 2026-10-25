@@ -3,6 +3,28 @@ import { TriangleAlert } from 'lucide-react';
 import { translate } from '../../lib/i18n.jsx';
 import { en } from '../../lib/en.js';
 
+function CrashScreen() {
+  return (
+    <div role="alert" className="mx-auto max-w-md px-6 py-16 text-center">
+      <TriangleAlert className="mx-auto h-10 w-10 text-brand-ink" aria-hidden="true" />
+      <h2 className="mt-4 text-xl font-bold">{translate(en, 'errors.crashTitle')}</h2>
+      <p className="mt-2 text-ink-muted">{translate(en, 'errors.crashBody')}</p>
+      <button
+        type="button"
+        onClick={() => window.location.reload()}
+        className="mt-6 h-12 rounded-control bg-brand px-5 font-semibold text-ink"
+      >
+        {translate(en, 'errors.reload')}
+      </button>
+    </div>
+  );
+}
+
+// Router-level fallback (errors thrown while matching or rendering a route).
+export function RouteError() {
+  return <CrashScreen />;
+}
+
 export class ErrorBoundary extends Component {
   state = { error: null };
 
@@ -16,19 +38,6 @@ export class ErrorBoundary extends Component {
 
   render() {
     if (!this.state.error) return this.props.children;
-    return (
-      <div role="alert" className="mx-auto max-w-md py-16 text-center">
-        <TriangleAlert className="mx-auto h-10 w-10 text-brand-ink" aria-hidden="true" />
-        <h2 className="mt-4 text-xl font-bold">{translate(en, 'errors.crashTitle')}</h2>
-        <p className="mt-2 text-ink-muted">{translate(en, 'errors.crashBody')}</p>
-        <button
-          type="button"
-          onClick={() => window.location.reload()}
-          className="mt-6 h-12 rounded-control bg-brand px-5 font-semibold text-ink"
-        >
-          {translate(en, 'errors.reload')}
-        </button>
-      </div>
-    );
+    return <CrashScreen />;
   }
 }

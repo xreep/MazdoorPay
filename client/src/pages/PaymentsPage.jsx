@@ -29,27 +29,31 @@ function BalanceList({ rows, kind, onPay }) {
   return (
     <ul className="divide-y divide-border">
       {rows.map((r) => (
-        <li key={r.workerId} className="flex items-center gap-4 px-4 py-3.5 sm:px-5">
+        <li key={r.workerId} className="flex items-center gap-3 px-4 py-3.5 sm:gap-4 sm:px-5">
           <div className="min-w-0 flex-1">
-            <Link to={`/workers/${r.workerId}`} className="font-semibold hover:underline">
+            <Link
+              to={`/workers/${r.workerId}`}
+              className="block truncate font-semibold hover:underline"
+            >
               {r.name}
             </Link>
             <p className="truncate text-sm text-ink-muted">
               {t(`roles.${r.role}`)} · {r.siteName ?? t('workers.noSite')}
               {!r.isActive && ` · ${t('common.inactive')}`}
             </p>
-          </div>
-          <div className="text-right">
-            <p className={`num text-lg font-bold ${kind === 'advance' ? 'text-brand-ink' : ''}`}>
-              {formatINR(Math.abs(r.balance))}
-            </p>
-            <p className="num text-xs text-ink-muted">
+            <p className="num hidden text-xs text-ink-muted sm:block">
               {t('payments.earnedPaid', { earned: formatINR(r.earned), paid: formatINR(r.paid) })}
             </p>
           </div>
+          <p
+            className={`num shrink-0 text-lg font-bold ${kind === 'advance' ? 'text-brand-ink' : ''}`}
+          >
+            {formatINR(Math.abs(r.balance))}
+          </p>
           {kind === 'due' && (
             <Button
               size="sm"
+              className="shrink-0"
               onClick={() => onPay(r.workerId)}
               aria-label={t('payments.payWorker', { name: r.name })}
             >

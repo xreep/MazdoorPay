@@ -49,7 +49,8 @@ export function AuthProvider({ children }) {
         } finally {
           setAccessToken(null);
           queryClient.clear();
-          setState({ status: 'anonymous', user: null });
+          // A deliberate logout lands on a plain /login, without "come back to" this page.
+          setState({ status: 'anonymous', user: null, loggedOut: true });
         }
       },
       updateUser: (user) => setState((s) => ({ ...s, user })),

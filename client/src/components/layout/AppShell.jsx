@@ -1,5 +1,5 @@
 import { Suspense, useEffect, useState } from 'react';
-import { NavLink, useLocation, useNavigate, useOutlet } from 'react-router-dom';
+import { NavLink, useLocation, useOutlet } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   BarChart3,
@@ -111,17 +111,16 @@ function AnimatedOutlet() {
 export function AppShell() {
   const t = useT();
   const { user, logout } = useAuth();
-  const navigate = useNavigate();
   const { pathname } = useLocation();
   const [moreOpen, setMoreOpen] = useState(false);
   const nav = user?.role === 'admin' ? ADMIN_NAV : CONTRACTOR_NAV;
 
   useEffect(() => setMoreOpen(false), [pathname]);
 
-  const onLogout = async () => {
+  // RequireAuth moves a logged-out user to /login.
+  const onLogout = () => {
     setMoreOpen(false);
-    await logout();
-    navigate('/login', { replace: true });
+    logout();
   };
 
   return (

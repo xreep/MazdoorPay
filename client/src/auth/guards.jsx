@@ -3,9 +3,10 @@ import { homeFor, useAuth } from './AuthProvider.jsx';
 import { FullPageSkeleton } from '../components/ui/Skeleton.jsx';
 
 export function RequireAuth({ children }) {
-  const { status } = useAuth();
+  const { status, loggedOut } = useAuth();
   const location = useLocation();
   if (status === 'loading') return <FullPageSkeleton />;
+  if (status === 'anonymous' && loggedOut) return <Navigate to="/login" replace />;
   if (status === 'anonymous') {
     const next = encodeURIComponent(`${location.pathname}${location.search}`);
     return <Navigate to={`/login?next=${next}`} replace />;

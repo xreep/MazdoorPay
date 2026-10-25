@@ -6,6 +6,7 @@ import { ServerWakeBanner } from './components/layout/ServerWakeBanner.jsx';
 import { FullPageSkeleton } from './components/ui/Skeleton.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import NotFoundPage from './pages/NotFoundPage.jsx';
+import { RouteError } from './components/layout/ErrorBoundary.jsx';
 
 const DashboardPage = lazy(() => import('./pages/DashboardPage.jsx'));
 const SitesPage = lazy(() => import('./pages/SitesPage.jsx'));
@@ -42,6 +43,7 @@ const contractorOnly = (children) => ({
 export const routes = [
   {
     element: <RootLayout />,
+    errorElement: <RouteError />,
     children: [
       { path: '/login', element: <LoginPage /> },
       {
