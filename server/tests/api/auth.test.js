@@ -101,8 +101,20 @@ describe('login and refresh', () => {
     const second = cookieValue(res);
     expect(second).toBeDefined();
     expect(second).not.toBe(first);
-    await RefreshToken.updateMany({ revokedAt: { $ne: null } }, { revokedAt: new Date(Date.now() - 60_000) });
+    await RefreshToken.updateMany(
+      { revokedAt: { $ne: null } },
+      { revokedAt: new Date(Date.now() - 60_000) }
+    );
     expect((await refreshWith(first)).status).toBe(401);
+  });
+
+  it('two tabs refreshing the same cookie at once both stay signed in', async () => {
+    const { user } = await registerContractor();
+    for (let i = 0; i < 25; i++) {
+      const a = cookieValue(await login(user.email, DEFAULT_PASSWORD));
+      const results = await Promise.all([refreshWith(a), refreshWith(a)]);
+      expect(results.map((r) => r.status)).toEqual([200, 200]);
+    }
   });
 
   it('after logout even a recently rotated cookie is refused', async () => {

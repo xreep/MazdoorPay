@@ -65,3 +65,13 @@ export const checkDateRange = (value, ctx) => {
 export const dateRangeFields = { from: daySchema, to: daySchema };
 
 export const dateRangeSchema = z.object(dateRangeFields).superRefine(checkDateRange);
+
+// For edits: an empty box (or null) means "remove this value", so it becomes null rather than undefined.
+const clearable = (valid) =>
+  z.union([z.literal('').transform(() => null), z.null(), valid]).optional();
+export const clearablePhoneSchema = clearable(
+  z.string().trim().regex(PATTERNS.PHONE_IN, 'Enter a 10-digit Indian mobile number')
+);
+export const clearableUpiIdSchema = clearable(
+  z.string().trim().regex(PATTERNS.UPI_ID, 'Enter a UPI ID like name@bank')
+);

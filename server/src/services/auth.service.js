@@ -139,27 +139,29 @@ export async function refresh(raw) {
     throw httpError(401, user ? SUSPENDED : SESSION_EXPIRED);
   }
 
-  const next = newRefreshToken();
-  if (!current.revokedAt) {
-    const claimed = await RefreshToken.findOneAndUpdate(
-      { _id: current._id, revokedAt: null },
-      { revokedAt: new Date(), replacedByHash: hashToken(next) }
-    );
-    // Lost the race to a parallel refresh of the same cookie: treat it like the grace case below.
-    if (!claimed && !(await RefreshToken.exists({ family: current.family, revokedAt: null }))) {
-      throw httpError(401, SESSION_EXPIRED);
-    }
-  } else if (!(await RefreshToken.exists({ family: current.family, revokedAt: null }))) {
+  if (
+    current.revokedAt &&
+    !(await RefreshToken.exists({ family: current.family, revokedAt: null }))
+  ) {
     // Logged out (or the session was revoked) since the rotation: nothing to continue.
     throw httpError(401, SESSION_EXPIRED);
   }
 
+  // Write the successor before retiring the current token, so a parallel refresh of the
+  // same cookie never sees the session without a live token.
+  const next = newRefreshToken();
   await RefreshToken.create({
     userId: user._id,
     tokenHash: hashToken(next),
     family: current.family,
     expiresAt: new Date(Date.now() + config.refreshTtlDays * DAY_MS),
   });
+  if (!current.revokedAt) {
+    await RefreshToken.updateOne(
+      { _id: current._id, revokedAt: null },
+      { revokedAt: new Date(), replacedByHash: hashToken(next) }
+    );
+  }
   return { user: publicUser(user), accessToken: signAccessToken(user), refreshToken: next };
 }
 

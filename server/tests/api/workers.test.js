@@ -136,6 +136,16 @@ describe('read and update', () => {
     ).toBe(400);
   });
 
+  it('PATCH can clear the phone and UPI ID', async () => {
+    const w = (await newWorker(a.api, { phone: '9876543210', upiId: 'ramesh@oksbi' })).body.worker;
+    const res = await a.api.patch(`/api/v1/workers/${w._id}`, { phone: '', upiId: null });
+    expect(res.status).toBe(200);
+    expect(res.body.worker.phone).toBeNull();
+    expect(res.body.worker.upiId).toBeNull();
+    const untouched = await a.api.patch(`/api/v1/workers/${w._id}`, { name: 'Ramesh Y' });
+    expect(untouched.body.worker.phone).toBeNull();
+  });
+
   it('deactivate and reactivate', async () => {
     const w = (await newWorker(a.api)).body.worker;
     expect((await a.api.post(`/api/v1/workers/${w._id}/deactivate`)).body.worker.isActive).toBe(

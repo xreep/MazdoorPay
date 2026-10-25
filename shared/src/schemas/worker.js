@@ -7,6 +7,8 @@ import {
   paiseSchema,
   phoneSchema,
   upiIdSchema,
+  clearablePhoneSchema,
+  clearableUpiIdSchema,
 } from './common.js';
 
 export const dailyRateSchema = paiseSchema(LIMITS.RATE_MIN_PAISE, LIMITS.RATE_MAX_PAISE);
@@ -29,8 +31,8 @@ export const workerCreateSchema = z.object({
 export const workerUpdateSchema = z.object({
   name: profileFields.name.optional(),
   role: profileFields.role.optional(),
-  phone: profileFields.phone,
-  upiId: profileFields.upiId,
+  phone: clearablePhoneSchema,
+  upiId: clearableUpiIdSchema,
   siteId: profileFields.siteId,
   preferredLanguage: profileFields.preferredLanguage,
   joinedOn: daySchema.optional(),
