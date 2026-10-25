@@ -29,6 +29,7 @@ The demo admin sees only the demo accounts, and demo accounts cannot be suspende
 - **Workers** — search and filter; each worker's profile shows what they earned, what they were paid, and what is still due, with a 60-day attendance calendar and wage history.
 - **Attendance** — one tap per worker for present, half-day or absent; "Mark all present", undo and a save bar; month calendar; muster roll and attendance report (CSV and print).
 - **Wages** — daily or weekly earnings for any period, with each worker's balance, and the wage register (CSV and print).
+- **WhatsApp** — one tap opens WhatsApp with a receipt or this week's summary for the worker, in their language (Hindi or English).
 - **Payments** — who to pay, advances still to recover, full history; recording a payment pre-fills what is owed, requires the UTR for UPI, and never records the same payment twice; mistakes are voided, not deleted; a printable receipt for every payment.
 
 **For the platform admin**

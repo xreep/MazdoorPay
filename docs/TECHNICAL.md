@@ -203,4 +203,5 @@ npm run restore -w server -- --file <file> --confirm  # replaces the collections
 
 - Render's free plan sleeps after 15 minutes without traffic; the first request then takes up to a minute (the app shows "Waking up the server…").
 - The demo admin's password is public on the login page for evaluation. It sees only the demo accounts (platform totals still count everyone) and cannot suspend them; rotate it afterwards.
-- Hindi translations, QR attendance, WhatsApp messages, UPI pay-assist, worker statement links, offline use and dark mode are designed but not built; see the PRD's future enhancements.
+- Hindi translations, QR attendance, UPI pay-assist, worker statement links, offline use and dark mode are designed but not built; see the PRD's future enhancements.
+- WhatsApp messages are click-to-send links (`wa.me`): MazdoorPay writes the text, and the contractor sends it from their own WhatsApp. Nothing is sent automatically.

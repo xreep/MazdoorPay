@@ -70,39 +70,45 @@ Construction contractors in India manage daily wage workers — masons, labourer
 
 ## 6. Functional requirements
 
-| #     | Requirement                           | How MazdoorPay meets it                                                                                                                                               |
-| ----- | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **1** | **Contractor module**                 |                                                                                                                                                                       |
-| 1.1   | Register / log in                     | Email and password sign-up (always a contractor account), login, silent session refresh, logout, lockout after 5 failed attempts                                      |
-| 1.2   | Create and manage construction sites  | Sites page: add, rename, set location, mark inactive, delete only when unused; worker counts per site                                                                 |
-| 1.3   | Add and manage workers                | Workers page with search and filters; add/edit; deactivate/reactivate; move between sites                                                                             |
-| 1.4   | Mark daily attendance                 | Attendance register per site and day; one tap per worker; "Mark all present"; undo; save bar                                                                          |
-| 1.5   | Track wages and payments              | Dashboard money totals; Wages page; Payments page with dues, advances and history                                                                                     |
-| **2** | **Worker management**                 |                                                                                                                                                                       |
-| 2.1   | Worker details: name, role, wage rate | Name, work type (mason, labourer, electrician, plumber, carpenter, painter, welder, helper, other), daily wage, phone, UPI ID, joining date, language                 |
-| 2.2   | Worker profiles                       | Profile page: balance (earned, paid, due or advance), details, wage history                                                                                           |
-| 2.3   | Work history                          | 60-day attendance calendar and recent payments on the profile; full history in attendance and payment lists                                                           |
-| 2.4   | Assign workers to sites               | Site chosen on the worker form; can be changed any time                                                                                                               |
-| **3** | **Attendance**                        |                                                                                                                                                                       |
-| 3.1   | Present / absent / half-day           | Three large buttons per worker, each with colour, icon and word                                                                                                       |
-| 3.2   | View attendance records               | Daily register, month calendar per site, per-worker calendar                                                                                                          |
-| 3.3   | Attendance reports                    | Attendance report and muster roll (workers × days, P/H/A, totals) as CSV and print view                                                                               |
-| 3.4   | Attendance history                    | Any past day can be opened; changes older than 7 days need a reason and are logged                                                                                    |
-| **4** | **Wage calculation**                  |                                                                                                                                                                       |
-| 4.1   | Wages from attendance                 | Present = day rate, half-day = half, absent = 0; the rate in force that day is stored with the mark                                                                   |
-| 4.2   | Daily / weekly calculation            | Wages page with a Daily / Weekly switch (weeks run Monday–Sunday) and period presets                                                                                  |
-| 4.3   | Total earnings and pending payments   | Earned in period, paid in period and current balance per worker and in total; dashboard "pending wages"                                                               |
-| 4.4   | Wage summaries                        | Wage register (days, rates, gross, advances, wages paid, balance) as CSV and print view                                                                               |
-| **5** | **Payment tracking**                  |                                                                                                                                                                       |
-| 5.1   | Record payments                       | Record payment form: amount pre-filled with what is owed, wage or advance, cash / UPI (with UTR) / bank, date, note                                                   |
-| 5.2   | Track pending dues                    | "To pay" list sorted by amount, with a total; advances list                                                                                                           |
-| 5.3   | Payment history                       | History with filters (worker, site, method, dates, voided)                                                                                                            |
-| 5.4   | Payment reports                       | Payments report as CSV and print view; printable receipt for each payment                                                                                             |
-| **6** | **Admin**                             |                                                                                                                                                                       |
-| 6.1   | Manage users and contractors          | Users list with search; read-only contractor detail; suspend (ends their sessions) and reactivate                                                                     |
-| 6.2   | Monitor system usage                  | Overview totals, weekly sign-ups, activity per day, full activity log with filters                                                                                    |
-| 6.3   | Ensure data accuracy                  | Data checks: attendance after deactivation or before joining, wages paid above earnings, UPI payments without a UTR, workers with no site, possible duplicate workers |
-| 6.4   | Analytics reports                     | KPI page with CSV export (see section 9)                                                                                                                              |
+| #     | Requirement                           | How MazdoorPay meets it                                                                                                                               |
+| ----- | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **1** | **Contractor module**                 |                                                                                                                                                       |
+| 1.1   | Register / log in                     | Email and password sign-up (always a contractor account), login, silent session refresh, logout, lockout after 5 failed attempts                      |
+| 1.2   | Create and manage construction sites  | Sites page: add, rename, set location, mark inactive, delete only when unused; worker counts per site                                                 |
+| 1.3   | Add and manage workers                | Workers page with search and filters; add/edit; deactivate/reactivate; move between sites                                                             |
+| 1.4   | Mark daily attendance                 | Attendance register per site and day; one tap per worker; "Mark all present"; undo; save bar                                                          |
+| 1.5   | Track wages and payments              | Dashboard money totals; Wages page; Payments page with dues, advances and history                                                                     |
+| **2** | **Worker management**                 |                                                                                                                                                       |
+| 2.1   | Worker details: name, role, wage rate | Name, work type (mason, labourer, electrician, plumber, carpenter, painter, welder, helper, other), daily wage, phone, UPI ID, joining date, language |
+| 2.2   | Worker profiles                       | Profile page: balance (earned, paid, due or advance), details, wage history                                                                           |
+| 2.3   | Work history                          | 60-day attendance calendar and recent payments on the profile; full history in attendance and payment lists                                           |
+| 2.4   | Assign workers to sites               | Site chosen on the worker form; can be changed any time                                                                                               |
+| **3** | **Attendance**                        |                                                                                                                                                       |
+| 3.1   | Present / absent / half-day           | Three large buttons per worker, each with colour, icon and word                                                                                       |
+| 3.2   | View attendance records               | Daily register, month calendar per site, per-worker calendar                                                                                          |
+| 3.3   | Attendance reports                    | Attendance report and muster roll (workers × days, P/H/A, totals) as CSV and print view                                                               |
+| 3.4   | Attendance history                    | Any past day can be opened; changes older than 7 days need a reason and are logged                                                                    |
+| **4** | **Wage calculation**                  |                                                                                                                                                       |
+| 4.1   | Wages from attendance                 | Present = day rate, half-day = half, absent = 0; the rate in force that day is stored with the mark                                                   |
+| 4.2   | Daily / weekly calculation            | Wages page with a Daily / Weekly switch (weeks run Monday–Sunday) and period presets                                                                  |
+| 4.3   | Total earnings and pending payments   | Earned in period, paid in period and current balance per worker and in total; dashboard "pending wages"                                               |
+| 4.4   | Wage summaries                        | Wage register (days, rates, gross, advances, wages paid, balance) as CSV and print view                                                               |
+| **5** | **Payment tracking**                  |                                                                                                                                                       |
+| 5.1   | Record payments                       | Record payment form: amount pre-filled with what is owed, wage or advance, cash / UPI (with UTR) / bank, date, note                                   |
+| 5.2   | Track pending dues                    | "To pay" list sorted by amount, with a total; advances list                                                                                           |
+| 5.3   | Payment history                       | History with filters (worker, site, method, dates, voided)                                                                                            |
+| 5.4   | Payment reports                       | Payments report as CSV and print view; printable receipt for each payment                                                                             |
+
+### Extras beyond the brief
+
+| Extra             | What it does                                                                                                                                                                                              |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| WhatsApp messages | One tap opens WhatsApp with a receipt (from the receipt page) or this week's summary (from the worker's profile) written in the worker's language; the contractor presses Send. No WhatsApp Business API. |
+| **6**             | **Admin**                                                                                                                                                                                                 |                                                                                                                                                                       |
+| 6.1               | Manage users and contractors                                                                                                                                                                              | Users list with search; read-only contractor detail; suspend (ends their sessions) and reactivate                                                                     |
+| 6.2               | Monitor system usage                                                                                                                                                                                      | Overview totals, weekly sign-ups, activity per day, full activity log with filters                                                                                    |
+| 6.3               | Ensure data accuracy                                                                                                                                                                                      | Data checks: attendance after deactivation or before joining, wages paid above earnings, UPI payments without a UTR, workers with no site, possible duplicate workers |
+| 6.4               | Analytics reports                                                                                                                                                                                         | KPI page with CSV export (see section 9)                                                                                                                              |
 
 **Pages (8):** Login / register, Dashboard, Sites, Workers (with worker profile), Attendance, Wages, Payments, Admin panel — plus printable views (receipt, muster roll, wage register, attendance and payments reports).
 
@@ -155,12 +161,13 @@ All are computed live from the data on the admin **Analytics** page and exportab
 
 ## 11. Release
 
-| Phase       | Content                                          | Status |
-| ----------- | ------------------------------------------------ | ------ |
-| 1 — Backend | API, rules, security, tests                      | Done   |
-| 2 — Web app | 8 pages, print views                             | Done   |
-| 3 — Quality | End-to-end tests, accessibility, performance, CI | Done   |
-| 4 — Launch  | Deployment, demo data, documentation             | Done   |
+| Phase       | Content                                                 | Status      |
+| ----------- | ------------------------------------------------------- | ----------- |
+| 1 — Backend | API, rules, security, tests                             | Done        |
+| 2 — Web app | 8 pages, print views                                    | Done        |
+| 3 — Quality | End-to-end tests, accessibility, performance, CI        | Done        |
+| 4 — Launch  | Deployment, demo data, documentation                    | Done        |
+| 5 — Extras  | WhatsApp messages, then the rest of section 13 in order | In progress |
 
 ## 12. Risks
 
@@ -174,17 +181,16 @@ All are computed live from the data on the admin **Analytics** page and exportab
 
 ## 13. Future enhancements
 
-Designed but not built in Phase 1:
+Designed but not built yet:
 
 1. **Hindi interface** — every screen already goes through a translation layer; only the Hindi text is missing.
 2. **Worker statement link** — a private, revocable link where a worker sees their own attendance, earnings and payments.
-3. **WhatsApp messages** — send a receipt or weekly summary to the worker in their language with one tap.
-4. **UPI pay-assist** — open the contractor's own UPI app with the worker's UPI ID and amount filled in (still not a payment integration).
-5. **QR attendance** — printed worker ID cards scanned with the phone camera.
-6. **Installable app and offline marking** — add to home screen; mark attendance without signal and sync later.
-7. **Dark mode** — the colour system already has a dark palette.
-8. **Overtime hours and piece-rate work.**
-9. **Biometric or GPS attendance.**
-10. **Digital payouts** through a payment gateway (UPI, bank transfer).
-11. **Government compliance filing** (PF, ESIC, BOCW welfare board).
-12. **Native mobile app** for on-site use.
+3. **UPI pay-assist** — open the contractor's own UPI app with the worker's UPI ID and amount filled in (still not a payment integration).
+4. **QR attendance** — printed worker ID cards scanned with the phone camera.
+5. **Installable app and offline marking** — add to home screen; mark attendance without signal and sync later.
+6. **Dark mode** — the colour system already has a dark palette.
+7. **Overtime hours and piece-rate work.**
+8. **Biometric or GPS attendance.**
+9. **Digital payouts** through a payment gateway (UPI, bank transfer).
+10. **Government compliance filing** (PF, ESIC, BOCW welfare board).
+11. **Native mobile app** for on-site use.
