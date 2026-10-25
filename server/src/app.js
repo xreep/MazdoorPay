@@ -36,12 +36,10 @@ export function createApp(overrides = {}) {
 
   app.get('/api/v1/health', (_req, res) => {
     const connected = mongoose.connection.readyState === 1;
-    res
-      .status(connected ? 200 : 503)
-      .json({
-        status: connected ? 'ok' : 'degraded',
-        db: connected ? 'connected' : 'disconnected',
-      });
+    res.status(connected ? 200 : 503).json({
+      status: connected ? 'ok' : 'degraded',
+      db: connected ? 'connected' : 'disconnected',
+    });
   });
 
   app.use('/api/v1', v1Routes);
