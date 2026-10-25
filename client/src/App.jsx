@@ -17,10 +17,9 @@ const WageRegisterPrint = lazy(() => import('./pages/print/WageRegisterPrint.jsx
 const PaymentsPage = lazy(() => import('./pages/PaymentsPage.jsx'));
 const ReceiptPrint = lazy(() => import('./pages/print/ReceiptPrint.jsx'));
 const PaymentsReportPrint = lazy(() => import('./pages/print/PaymentsReportPrint.jsx'));
+const AdminPage = lazy(() => import('./pages/AdminPage.jsx'));
 const MusterRollPrint = lazy(() => import('./pages/print/MusterRollPrint.jsx'));
 const AttendanceReportPrint = lazy(() => import('./pages/print/AttendanceReportPrint.jsx'));
-
-const Placeholder = ({ name }) => <h1 className="text-2xl font-bold">{name}</h1>;
 
 function RootLayout() {
   return (
@@ -62,12 +61,18 @@ export const routes = [
             { path: '/sites', element: <SitesPage /> },
           ]),
           {
-            path: '/admin/*',
             element: (
               <RequireRole role="admin">
-                <Placeholder name="Admin" />
+                <Outlet />
               </RequireRole>
             ),
+            children: [
+              { path: '/admin', element: <AdminPage section="overview" /> },
+              { path: '/admin/users', element: <AdminPage section="users" /> },
+              { path: '/admin/activity', element: <AdminPage section="activity" /> },
+              { path: '/admin/accuracy', element: <AdminPage section="accuracy" /> },
+              { path: '/admin/analytics', element: <AdminPage section="analytics" /> },
+            ],
           },
         ],
       },
