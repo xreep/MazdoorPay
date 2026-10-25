@@ -123,7 +123,7 @@ describe('AttendancePage', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Mark all present' }));
     expect(screen.getByText('2 unsaved changes')).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: 'Undo' }));
-    expect(screen.queryByText(/unsaved change/)).toBeNull();
+    await waitFor(() => expect(screen.queryByText(/unsaved change/)).toBeNull());
   });
 
   it('asks for a reason before changing a day more than 7 days back', async () => {
