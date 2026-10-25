@@ -1,6 +1,8 @@
 import { Router } from 'express';
+import authRoutes from './auth.js';
 
-// Module routers are mounted here as each module lands.
 const router = Router();
+
+router.use('/auth', authRoutes);
 
 export default router;
