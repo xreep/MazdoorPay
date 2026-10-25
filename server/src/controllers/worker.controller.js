@@ -28,3 +28,7 @@ export async function deactivate(req, res) {
 export async function reactivate(req, res) {
   res.json({ worker: await workers.setActive(contextOf(req), req.params.id, true) });
 }
+
+export async function summary(req, res) {
+  res.json(await workers.getWorkerSummary(req.user.id, req.params.id));
+}

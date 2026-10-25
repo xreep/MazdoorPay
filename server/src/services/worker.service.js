@@ -1,12 +1,14 @@
 import mongoose from 'mongoose';
-import { todayIST } from '@mazdoorpay/shared';
+import { addDays, todayIST } from '@mazdoorpay/shared';
 import { Worker } from '../models/Worker.js';
 import { Site } from '../models/Site.js';
 import { Attendance } from '../models/Attendance.js';
+import { Payment } from '../models/Payment.js';
 import { httpError } from '../utils/httpError.js';
 import { pageResult, skipFor } from '../utils/pagination.js';
 import { pick, recordAudit } from './audit.service.js';
 import { latestRateEntry } from './rate.js';
+import { getBalance } from './ledger.service.js';
 
 const AUDIT_FIELDS = [
   'name',
@@ -185,4 +187,24 @@ export async function setActive(ctx, workerId, isActive) {
     after: { isActive },
   });
   return serializeWorker(worker);
+}
+
+const SUMMARY_ATTENDANCE_DAYS = 60;
+const SUMMARY_PAYMENTS = 20;
+
+// Everything the worker profile page needs in one call.
+export async function getWorkerSummary(contractorId, workerId) {
+  const { worker, site } = await getWorker(contractorId, workerId);
+  const since = addDays(todayIST(), -(SUMMARY_ATTENDANCE_DAYS - 1));
+  const [balance, recentAttendance, recentPayments] = await Promise.all([
+    getBalance(contractorId, worker._id),
+    Attendance.find({ contractorId, workerId: worker._id, day: { $gte: since } })
+      .sort({ day: -1 })
+      .lean(),
+    Payment.find({ contractorId, workerId: worker._id })
+      .sort({ day: -1, createdAt: -1 })
+      .limit(SUMMARY_PAYMENTS)
+      .lean(),
+  ]);
+  return { worker, site, balance, recentAttendance, recentPayments };
 }

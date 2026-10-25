@@ -4,6 +4,7 @@ import authRoutes from './auth.js';
 import siteRoutes from './sites.js';
 import workerRoutes from './workers.js';
 import attendanceRoutes from './attendance.js';
+import paymentRoutes from './payments.js';
 
 const router = Router();
 const contractor = [requireAuth, requireRole('contractor')];
@@ -12,5 +13,6 @@ router.use('/auth', authRoutes);
 router.use('/sites', contractor, siteRoutes);
 router.use('/workers', contractor, workerRoutes);
 router.use('/attendance', contractor, attendanceRoutes);
+router.use('/payments', contractor, paymentRoutes);
 
 export default router;

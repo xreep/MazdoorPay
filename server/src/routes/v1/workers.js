@@ -15,6 +15,7 @@ const byId = validate({ params: idParamSchema });
 router.get('/', validate({ query: workerListQuerySchema }), ctrl.list);
 router.post('/', validate({ body: workerCreateSchema }), ctrl.create);
 router.get('/:id', byId, ctrl.get);
+router.get('/:id/summary', byId, ctrl.summary);
 router.patch('/:id', validate({ params: idParamSchema, body: workerUpdateSchema }), ctrl.update);
 router.post(
   '/:id/rate',

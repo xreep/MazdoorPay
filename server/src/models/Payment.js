@@ -1,22 +1,29 @@
 import { Schema, model } from 'mongoose';
+import { PAYMENT_METHODS, PAYMENT_TYPES } from '@mazdoorpay/shared';
 
-const PAYMENT_METHODS = ['cash', 'upi', 'bank'];
-
+// Payments are never edited or deleted; mistakes are voided with a reason.
 const paymentSchema = new Schema(
   {
-    workerId: { type: Schema.Types.ObjectId, ref: 'Worker', required: true, index: true },
-    siteId: { type: Schema.Types.ObjectId, ref: 'Site', index: true },
-    contractorId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
-    amount: { type: Number, required: true, min: [0, 'Amount must be positive'] },
-    date: { type: Date, required: true, default: Date.now },
+    contractorId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    workerId: { type: Schema.Types.ObjectId, ref: 'Worker', required: true },
+    siteId: { type: Schema.Types.ObjectId, ref: 'Site', default: null },
+    day: { type: String, required: true },
+    amount: { type: Number, required: true, min: 1 },
+    type: { type: String, enum: PAYMENT_TYPES, required: true },
     method: { type: String, enum: PAYMENT_METHODS, required: true },
+    reference: { type: String, trim: true },
     notes: { type: String, trim: true, maxlength: 500 },
     recordedBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    idempotencyKey: { type: String, required: true },
+    voidedAt: { type: Date, default: null },
+    voidedBy: { type: Schema.Types.ObjectId, ref: 'User' },
+    voidReason: { type: String, trim: true, maxlength: 200 },
   },
   { timestamps: true }
 );
 
-paymentSchema.index({ contractorId: 1, date: -1 });
-paymentSchema.index({ workerId: 1, date: -1 });
+paymentSchema.index({ contractorId: 1, idempotencyKey: 1 }, { unique: true });
+paymentSchema.index({ contractorId: 1, day: -1 });
+paymentSchema.index({ workerId: 1, day: -1 });
 
 export const Payment = model('Payment', paymentSchema);
