@@ -6,8 +6,10 @@ It digitises daily attendance, works out wages from that attendance, tracks paym
 
 ## Live URLs
 
-- Frontend (Vercel): TBD after deploy
-- Backend API (Render): TBD after deploy
+- App: https://mazdoorpay.vercel.app
+- API health: https://mazdoorpay-api.onrender.com/api/v1/health
+
+The API runs on Render's free plan, which sleeps after 15 minutes without traffic; the first visit after that can take up to a minute while it wakes up.
 
 ## Stack
 
