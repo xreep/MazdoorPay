@@ -115,6 +115,19 @@ const ROUTES = [
     { query: s.workerListQuerySchema },
   ],
   ['post', '/workers', 'Workers', 'Add a worker', { body: s.workerCreateSchema, created: true }],
+  [
+    'get',
+    '/workers/cards',
+    'Workers',
+    'Printable ID cards with signed QR codes, for a site or one worker',
+    { query: s.workerCardsQuerySchema },
+  ],
+  [
+    'post',
+    '/workers/{id}/card/replace',
+    'Workers',
+    "Replace a lost ID card; the old card's code stops working",
+  ],
   ['get', '/workers/{id}', 'Workers', 'One worker with their site'],
   [
     'get',
@@ -175,6 +188,16 @@ const ROUTES = [
     { query: s.calendarQuerySchema },
   ],
 
+  [
+    'post',
+    '/attendance/scan',
+    'Attendance',
+    'Mark the worker on a scanned ID card present today (kept as is if already marked)',
+    {
+      body: s.scanCardSchema,
+      errors: { 400: 'Not a MazdoorPay card, a replaced card, or a worker who cannot be marked' },
+    },
+  ],
   [
     'get',
     '/wages/summary',

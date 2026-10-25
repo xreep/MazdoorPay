@@ -81,6 +81,24 @@ const render = (route = `/attendance?siteId=${S1}`) =>
 afterEach(() => vi.useRealTimers());
 
 describe('AttendancePage', () => {
+  it("offers card scanning for today and the site's ID cards to print", async () => {
+    server.use(...handlers());
+    render();
+    await screen.findByRole('group', { name: 'Ramesh Kumar' });
+    expect(screen.getByRole('button', { name: 'Scan ID cards' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Print ID cards' })).toHaveAttribute(
+      'href',
+      `/print/cards?siteId=${S1}`
+    );
+  });
+
+  it('does not offer scanning on a past day, since a scan marks today', async () => {
+    server.use(...handlers());
+    render(`/attendance?siteId=${S1}&day=${addDays(todayIST(), -1)}`);
+    await screen.findByRole('group', { name: 'Ramesh Kumar' });
+    expect(screen.queryByRole('button', { name: 'Scan ID cards' })).toBeNull();
+  });
+
   it('opens on the IST day even when UTC is still yesterday (Review Focus 5)', async () => {
     vi.useFakeTimers({ toFake: ['Date'] });
     vi.setSystemTime(new Date('2026-10-24T19:00:00Z'));

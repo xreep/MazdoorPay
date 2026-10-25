@@ -1,7 +1,17 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
-import { FileText, HandCoins, IndianRupee, Pencil, Phone, Power, UserX } from 'lucide-react';
+import {
+  FileText,
+  HandCoins,
+  IdCard,
+  IndianRupee,
+  Pencil,
+  Phone,
+  Power,
+  RefreshCw,
+  UserX,
+} from 'lucide-react';
 import { formatINR, todayIST, weekStart } from '@mazdoorpay/shared';
 import { useT } from '../lib/i18n.jsx';
 import { useAuth } from '../auth/AuthProvider.jsx';
@@ -19,7 +29,11 @@ import { Skeleton, SkeletonRows } from '../components/ui/Skeleton.jsx';
 import { WorkerForm } from '../features/workers/WorkerForm.jsx';
 import { RateChangeDialog } from '../features/workers/RateChangeDialog.jsx';
 import { WorkerCalendar } from '../features/workers/WorkerCalendar.jsx';
-import { useSetWorkerActive, useWorkerSummary } from '../features/workers/useWorkers.js';
+import {
+  useReplaceCard,
+  useSetWorkerActive,
+  useWorkerSummary,
+} from '../features/workers/useWorkers.js';
 
 const linkButton =
   'inline-flex h-12 items-center justify-center gap-2 rounded-control px-5 font-semibold transition';
@@ -75,6 +89,8 @@ export default function WorkerProfilePage() {
   const [editOpen, setEditOpen] = useState(false);
   const [rateOpen, setRateOpen] = useState(false);
   const [confirmOff, setConfirmOff] = useState(false);
+  const [confirmCard, setConfirmCard] = useState(false);
+  const replaceCard = useReplaceCard();
 
   if (isPending) {
     return (
@@ -221,6 +237,17 @@ export default function WorkerProfilePage() {
                 <FileText className="h-4 w-4" aria-hidden="true" />
                 {t('slip.link')}
               </Link>
+              <Link
+                to={`/print/cards?workerId=${worker._id}`}
+                className={buttonClasses({ variant: 'secondary', size: 'sm' })}
+              >
+                <IdCard className="h-4 w-4" aria-hidden="true" />
+                {t('cards.link')}
+              </Link>
+              <Button variant="ghost" size="sm" onClick={() => setConfirmCard(true)}>
+                <RefreshCw className="h-4 w-4" aria-hidden="true" />
+                {t('cards.replace')}
+              </Button>
               <Button
                 variant="secondary"
                 size="sm"
@@ -304,6 +331,24 @@ export default function WorkerProfilePage() {
         loading={setActive.isPending}
         onConfirm={() => toggleActive(false)}
         onCancel={() => setConfirmOff(false)}
+      />
+      <ConfirmDialog
+        open={confirmCard}
+        title={t('cards.replaceTitle', { name: worker.name })}
+        body={t('cards.replaceBody')}
+        confirmLabel={t('cards.replace')}
+        loading={replaceCard.isPending}
+        onConfirm={async () => {
+          try {
+            await replaceCard.mutateAsync(worker._id);
+            toast.success(t('cards.replaced'));
+          } catch (err) {
+            toast.error(err.message);
+          } finally {
+            setConfirmCard(false);
+          }
+        }}
+        onCancel={() => setConfirmCard(false)}
       />
     </>
   );

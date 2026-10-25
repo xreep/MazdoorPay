@@ -57,6 +57,7 @@ export const en = {
   },
   common: {
     close: 'Close',
+    done: 'Done',
     cancel: 'Cancel',
     save: 'Save',
     saveChanges: 'Save changes',
@@ -208,6 +209,17 @@ export const en = {
     noPayments: 'No payments yet.',
   },
   attendance: {
+    scan: 'Scan ID cards',
+    scanTitle: 'Scan ID cards',
+    scanHint: "Point the camera at a worker's card. Each card marks that worker present today.",
+    scanMarked: '{name} marked present',
+    scanAlready: '{name} was already marked: {status}',
+    scanNew: 'Marked present',
+    scanSeen: 'Already marked',
+    scansSoFar: 'Scanned this time',
+    cameraBlocked: 'Allow camera access in your browser to scan cards.',
+    noCamera: 'The camera could not be started on this device.',
+    printCards: 'Print ID cards',
     day: 'Day',
     prevDay: 'Previous day',
     nextDay: 'Next day',
@@ -413,6 +425,19 @@ export const en = {
   whatsapp: {
     sendReceipt: 'Send on WhatsApp',
     sendWeek: 'Send week on WhatsApp',
+  },
+  cards: {
+    title: 'ID cards',
+    subtitle:
+      'Cut out along the border. Scan a card on the Attendance page to mark that worker present.',
+    none: 'No active workers on this site.',
+    issuedBy: 'Issued by {name}',
+    qrFor: 'QR code for {name}',
+    link: 'ID card',
+    replace: 'Replace lost card',
+    replaceTitle: "Replace {name}'s card?",
+    replaceBody: 'The old card will stop working. Print the new card and give it to the worker.',
+    replaced: 'New card ready. The old card no longer works.',
   },
   slip: {
     title: 'Wage slip',

@@ -61,3 +61,8 @@ export const calendarQuerySchema = z.object({
   siteId: objectIdSchema.optional(),
   month: monthSchema,
 });
+
+// A scanned worker ID card; the server checks the code's signature.
+export const scanCardSchema = z.object({
+  code: z.string().trim().min(1, 'Scan a card').max(100, 'This is not a MazdoorPay worker card'),
+});

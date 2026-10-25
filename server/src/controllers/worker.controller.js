@@ -36,3 +36,11 @@ export async function reactivate(req, res) {
 export async function summary(req, res) {
   res.json(await workers.getWorkerSummary(req.user.id, req.params.id));
 }
+
+export async function cards(req, res) {
+  res.json(await workers.listCards(req.user.id, req.query));
+}
+
+export async function replaceCard(req, res) {
+  res.json(await workers.replaceCard(contextOf(req), req.params.id));
+}

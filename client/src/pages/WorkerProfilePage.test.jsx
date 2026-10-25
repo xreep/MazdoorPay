@@ -94,6 +94,30 @@ describe('WorkerProfilePage', () => {
     expect(url.searchParams.get('to')).toBe(todayIST());
   });
 
+  it('prints the ID card and replaces a lost one after confirming', async () => {
+    let replaced = 0;
+    server.use(
+      ...base(),
+      http.post(API('/workers/w1/card/replace'), () => {
+        replaced += 1;
+        return HttpResponse.json({ code: 'MP1.x.2.y' });
+      })
+    );
+    render();
+    expect(await screen.findByRole('link', { name: 'ID card' })).toHaveAttribute(
+      'href',
+      '/print/cards?workerId=w1'
+    );
+    await userEvent.click(screen.getByRole('button', { name: 'Replace lost card' }));
+    const dialog = await screen.findByRole('dialog', { name: "Replace Ramesh Kumar's card?" });
+    expect(replaced).toBe(0);
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Replace lost card' }));
+    await waitFor(() => expect(replaced).toBe(1));
+    expect(
+      await screen.findByText('New card ready. The old card no longer works.')
+    ).toBeInTheDocument();
+  });
+
   it('says "advance outstanding" when the balance is negative', async () => {
     server.use(
       ...base(

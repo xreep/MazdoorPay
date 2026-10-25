@@ -50,3 +50,22 @@ export function useMarkAttendance(siteId) {
     },
   });
 }
+
+// Scanning a worker's ID card marks them present today on the server.
+export function useScanCard() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (code) => api.post('/attendance/scan', { code }),
+    onSuccess: () => {
+      for (const k of [
+        ['attendance-sheet'],
+        ['attendance-calendar'],
+        ['dashboard'],
+        ['worker'],
+        ['dues'],
+        ['wages'],
+      ])
+        queryClient.invalidateQueries({ queryKey: k });
+    },
+  });
+}

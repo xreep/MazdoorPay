@@ -10,6 +10,7 @@ export function PrintLayout({
   meta,
   landscape = false,
   paper = 'A4',
+  signatures = true,
   actions,
   children,
 }) {
@@ -51,14 +52,16 @@ export function PrintLayout({
           <Logo />
         </header>
         {children}
-        <footer className="mt-10 grid grid-cols-2 gap-10 text-sm">
-          <div className="border-t border-black pt-2">{t('print.contractorSignature')}</div>
-          <div className="border-t border-black pt-2">
-            {t('print.generated', {
-              at: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
-            })}
-          </div>
-        </footer>
+        {signatures && (
+          <footer className="mt-10 grid grid-cols-2 gap-10 text-sm">
+            <div className="border-t border-black pt-2">{t('print.contractorSignature')}</div>
+            <div className="border-t border-black pt-2">
+              {t('print.generated', {
+                at: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
+              })}
+            </div>
+          </footer>
+        )}
       </main>
     </div>
   );

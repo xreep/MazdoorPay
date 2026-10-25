@@ -1,13 +1,22 @@
-import { useEffect, useState } from 'react';
+import { Suspense, lazy, useEffect, useState } from 'react';
 import { Link, useBlocker, useSearchParams } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { toast } from 'sonner';
-import { Building2, CheckCheck, ChevronLeft, ChevronRight, Save, Undo2 } from 'lucide-react';
+import {
+  Building2,
+  CheckCheck,
+  ChevronLeft,
+  ChevronRight,
+  IdCard,
+  Save,
+  ScanLine,
+  Undo2,
+} from 'lucide-react';
 import { LIMITS, addDays, diffDays, isValidDay, todayIST } from '@mazdoorpay/shared';
 import { useT } from '../lib/i18n.jsx';
 import { formatDayLong } from '../lib/format.js';
 import { PageHeader } from '../components/layout/PageHeader.jsx';
-import { Button } from '../components/ui/Button.jsx';
+import { Button, buttonClasses } from '../components/ui/Button.jsx';
 import { Card } from '../components/ui/Card.jsx';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog.jsx';
 import { EmptyState } from '../components/ui/EmptyState.jsx';
@@ -25,6 +34,11 @@ import { AttendanceGrid } from '../features/attendance/AttendanceGrid.jsx';
 import { MonthHeatmap } from '../features/attendance/MonthHeatmap.jsx';
 import { AttendanceReports } from '../features/attendance/AttendanceReports.jsx';
 import { setUnsavedCount } from '../lib/unsaved.js';
+
+// The camera library loads only when someone starts scanning.
+const ScanDialog = lazy(() =>
+  import('../features/attendance/ScanDialog.jsx').then((m) => ({ default: m.ScanDialog }))
+);
 
 const unsavedLabel = (t, n) =>
   n === 1 ? t('attendance.unsavedOne') : t('attendance.unsavedMany', { n });
@@ -221,6 +235,7 @@ export default function AttendancePage() {
   const tab = params.get('tab') ?? 'mark';
   const [dirty, setDirty] = useState(0);
   const [pendingSwitch, setPendingSwitch] = useState(null);
+  const [scanning, setScanning] = useState(false);
   const blocker = useBlocker(
     ({ currentLocation, nextLocation }) =>
       dirty > 0 && currentLocation.pathname !== nextLocation.pathname
@@ -288,7 +303,34 @@ export default function AttendancePage() {
 
   return (
     <>
-      <PageHeader title={t('nav.attendance')} subtitle={formatDayLong(day)} />
+      <PageHeader
+        title={t('nav.attendance')}
+        subtitle={formatDayLong(day)}
+        actions={
+          <>
+            {day === today && (
+              <Button variant="secondary" onClick={() => setScanning(true)}>
+                <ScanLine className="h-5 w-5" aria-hidden="true" />
+                {t('attendance.scan')}
+              </Button>
+            )}
+            {siteId && (
+              <Link
+                to={`/print/cards?siteId=${siteId}`}
+                className={buttonClasses({ variant: 'ghost' })}
+              >
+                <IdCard className="h-5 w-5" aria-hidden="true" />
+                {t('attendance.printCards')}
+              </Link>
+            )}
+          </>
+        }
+      />
+      {scanning && (
+        <Suspense fallback={null}>
+          <ScanDialog open onClose={() => setScanning(false)} />
+        </Suspense>
+      )}
 
       <div className="mb-4 grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
         <Field label={t('workers.site')}>

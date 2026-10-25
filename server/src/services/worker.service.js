@@ -10,6 +10,8 @@ import { pageResult, skipFor } from '../utils/pagination.js';
 import { pick, recordAudit } from './audit.service.js';
 import { latestRateEntry } from './rate.js';
 import { getBalance } from './ledger.service.js';
+import { signWorkerCode } from './qr.service.js';
+import { findOwnedSite } from './site.service.js';
 
 const AUDIT_FIELDS = [
   'name',
@@ -301,4 +303,53 @@ export async function getWageSlip(contractorId, workerId, { from, to }) {
     openingBalance,
     closingBalance: openingBalance + totals.earned - totals.wagesPaid - totals.advancesPaid,
   };
+}
+
+const cardOf = (worker, sitesById) => ({
+  worker: { _id: worker._id, name: worker.name, role: worker.role },
+  site: worker.siteId ? (sitesById.get(String(worker.siteId)) ?? null) : null,
+  code: signWorkerCode(worker._id, worker.qrVersion),
+});
+
+// Printable ID cards: every active worker on a site, or one worker.
+export async function listCards(contractorId, { siteId, workerId }) {
+  let workers;
+  if (workerId) workers = [(await getWorker(contractorId, workerId)).worker];
+  else {
+    await findOwnedSite(contractorId, siteId);
+    workers = await Worker.find({ contractorId, siteId, isActive: true })
+      .sort({ name: 1, _id: 1 })
+      .lean();
+  }
+  const siteIds = [...new Set(workers.map((w) => String(w.siteId)).filter((id) => id !== 'null'))];
+  const [sites, contractor] = await Promise.all([
+    Site.find({ _id: { $in: siteIds }, contractorId })
+      .select('name location')
+      .lean(),
+    User.findById(contractorId).select('name phone').lean(),
+  ]);
+  const sitesById = new Map(sites.map((s) => [String(s._id), s]));
+  return {
+    contractor: { name: contractor?.name, phone: contractor?.phone ?? null },
+    cards: workers.map((w) => cardOf(w, sitesById)),
+  };
+}
+
+// A lost card: issue a new one, which makes the old card's code stop working.
+export async function replaceCard(ctx, workerId) {
+  const { worker } = await getWorker(ctx.contractorId, workerId);
+  const updated = await Worker.findOneAndUpdate(
+    { _id: worker._id, contractorId: ctx.contractorId },
+    { $inc: { qrVersion: 1 } },
+    { new: true }
+  ).lean();
+  await recordAudit({
+    ...ctx,
+    action: 'worker.card_replace',
+    entity: 'Worker',
+    entityId: worker._id,
+    before: { qrVersion: worker.qrVersion },
+    after: { qrVersion: updated.qrVersion },
+  });
+  return { code: signWorkerCode(updated._id, updated.qrVersion) };
 }

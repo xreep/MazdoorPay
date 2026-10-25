@@ -27,7 +27,7 @@ The demo admin sees only the demo accounts, and demo accounts cannot be suspende
 - **Dashboard** — today's attendance progress per site, wages pending, advances outstanding, money paid this week, and a 30-day trend.
 - **Sites** — every site with its worker count.
 - **Workers** — search and filter; each worker's profile shows what they earned, what they were paid, and what is still due, with a 60-day attendance calendar and wage history.
-- **Attendance** — one tap per worker for present, half-day or absent; "Mark all present", undo and a save bar; month calendar; muster roll and attendance report (CSV and print).
+- **Attendance** — one tap per worker for present, half-day or absent, or scan workers' printed QR ID cards with the phone camera; "Mark all present", undo and a save bar; month calendar; muster roll and attendance report (CSV and print).
 - **Wages** — daily or weekly earnings for any period, with each worker's balance, the wage register (CSV and print), and a printable wage slip for each worker.
 - **WhatsApp** — one tap opens WhatsApp with a receipt or this week's summary for the worker, in their language (Hindi or English).
 - **Payments** — who to pay, advances still to recover, full history; recording a payment pre-fills what is owed, can open the contractor's UPI app (or show a QR code) with the worker and amount filled in, requires the UTR for UPI, and never records the same payment twice; mistakes are voided, not deleted; a printable receipt for every payment.

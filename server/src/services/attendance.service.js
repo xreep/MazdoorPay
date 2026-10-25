@@ -7,6 +7,7 @@ import { pageResult, skipFor } from '../utils/pagination.js';
 import { recordAuditMany } from './audit.service.js';
 import { findOwnedSite } from './site.service.js';
 import { rateOn } from './rate.js';
+import { readWorkerCode } from './qr.service.js';
 
 const { ObjectId } = mongoose.Types;
 
@@ -220,4 +221,32 @@ export async function getCalendar(contractorId, { siteId, month }) {
       };
     }),
   };
+}
+
+// A scanned ID card marks that worker present today. A worker already marked today keeps their mark.
+export async function scanCard(ctx, code) {
+  const card = readWorkerCode(code);
+  if (!card) throw httpError(400, 'This is not a MazdoorPay worker card');
+  const worker = await Worker.findOne({
+    _id: card.workerId,
+    contractorId: ctx.contractorId,
+  }).lean();
+  if (!worker) throw httpError(404, 'This card is for someone who is not one of your workers');
+  if (worker.qrVersion !== card.version)
+    throw httpError(400, "This card has been replaced. Use the worker's new card.");
+
+  const day = todayIST();
+  const who = { _id: worker._id, name: worker.name, role: worker.role };
+  const existing = await Attendance.findOne({ workerId: worker._id, day }).lean();
+  if (existing) return { result: 'already', status: existing.status, worker: who, day };
+
+  const saved = await markAttendance({
+    ...ctx,
+    day,
+    records: [{ workerId: String(worker._id), status: 'present' }],
+    method: 'qr',
+  });
+  if (saved.errors.length) throw httpError(400, saved.errors[0].error);
+  // Two scans at once: the second finds the first one's mark inside its transaction.
+  return { result: saved.saved ? 'marked' : 'already', status: 'present', worker: who, day };
 }

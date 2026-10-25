@@ -47,3 +47,6 @@ export const useSetWorkerActive = () =>
   useWorkerMutation(({ id, active }) =>
     api.post(`/workers/${id}/${active ? 'reactivate' : 'deactivate'}`).then((r) => r.worker)
   );
+
+export const useReplaceCard = () =>
+  useWorkerMutation((id) => api.post(`/workers/${id}/card/replace`));

@@ -16,3 +16,7 @@ export async function list(req, res) {
 export async function calendar(req, res) {
   res.json(await attendance.getCalendar(req.user.id, req.query));
 }
+
+export async function scan(req, res) {
+  res.json(await attendance.scanCard(contextOf(req), req.body.code));
+}

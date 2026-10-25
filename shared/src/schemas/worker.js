@@ -53,3 +53,11 @@ export const workerListQuerySchema = paginationSchema.extend({
 
 // A wage slip covers one worker from `from` to `to`, both inclusive.
 export const wageSlipQuerySchema = dateRangeSchema;
+
+// ID cards for every active worker on a site, or for one worker.
+export const workerCardsQuerySchema = z
+  .object({ siteId: objectIdSchema.optional(), workerId: objectIdSchema.optional() })
+  .refine((q) => Boolean(q.siteId) !== Boolean(q.workerId), {
+    message: 'Pick a site or a worker',
+    path: ['siteId'],
+  });
