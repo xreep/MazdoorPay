@@ -23,7 +23,7 @@ It digitises daily attendance, works out wages from that attendance, tracks paym
 - `shared/` — `@mazdoorpay/shared`: Zod schemas, constants, India-time (IST) day helpers, paise money helpers
 - `server/` — Express API under `/api/v1`
 - `client/` — React app: dashboard, sites, workers, attendance, wages, payments, admin panel, print views
-- `docs/` — requirements, design and build plans
+- `docs/` — project requirements
 
 ## Run locally
 
