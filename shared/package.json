@@ -1,0 +1,17 @@
+{
+  "name": "@mazdoorpay/shared",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Schemas, constants, IST date and paise money helpers shared by server and client",
+  "type": "module",
+  "main": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "dependencies": {
+    "zod": "^4.6.7"
+  }
+}

@@ -1,5 +1,5 @@
 // Central error handler: never leak stack traces to the client.
-export const errorHandler = (err, req, res, next) => {
+export const errorHandler = (err, _req, res, _next) => {
   let statusCode = err.statusCode || 500;
   let message = err.message || 'Internal Server Error';
 
@@ -24,7 +24,6 @@ export const errorHandler = (err, req, res, next) => {
     message = 'Invalid identifier';
   }
 
-  // eslint-disable-next-line no-console
   console.error('[ERROR]', err);
   res.status(statusCode).json({ error: message });
 };

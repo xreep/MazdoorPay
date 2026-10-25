@@ -1,8 +1,15 @@
 import { Schema, model } from 'mongoose';
 
 const WORKER_ROLES = [
-  'mason', 'labourer', 'electrician', 'plumber', 'carpenter',
-  'painter', 'welder', 'helper', 'other',
+  'mason',
+  'labourer',
+  'electrician',
+  'plumber',
+  'carpenter',
+  'painter',
+  'welder',
+  'helper',
+  'other',
 ];
 
 const workerSchema = new Schema(

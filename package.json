@@ -3,20 +3,29 @@
   "version": "1.0.0",
   "private": true,
   "description": "Daily Wage Labour Attendance & Payment Platform",
+  "type": "module",
+  "workspaces": [
+    "shared",
+    "server"
+  ],
   "scripts": {
-    "dev:server": "cd server && npm run dev",
-    "dev:client": "cd client && npm run dev",
-    "server": "cd server && npm start",
-    "client": "cd client && npm start",
-    "seed": "cd server && npm run seed",
-    "test:server": "cd server && npm test",
-    "test:client": "cd client && npm test",
-    "test": "npm run test:server && npm run test:client",
-    "audit": "npm audit && cd server && npm audit && cd ../client && npm audit",
-    "postinstall": "cd server && npm install && cd ../client && npm install"
+    "dev:server": "npm run dev -w server",
+    "start": "npm start -w server",
+    "test": "npm test -w server",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "seed": "npm run seed -w server",
+    "audit": "npm audit --omit=dev"
   },
   "engines": {
     "node": ">=20.0.0"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@eslint/js": "^9.13.0",
+    "eslint": "^9.13.0",
+    "eslint-config-prettier": "^9.1.0",
+    "globals": "^15.11.0",
+    "prettier": "^3.3.3"
+  }
 }

@@ -1,18 +1,53 @@
-import { app } from './index.js';
-import connectDB from './config/db.js';
+import express from 'express';
+import helmet from 'helmet';
+import cors from 'cors';
+import compression from 'compression';
+import cookieParser from 'cookie-parser';
+import morgan from 'morgan';
+import mongoose from 'mongoose';
+import { config } from './config/env.js';
+import { sanitize } from './middleware/sanitize.js';
+import { createAuthLimiter, createGlobalLimiter } from './middleware/rateLimits.js';
+import { errorHandler } from './middleware/error.js';
+import v1Routes from './routes/v1/index.js';
 
-const PORT = process.env.PORT || 5000;
+export function createApp(overrides = {}) {
+  const settings = { ...config, ...overrides };
+  const app = express();
 
-const start = async () => {
-  await connectDB();
-  app.listen(PORT, () => {
-    // eslint-disable-next-line no-console
-    console.log(`API server listening on http://localhost:${PORT}`);
+  app.set('trust proxy', 1);
+  app.disable('x-powered-by');
+
+  app.use(helmet());
+  app.use(
+    cors({
+      origin: (origin, done) => done(null, !origin || settings.frontendOrigins.includes(origin)),
+      credentials: true,
+    })
+  );
+  app.use(compression());
+  app.use(express.json({ limit: '100kb' }));
+  app.use(cookieParser());
+  app.use(sanitize);
+  if (!settings.isTest) app.use(morgan(settings.isProd ? 'combined' : 'dev'));
+
+  app.use('/api', createGlobalLimiter(settings.rateLimitMax));
+  app.use('/api/v1/auth', createAuthLimiter(settings.authRateLimitMax));
+
+  app.get('/api/v1/health', (_req, res) => {
+    const connected = mongoose.connection.readyState === 1;
+    res
+      .status(connected ? 200 : 503)
+      .json({
+        status: connected ? 'ok' : 'degraded',
+        db: connected ? 'connected' : 'disconnected',
+      });
   });
-};
 
-start().catch((err) => {
-  // eslint-disable-next-line no-console
-  console.error('Failed to start', err);
-  process.exit(1);
-});
+  app.use('/api/v1', v1Routes);
+
+  app.use((_req, res) => res.status(404).json({ error: 'Not found' }));
+  app.use(errorHandler);
+
+  return app;
+}

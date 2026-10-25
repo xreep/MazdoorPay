@@ -38,7 +38,7 @@ const INDIAN_WORKERS = [
 const randomStatus = () => {
   const r = Math.random();
   if (r < 0.78) return 'present';
-  if (r < 0.90) return 'absent';
+  if (r < 0.9) return 'absent';
   return 'half-day';
 };
 
@@ -176,21 +176,13 @@ const seed = async () => {
   }
   await Payment.insertMany(payments, { ordered: false });
 
-  // eslint-disable-next-line no-console
   console.log('Seed complete:');
-  // eslint-disable-next-line no-console
   console.log(`  Contractor 1: ${contractor1.email}`);
-  // eslint-disable-next-line no-console
   console.log(`  Contractor 2: ${contractor2.email}`);
-  // eslint-disable-next-line no-console
   console.log(`  Admin: ${admin.email}`);
-  // eslint-disable-next-line no-console
   console.log(`  Sites: ${await Site.countDocuments()}`);
-  // eslint-disable-next-line no-console
   console.log(`  Workers: ${await Worker.countDocuments()}`);
-  // eslint-disable-next-line no-console
   console.log(`  Attendance records: ${await Attendance.countDocuments()}`);
-  // eslint-disable-next-line no-console
   console.log(`  Payments: ${await Payment.countDocuments()}`);
 
   await mongoose.disconnect();
@@ -198,7 +190,6 @@ const seed = async () => {
 };
 
 seed().catch((err) => {
-  // eslint-disable-next-line no-console
   console.error('Seed failed', err);
   process.exit(1);
 });
