@@ -474,6 +474,12 @@ export const en = {
     amount: 'Amount',
     date: 'Date paid',
     utr: 'UPI reference (UTR)',
+    payInUpiApp: 'Pay {amount} in your UPI app',
+    upiQrLabel: 'UPI QR code: pay {amount} to {upiId}',
+    scanToPay: "Scan this with your phone's UPI app to pay {amount} to {upiId}.",
+    upiConfirmHint:
+      'MazdoorPay cannot see whether the payment went through. After paying, type the 12-digit UTR from your UPI app below.',
+    upiMissing: "Add {name}'s UPI ID on their profile to pay from here.",
     utrHint: '12 digits, shown in the UPI app after paying',
     utrShort: 'UTR {ref}',
     bankRef: 'Bank reference (optional)',

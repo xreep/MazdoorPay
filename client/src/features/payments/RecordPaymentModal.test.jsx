@@ -84,6 +84,66 @@ describe('RecordPaymentModal', () => {
     expect(posts).toHaveLength(0);
   });
 
+  describe('UPI pay-assist', () => {
+    const asTouchPhone = (touch) =>
+      vi.spyOn(window, 'matchMedia').mockImplementation((query) => ({
+        matches: touch && query.includes('coarse'),
+        media: query,
+        addEventListener() {},
+        removeEventListener() {},
+      }));
+
+    it("opens the contractor's UPI app on a phone, with the worker and amount filled in", async () => {
+      const spy = asTouchPhone(true);
+      server.use(...handlers());
+      render();
+      const dialog = await screen.findByRole('dialog', { name: 'Record payment' });
+      await waitFor(() => expect(within(dialog).getByLabelText('Amount')).toHaveValue('1400'));
+      expect(within(dialog).queryByRole('link', { name: /UPI app/ })).toBeNull();
+      await userEvent.click(within(dialog).getByRole('radio', { name: 'UPI' }));
+      const link = within(dialog).getByRole('link', { name: 'Pay ₹1,400 in your UPI app' });
+      const href = link.getAttribute('href');
+      expect(href).toMatch(
+        /^upi:\/\/pay\?pa=ramesh@oksbi&pn=Ramesh%20Kumar&am=1400\.00&cu=INR&tn=/
+      );
+      expect(
+        within(dialog).getByText(/MazdoorPay cannot see whether the payment went through/)
+      ).toBeInTheDocument();
+
+      const amount = within(dialog).getByLabelText('Amount');
+      await userEvent.clear(amount);
+      await userEvent.type(amount, '500');
+      expect(
+        within(dialog).getByRole('link', { name: 'Pay ₹500 in your UPI app' }).getAttribute('href')
+      ).toMatch('am=500.00');
+      spy.mockRestore();
+    });
+
+    it('shows a QR code to scan with a phone on a computer', async () => {
+      const spy = asTouchPhone(false);
+      server.use(...handlers());
+      render();
+      const dialog = await screen.findByRole('dialog', { name: 'Record payment' });
+      await waitFor(() => expect(within(dialog).getByLabelText('Amount')).toHaveValue('1400'));
+      await userEvent.click(within(dialog).getByRole('radio', { name: 'UPI' }));
+      expect(
+        await within(dialog).findByRole('img', { name: 'UPI QR code: pay ₹1,400 to ramesh@oksbi' })
+      ).toBeInTheDocument();
+      spy.mockRestore();
+    });
+
+    it('explains what is missing when the worker has no UPI ID', async () => {
+      server.use(...handlers());
+      render(W2);
+      const dialog = await screen.findByRole('dialog', { name: 'Record payment' });
+      await userEvent.click(within(dialog).getByRole('radio', { name: 'UPI' }));
+      expect(
+        await within(dialog).findByText(/Add Kishan Lal's UPI ID on their profile/)
+      ).toBeInTheDocument();
+      expect(within(dialog).queryByRole('img', { name: /UPI QR code/ })).toBeNull();
+    });
+  });
+
   it('offers to record the extra as an advance when above dues', async () => {
     const posts = [];
     server.use(

@@ -17,6 +17,7 @@ import { SegmentedControl } from '../../components/ui/SegmentedControl.jsx';
 import { Button } from '../../components/ui/Button.jsx';
 import { useWorkerSummary, useWorkers } from '../workers/useWorkers.js';
 import { useRecordPayment } from './usePayments.js';
+import { UpiPayAssist } from './UpiPayAssist.jsx';
 
 const FIELDS = ['workerId', 'amount', 'type', 'method', 'reference', 'notes', 'day'];
 
@@ -53,6 +54,7 @@ export function RecordPaymentModal({ open, workerId: initialWorkerId, onClose })
   });
   const method = watch('method');
   const type = watch('type');
+  const amount = watch('amount');
   const balance = summary?.balance.balance ?? null;
   const due = balance == null ? null : Math.max(balance, 0);
 
@@ -199,6 +201,10 @@ export function RecordPaymentModal({ open, workerId: initialWorkerId, onClose })
         <Field label={t('payments.date')} error={e.day?.message}>
           <Input type="date" max={todayIST()} {...register('day')} />
         </Field>
+
+        {method === 'upi' && summary && (
+          <UpiPayAssist worker={summary.worker} amount={amount} type={type} />
+        )}
 
         {method !== 'cash' && (
           <Field
