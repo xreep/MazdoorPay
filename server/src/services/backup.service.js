@@ -1,10 +1,12 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { gunzipSync, gzipSync } from 'node:zlib';
-import { EJSON } from 'bson';
+import mongoose from 'mongoose';
 
 // Logical backup of every collection as Extended JSON (keeps ObjectIds and Dates), gzipped.
 // Atlas M0 has no automated backups, so this is the safety net; restore needs an explicit confirm.
+// EJSON comes from the driver Mongoose uses, so its BSON types always match what the driver accepts.
+const { EJSON } = mongoose.mongo.BSON;
 
 const stamp = (now) =>
   now
