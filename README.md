@@ -1,85 +1,115 @@
 # MazdoorPay
 
-Daily wage labour attendance and payment platform for construction contractors and site managers.
+**Attendance, wages and payments for construction sites.** Contractors mark each day's attendance in one tap per worker, MazdoorPay works out every worker's wages, and every payment and advance is recorded — so nobody argues on Saturday.
 
-It digitises daily attendance, works out wages from that attendance, tracks payments, advances and dues, and keeps a transparent, audited record for every worker across multiple sites.
+**Live app → https://mazdoorpay.vercel.app** · [API reference](https://mazdoorpay-api.onrender.com/api/v1/docs/) · [Technical documentation](docs/TECHNICAL.md) · [Product requirements (PRD)](docs/PRD.md)
 
-## Live URLs
+![Contractor dashboard](docs/screenshots/dashboard.png)
 
-- App: https://mazdoorpay.vercel.app
-- API health: https://mazdoorpay-api.onrender.com/api/v1/health
+> The API runs on Render's free plan, which sleeps after 15 minutes without traffic. The first visit after that can take up to a minute; the app shows "Waking up the server…" meanwhile.
 
-The API runs on Render's free plan, which sleeps after 15 minutes without traffic; the first visit after that can take up to a minute while it wakes up.
+## Try it
 
-## Stack
+The login page has a **Use** button for each demo account. The demo data has 30 workers on four sites with 45 days of attendance, weekly payouts in cash and UPI, advances, pay raises and a voided payment.
 
-- Backend: Node.js 20, Express 5, Mongoose 8, Zod 4
-- Database: MongoDB Atlas (transactions on a replica set)
-- Auth: 15-minute JWT access token + rotating httpOnly refresh cookie, bcrypt
-- Tests: Jest, supertest, mongodb-memory-server
-- Frontend: React 18, Vite, React Router, TanStack Query, Tailwind CSS, Framer Motion, Recharts
-- Client tests: Vitest, Testing Library, MSW
+| Role                                  | Email                        | Password     |
+| ------------------------------------- | ---------------------------- | ------------ |
+| Contractor — Bengaluru, 2 sites       | `ravi.kumar@mazdoorpay.in`   | `Demo@2026`  |
+| Contractor — Pune and Mumbai, 2 sites | `sunita.patil@mazdoorpay.in` | `Demo@2026`  |
+| Platform admin                        | `admin@mazdoorpay.in`        | `Admin@2026` |
+
+## What it does
+
+**For contractors**
+
+- **Dashboard** — today's attendance progress per site, wages pending, advances outstanding, money paid this week, and a 30-day trend.
+- **Sites** — every site with its worker count.
+- **Workers** — search and filter; each worker's profile shows what they earned, what they were paid, and what is still due, with a 60-day attendance calendar and wage history.
+- **Attendance** — one tap per worker for present, half-day or absent; "Mark all present", undo and a save bar; month calendar; muster roll and attendance report (CSV and print).
+- **Wages** — daily or weekly earnings for any period, with each worker's balance, and the wage register (CSV and print).
+- **Payments** — who to pay, advances still to recover, full history; recording a payment pre-fills what is owed, requires the UTR for UPI, and never records the same payment twice; mistakes are voided, not deleted; a printable receipt for every payment.
+
+**For the platform admin**
+
+- Platform totals, sign-ups per week and activity per day.
+- Users: search, read-only view of a contractor's sites and workers (contact details masked), suspend and reactivate.
+- Activity log of every change, filterable by contractor, action and date.
+- Data checks for records that break the rules, and the project's KPIs with CSV export.
+
+| Mark attendance on a phone                                      | Worker profile                                         | Payments                                   |
+| --------------------------------------------------------------- | ------------------------------------------------------ | ------------------------------------------ |
+| ![Attendance on a phone](docs/screenshots/phone-attendance.png) | ![Worker profile](docs/screenshots/worker-profile.png) | ![Payments](docs/screenshots/payments.png) |
+
+## Quality
+
+- **Tests:** 164 API tests (98% line coverage), 125 app tests, and 10 Playwright end-to-end tests covering the full contractor journey, the admin flow, a 15-worker speed check, phone layouts and accessibility scans of every page.
+- **Accessibility:** Lighthouse 100; axe finds no serious or critical issues; 48 px tap targets; status always shown as colour, icon and word.
+- **Performance:** Lighthouse mobile performance 96–98; API p99 under 90 ms on every endpoint under load.
+- **Security:** rotating httpOnly refresh cookies with theft detection, login lockout, role checks on every request, strict per-contractor data isolation, validation on every endpoint, audit log of every write.
+- **CI:** GitHub Actions runs lint, all test suites, the production build, the dependency audit and the end-to-end tests on every push.
+
+Details and numbers: [docs/TECHNICAL.md](docs/TECHNICAL.md).
+
+## Tech stack
+
+| Layer    | Technology                                                                                           |
+| -------- | ---------------------------------------------------------------------------------------------------- |
+| App      | React 18, Vite, React Router, TanStack Query, Tailwind CSS, Framer Motion, Recharts, react-hook-form |
+| API      | Node.js 22, Express 5, Mongoose 8, Zod 4 (schemas shared with the app)                               |
+| Database | MongoDB Atlas, with transactions for money                                                           |
+| Hosting  | Vercel (app) and Render (API)                                                                        |
+| Tests    | Jest, supertest, mongodb-memory-server, Vitest, Testing Library, MSW, Playwright, axe                |
 
 ## Repository layout
 
-- `shared/` — `@mazdoorpay/shared`: Zod schemas, constants, India-time (IST) day helpers, paise money helpers
-- `server/` — Express API under `/api/v1`
-- `client/` — React app: dashboard, sites, workers, attendance, wages, payments, admin panel, print views
-- `docs/` — project requirements
+| Folder    | Contents                                                                                  |
+| --------- | ----------------------------------------------------------------------------------------- |
+| `shared/` | Validation schemas, constants, India-time date and paise money helpers used by both sides |
+| `server/` | Express API under `/api/v1`                                                               |
+| `client/` | React app and print views                                                                 |
+| `e2e/`    | Playwright end-to-end and accessibility tests                                             |
+| `docs/`   | Requirements, PRD, technical documentation, screenshots                                   |
 
 ## Run locally
 
-Prerequisites: Node.js 20+.
+Requires Node.js 20 or newer.
 
 ```bash
 npm install
-cp server/.env.example server/.env   # then fill in MONGODB_URI and the two secrets
 ```
 
-Fastest start, no database needed — the API on an in-memory MongoDB filled with demo data, plus the web app:
+The quickest start needs no database: the API runs on an in-memory MongoDB filled with demo data.
 
 ```bash
-npm run dev:memory -w server   # API on http://localhost:5055 (terminal 1)
-npm run dev:client             # app on http://localhost:5173 (terminal 2)
+npm run dev:memory -w server   # API on http://localhost:5055
+npm run dev:client             # app on http://localhost:5173
 ```
 
-With a real database (local MongoDB replica set or Atlas):
+With a real database, copy `server/.env.example` to `server/.env`, set `MONGODB_URI` (a replica set, such as Atlas, because payments use transactions) and the two secrets, then:
 
 ```bash
 npm run seed         # replaces only the demo accounts; real users are never touched
 npm run dev:server   # API on http://localhost:5055
 ```
 
-Create a real admin account:
+Other commands:
 
 ```bash
-npm run create-admin -w server -- --name "Asha Rao" --email asha@example.com --password 'Choose-a-strong-1'
-```
-
-## Demo logins (after seeding)
-
-| Role                              | Email                        | Password     |
-| --------------------------------- | ---------------------------- | ------------ |
-| Contractor (Bengaluru, 2 sites)   | `ravi.kumar@mazdoorpay.in`   | `Demo@2026`  |
-| Contractor (Pune/Mumbai, 2 sites) | `sunita.patil@mazdoorpay.in` | `Demo@2026`  |
-| Admin                             | `admin@mazdoorpay.in`        | `Admin@2026` |
-
-The seed creates 30 workers, 45 days of attendance, Saturday wage payouts (cash and UPI), four advances, three pay raises and one voided payment.
-
-## Scripts
-
-```bash
-npm test                          # API and client test suites
-npm run build                     # production build of the client
-npm run test:coverage -w server   # with coverage gate (lines ≥ 80%, branches ≥ 70%)
+npm test                          # API and app tests
+npm run test:coverage -w server   # API tests with the coverage gate
+npm run test:e2e                  # Playwright end-to-end tests
 npm run lint                      # ESLint
-npm run audit                     # production dependency audit
+npm run build                     # production build of the app
+npm run backup -w server          # backup of every collection to backups/
+npm run create-admin -w server -- --name "Asha Rao" --email asha@example.com --password 'Choose-a-strong-1'
 ```
 
 ## Deployment
 
-- **Database:** MongoDB Atlas (M0 is enough). Network access must allow Render (`0.0.0.0/0` on the free tier, whose IPs change).
-- **API:** Render Blueprint from [`render.yaml`](render.yaml) — Node 22, Singapore region, health check `/api/v1/health`. Set `MONGODB_URI` (Atlas connection string with the database name `mazdoorpay`) and `FRONTEND_ORIGIN` (the Vercel URL) in the Render dashboard; the two secrets are generated by Render.
-- **Web app:** Vercel, project Root Directory = `client`; [`client/vercel.json`](client/vercel.json) installs the `client` and `shared` workspaces from the repo root, builds `dist`, and rewrites `/api/*` to the Render service so the app and API share one origin (the refresh cookie stays first-party).
-- **Demo data:** with `SEED_DEMO_IF_MISSING=true` (set in `render.yaml`) the API creates the demo accounts on its first start when none exist. To reset them later, run `npm run seed` locally with the Atlas URI in `server/.env`; it only replaces the demo accounts.
-- **Free tier note:** Render's free plan sleeps after 15 minutes; the first request then takes up to a minute and the app shows "Waking up the server…".
+- **Database:** MongoDB Atlas. Network access must allow Render (`0.0.0.0/0` on the free tier, whose IPs change), with a database user that can read and write.
+- **API:** Render Blueprint from [`render.yaml`](render.yaml) — Node 22, Singapore region, health check `/api/v1/health`. Set `MONGODB_URI` and `FRONTEND_ORIGIN` in the Render dashboard; Render generates the secrets. With `SEED_DEMO_IF_MISSING=true` the API creates the demo accounts on its first start.
+- **App:** Vercel project with root directory `client`. [`client/vercel.json`](client/vercel.json) builds the app and rewrites `/api/*` to Render, so the app and API share one address and the login cookie stays first-party.
+
+## Requirements
+
+The original brief is in [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md); the [PRD](docs/PRD.md) maps every requirement to the feature that meets it.

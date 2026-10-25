@@ -26,12 +26,10 @@ test('marks 15 workers present and saves in under 30 seconds', async ({ page, re
   await page.getByRole('button', { name: 'Save attendance' }).click();
   await expect(page.getByText('Attendance saved for 15 workers')).toBeVisible();
   const seconds = (Date.now() - started) / 1000;
-  test
-    .info()
-    .annotations.push({
-      type: 'timing',
-      description: `15 workers marked and saved in ${seconds.toFixed(1)} s`,
-    });
+  test.info().annotations.push({
+    type: 'timing',
+    description: `15 workers marked and saved in ${seconds.toFixed(1)} s`,
+  });
   console.log(`15 workers marked and saved in ${seconds.toFixed(1)} s`);
   expect(seconds).toBeLessThan(30);
 });
