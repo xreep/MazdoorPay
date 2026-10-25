@@ -1,13 +1,15 @@
 import { Suspense, lazy } from 'react';
 import { Outlet } from 'react-router-dom';
 import { RequireAuth, RequireRole } from './auth/guards.jsx';
-import { AppShell } from './components/layout/AppShell.jsx';
 import { ServerWakeBanner } from './components/layout/ServerWakeBanner.jsx';
 import { FullPageSkeleton } from './components/ui/Skeleton.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import NotFoundPage from './pages/NotFoundPage.jsx';
 import { RouteError } from './components/layout/ErrorBoundary.jsx';
 
+const AppShell = lazy(() =>
+  import('./components/layout/AppShell.jsx').then((m) => ({ default: m.AppShell }))
+);
 const DashboardPage = lazy(() => import('./pages/DashboardPage.jsx'));
 const SitesPage = lazy(() => import('./pages/SitesPage.jsx'));
 const WorkersPage = lazy(() => import('./pages/WorkersPage.jsx'));
@@ -49,7 +51,9 @@ export const routes = [
       {
         element: (
           <RequireAuth>
-            <AppShell />
+            <Suspense fallback={<FullPageSkeleton />}>
+              <AppShell />
+            </Suspense>
           </RequireAuth>
         ),
         children: [

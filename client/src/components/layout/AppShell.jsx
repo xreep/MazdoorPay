@@ -1,6 +1,6 @@
 import { Suspense, useEffect, useState } from 'react';
 import { NavLink, useLocation, useOutlet } from 'react-router-dom';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, MotionConfig, motion } from 'framer-motion';
 import {
   BarChart3,
   Building2,
@@ -128,114 +128,117 @@ export function AppShell() {
     else logout();
   };
 
+  // Motion lives with the signed-in screens, so the login page loads without it.
   return (
-    <div className="min-h-dvh lg:grid lg:grid-cols-[16.5rem_minmax(0,1fr)]">
-      <div className="hivis-tape fixed inset-x-0 top-0 z-40 h-1.5" aria-hidden="true" />
+    <MotionConfig reducedMotion="user">
+      <div className="min-h-dvh lg:grid lg:grid-cols-[16.5rem_minmax(0,1fr)]">
+        <div className="hivis-tape fixed inset-x-0 top-0 z-40 h-1.5" aria-hidden="true" />
 
-      <aside className="no-print sticky top-0 hidden h-dvh flex-col border-r border-border bg-surface px-4 pb-6 pt-8 lg:flex">
-        <div className="px-2">
-          <Logo />
-        </div>
-        <nav aria-label={t('nav.main')} className="mt-8 space-y-1">
-          {nav.map((item) => (
-            <SideLink key={item.to} item={item} />
-          ))}
-        </nav>
-        <div className="mt-auto border-t border-border pt-4">
-          <div className="flex items-center gap-3 px-2">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-ink text-sm font-bold text-white">
+        <aside className="no-print sticky top-0 hidden h-dvh flex-col border-r border-border bg-surface px-4 pb-6 pt-8 lg:flex">
+          <div className="px-2">
+            <Logo />
+          </div>
+          <nav aria-label={t('nav.main')} className="mt-8 space-y-1">
+            {nav.map((item) => (
+              <SideLink key={item.to} item={item} />
+            ))}
+          </nav>
+          <div className="mt-auto border-t border-border pt-4">
+            <div className="flex items-center gap-3 px-2">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-ink text-sm font-bold text-white">
+                {initials(user?.name)}
+              </span>
+              <div className="min-w-0">
+                <p className="truncate font-semibold">{user?.name}</p>
+                <p className="truncate text-sm text-ink-muted">
+                  {user?.role === 'admin' ? t('nav.roleAdmin') : t('nav.roleContractor')}
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={onLogout}
+              className="mt-3 flex h-12 w-full items-center gap-3 rounded-control px-3 text-ink-muted hover:bg-ink/5 hover:text-ink"
+            >
+              <LogOut className="h-5 w-5" aria-hidden="true" />
+              {t('nav.logout')}
+            </button>
+          </div>
+        </aside>
+
+        <div className="min-w-0">
+          <header className="no-print sticky top-1.5 z-30 flex h-14 items-center justify-between border-b border-border bg-bg/90 px-4 backdrop-blur lg:hidden">
+            <Logo />
+            <span
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-ink text-xs font-bold text-white"
+              aria-label={user?.name}
+            >
               {initials(user?.name)}
             </span>
-            <div className="min-w-0">
-              <p className="truncate font-semibold">{user?.name}</p>
-              <p className="truncate text-sm text-ink-muted">
-                {user?.role === 'admin' ? t('nav.roleAdmin') : t('nav.roleContractor')}
-              </p>
-            </div>
-          </div>
+          </header>
+          <main
+            id="main"
+            className="mx-auto w-full max-w-6xl px-4 pb-28 pt-6 sm:px-6 lg:px-10 lg:pb-14 lg:pt-10"
+          >
+            <ErrorBoundary key={pathname}>
+              <Suspense fallback={<SkeletonRows n={6} className="h-20" />}>
+                <AnimatedOutlet />
+              </Suspense>
+            </ErrorBoundary>
+          </main>
+        </div>
+
+        <nav
+          aria-label={t('nav.quick')}
+          className="no-print fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t border-border bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden"
+        >
+          {nav.slice(0, QUICK_COUNT).map((item) => (
+            <TabLink key={item.to} item={item} />
+          ))}
+          <button
+            type="button"
+            onClick={() => setMoreOpen(true)}
+            className="flex h-16 flex-col items-center justify-center gap-1 text-[0.72rem] font-semibold text-ink-muted"
+          >
+            <span className="flex h-8 w-12 items-center justify-center rounded-full">
+              <Menu className="h-5 w-5" aria-hidden="true" />
+            </span>
+            {t('nav.more')}
+          </button>
+        </nav>
+
+        <Modal
+          open={moreOpen}
+          onClose={() => setMoreOpen(false)}
+          title={t('nav.more')}
+          variant="drawer"
+        >
+          <nav className="space-y-1">
+            {nav.slice(QUICK_COUNT).map((item) => (
+              <SideLink key={item.to} item={item} />
+            ))}
+          </nav>
           <button
             type="button"
             onClick={onLogout}
-            className="mt-3 flex h-12 w-full items-center gap-3 rounded-control px-3 text-ink-muted hover:bg-ink/5 hover:text-ink"
+            className="mt-4 flex h-12 w-full items-center gap-3 rounded-control border border-border px-3 font-medium"
           >
             <LogOut className="h-5 w-5" aria-hidden="true" />
             {t('nav.logout')}
           </button>
-        </div>
-      </aside>
-
-      <div className="min-w-0">
-        <header className="no-print sticky top-1.5 z-30 flex h-14 items-center justify-between border-b border-border bg-bg/90 px-4 backdrop-blur lg:hidden">
-          <Logo />
-          <span
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-ink text-xs font-bold text-white"
-            aria-label={user?.name}
-          >
-            {initials(user?.name)}
-          </span>
-        </header>
-        <main
-          id="main"
-          className="mx-auto w-full max-w-6xl px-4 pb-28 pt-6 sm:px-6 lg:px-10 lg:pb-14 lg:pt-10"
-        >
-          <ErrorBoundary key={pathname}>
-            <Suspense fallback={<SkeletonRows n={6} className="h-20" />}>
-              <AnimatedOutlet />
-            </Suspense>
-          </ErrorBoundary>
-        </main>
+        </Modal>
+        <ConfirmDialog
+          open={confirmLogout}
+          title={t('nav.logoutUnsaved', { n: unsaved })}
+          body={t('attendance.discardBody')}
+          confirmLabel={t('nav.logout')}
+          onConfirm={() => {
+            setConfirmLogout(false);
+            logout();
+          }}
+          onCancel={() => setConfirmLogout(false)}
+        />
       </div>
-
-      <nav
-        aria-label={t('nav.quick')}
-        className="no-print fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t border-border bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden"
-      >
-        {nav.slice(0, QUICK_COUNT).map((item) => (
-          <TabLink key={item.to} item={item} />
-        ))}
-        <button
-          type="button"
-          onClick={() => setMoreOpen(true)}
-          className="flex h-16 flex-col items-center justify-center gap-1 text-[0.72rem] font-semibold text-ink-muted"
-        >
-          <span className="flex h-8 w-12 items-center justify-center rounded-full">
-            <Menu className="h-5 w-5" aria-hidden="true" />
-          </span>
-          {t('nav.more')}
-        </button>
-      </nav>
-
-      <Modal
-        open={moreOpen}
-        onClose={() => setMoreOpen(false)}
-        title={t('nav.more')}
-        variant="drawer"
-      >
-        <nav className="space-y-1">
-          {nav.slice(QUICK_COUNT).map((item) => (
-            <SideLink key={item.to} item={item} />
-          ))}
-        </nav>
-        <button
-          type="button"
-          onClick={onLogout}
-          className="mt-4 flex h-12 w-full items-center gap-3 rounded-control border border-border px-3 font-medium"
-        >
-          <LogOut className="h-5 w-5" aria-hidden="true" />
-          {t('nav.logout')}
-        </button>
-      </Modal>
-      <ConfirmDialog
-        open={confirmLogout}
-        title={t('nav.logoutUnsaved', { n: unsaved })}
-        body={t('attendance.discardBody')}
-        confirmLabel={t('nav.logout')}
-        onConfirm={() => {
-          setConfirmLogout(false);
-          logout();
-        }}
-        onCancel={() => setConfirmLogout(false)}
-      />
-    </div>
+    </MotionConfig>
   );
 }
