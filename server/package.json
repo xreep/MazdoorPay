@@ -10,7 +10,9 @@
     "start": "node src/server.js",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
     "seed": "node src/seed/index.js",
-    "create-admin": "node src/scripts/createAdmin.js"
+    "create-admin": "node src/scripts/createAdmin.js",
+    "test:coverage": "NODE_OPTIONS=--experimental-vm-modules jest --coverage",
+    "dev:memory": "node src/scripts/devMemory.js"
   },
   "dependencies": {
     "@mazdoorpay/shared": "1.0.0",
