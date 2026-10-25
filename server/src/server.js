@@ -13,9 +13,7 @@ async function start() {
   if (process.env.SEED_DEMO_IF_MISSING === 'true') {
     const { seedDemoIfMissing } = await import('./seed/runSeed.js');
     seedDemoIfMissing({ log: (line) => console.log(`[seed] ${line}`) })
-      .then((counts) =>
-        console.log(counts ? '[seed] demo data created' : '[seed] demo data already present')
-      )
+      .then((counts) => console.log(counts ? '[seed] demo data created' : '[seed] nothing to do'))
       .catch((err) => console.error(`[seed] failed: ${err.message}`));
   }
 }

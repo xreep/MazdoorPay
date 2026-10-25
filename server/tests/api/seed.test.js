@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import { User } from '../../src/models/User.js';
 import { Worker } from '../../src/models/Worker.js';
 import { Attendance } from '../../src/models/Attendance.js';
@@ -84,4 +85,26 @@ it('seedDemoIfMissing redoes a seed that was interrupted part-way', async () => 
   const counts = await seedDemoIfMissing({ now: NOW });
   expect(counts).toMatchObject({ contractors: 2, workers: 30, attendance: 1350 });
   expect(await seedDemoIfMissing({ now: NOW })).toBeNull();
+}, 120000);
+
+it('seedDemoIfMissing seeds only once when two instances start together', async () => {
+  // Render starts the new instance while the old one is still running.
+  const results = await Promise.all([
+    seedDemoIfMissing({ now: NOW }),
+    seedDemoIfMissing({ now: NOW }),
+  ]);
+  expect(results.filter(Boolean)).toHaveLength(1);
+  expect(await User.countDocuments({ isDemo: true })).toBe(3);
+  expect(await Worker.countDocuments()).toBe(30);
+}, 120000);
+
+it('seedDemoIfMissing waits out a live lock but takes over an abandoned one', async () => {
+  const state = mongoose.connection.collection('seedstate');
+  await state.insertOne({ _id: 'demo-seed-lock', until: new Date(Date.now() + 60_000) });
+  expect(await seedDemoIfMissing({ now: NOW })).toBeNull();
+  expect(await User.countDocuments({ isDemo: true })).toBe(0);
+
+  await state.updateOne({ _id: 'demo-seed-lock' }, { $set: { until: new Date(Date.now() - 1) } });
+  expect(await seedDemoIfMissing({ now: NOW })).toMatchObject({ contractors: 2 });
+  expect(await state.findOne({ _id: 'demo-seed-lock' })).toBeNull();
 }, 120000);

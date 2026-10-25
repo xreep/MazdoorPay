@@ -45,6 +45,8 @@ function prng(seed) {
 }
 
 async function removeDemoData() {
+  // Clear the "finished" marker first, so a removal cut short is redone by the next start.
+  await seedMarker().deleteOne({ _id: 'demo-seed' });
   const demo = await User.find({ isDemo: true }).select('_id email').lean();
   const ids = demo.map((u) => u._id);
   const owned = { contractorId: { $in: ids } };
@@ -58,7 +60,6 @@ async function removeDemoData() {
     LoginAttempt.deleteMany({ email: { $in: demo.map((u) => u.email) } }),
   ]);
   await User.deleteMany({ _id: { $in: ids } });
-  await seedMarker().deleteOne({ _id: 'demo-seed' });
 }
 
 // Written only when a seed run finishes, so an interrupted run is detected and redone.
@@ -275,9 +276,40 @@ export async function runSeed({ now = new Date(), log = () => {}, allowProd = fa
   return counts;
 }
 
+const LOCK_ID = 'demo-seed-lock';
+// A seed takes well under a minute; a lock older than this belongs to an instance that died.
+const LOCK_MS = 10 * 60 * 1000;
+
+async function acquireSeedLock() {
+  const until = new Date(Date.now() + LOCK_MS);
+  try {
+    await seedMarker().insertOne({ _id: LOCK_ID, until });
+    return true;
+  } catch (err) {
+    if (err.code !== 11000) throw err;
+  }
+  const abandoned = await seedMarker().findOneAndUpdate(
+    { _id: LOCK_ID, until: { $lt: new Date() } },
+    { $set: { until } }
+  );
+  return Boolean(abandoned);
+}
+
+const seeded = async () => Boolean(await seedMarker().findOne({ _id: 'demo-seed' }));
+
 // For hosts without a shell (Render free tier): create the demo accounts on first start only.
-// Returns the counts when it seeded, or null when a completed demo seed already exists.
+// During a deploy the old and new instances both start this; the lock lets only one seed.
+// Returns the counts when it seeded, or null when the demo data exists or is being created.
 export async function seedDemoIfMissing({ now = new Date(), log = () => {} } = {}) {
-  if (await seedMarker().findOne({ _id: 'demo-seed' })) return null;
-  return runSeed({ now, log, allowProd: true });
+  if (await seeded()) return null;
+  if (!(await acquireSeedLock())) {
+    log('Another instance is creating the demo data');
+    return null;
+  }
+  try {
+    if (await seeded()) return null;
+    return await runSeed({ now, log, allowProd: true });
+  } finally {
+    await seedMarker().deleteOne({ _id: LOCK_ID });
+  }
 }
