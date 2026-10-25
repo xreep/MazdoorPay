@@ -1,7 +1,13 @@
 import * as admin from '../services/admin.service.js';
 import { sendReport } from '../utils/csv.js';
 
-const adminContext = (req) => ({ actor: { id: req.user.id, role: req.user.role }, ip: req.ip });
+// The demo admin's password is public, so it only sees the demo accounts.
+const visibility = (req) => ({ demoOnly: req.user.isDemo });
+const adminContext = (req) => ({
+  actor: { id: req.user.id, role: req.user.role },
+  ip: req.ip,
+  ...visibility(req),
+});
 
 const KPI_LABELS = {
   contractors: 'Contractors',
@@ -16,13 +22,16 @@ const KPI_LABELS = {
 
 export const overview = async (_req, res) => res.json(await admin.getOverview());
 export const growth = async (req, res) => res.json(await admin.getGrowth(req.query));
-export const users = async (req, res) => res.json(await admin.listUsers(req.query));
-export const user = async (req, res) => res.json(await admin.getUser(req.params.id));
-export const activity = async (req, res) => res.json(await admin.listActivity(req.query));
+export const users = async (req, res) =>
+  res.json(await admin.listUsers(req.query, visibility(req)));
+export const user = async (req, res) =>
+  res.json(await admin.getUser(req.params.id, visibility(req)));
+export const activity = async (req, res) =>
+  res.json(await admin.listActivity(req.query, visibility(req)));
 export const dailyActivity = async (req, res) => res.json(await admin.getDailyActivity(req.query));
 export const userWorkers = async (req, res) =>
-  res.json(await admin.listContractorWorkers(req.params.id, req.query));
-export const anomalies = async (_req, res) => res.json(await admin.findAnomalies());
+  res.json(await admin.listContractorWorkers(req.params.id, req.query, visibility(req)));
+export const anomalies = async (req, res) => res.json(await admin.findAnomalies(visibility(req)));
 
 export async function suspend(req, res) {
   res.json({ user: await admin.suspendUser(adminContext(req), req.params.id, req.body.reason) });

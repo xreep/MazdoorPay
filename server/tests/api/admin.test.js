@@ -316,3 +316,66 @@ describe('KPIs', () => {
     expect(csv.text).toMatch(/Payment accuracy \(%\),75/);
   });
 });
+
+describe('demo admin', () => {
+  // The demo admin's password is public, so it must only ever see the demo contractors.
+  let demoAdmin;
+  let demo;
+  beforeEach(async () => {
+    demoAdmin = { ...(await createAdminUser({ isDemo: true })) };
+    demoAdmin.api = authed(demoAdmin.token);
+    demo = await registerContractor({ name: 'Demo Contractor' });
+    await User.updateOne({ _id: demo.user._id }, { isDemo: true });
+    await authed(demo.token).post('/api/v1/sites', { name: 'Demo Site' });
+  });
+
+  it('lists only demo accounts', async () => {
+    const res = await demoAdmin.api.get('/api/v1/admin/users');
+    expect(res.status).toBe(200);
+    const ids = res.body.data.map((u) => u._id);
+    expect(ids).toContain(demo.user._id);
+    expect(ids).not.toContain(fx.user._id);
+    expect(res.body.data.every((u) => u.isDemo)).toBe(true);
+  });
+
+  it("cannot open a real contractor's account or workers", async () => {
+    expect((await demoAdmin.api.get(`/api/v1/admin/users/${fx.user._id}`)).status).toBe(404);
+    expect((await demoAdmin.api.get(`/api/v1/admin/users/${fx.user._id}/workers`)).status).toBe(
+      404
+    );
+    expect((await demoAdmin.api.get(`/api/v1/admin/users/${demo.user._id}`)).status).toBe(200);
+  });
+
+  it("sees only demo contractors' activity and anomalies", async () => {
+    await Worker.updateOne({ _id: fx.w1._id }, { siteId: null });
+    const activity = await demoAdmin.api.get('/api/v1/admin/activity?limit=100');
+    expect(activity.body.total).toBeGreaterThan(0);
+    expect(activity.body.data.every((a) => a.contractorId === demo.user._id)).toBe(true);
+    const real = await demoAdmin.api.get(`/api/v1/admin/activity?contractorId=${fx.user._id}`);
+    expect(real.body.total).toBe(0);
+
+    const anomalies = await demoAdmin.api.get('/api/v1/admin/anomalies');
+    expect(anomalies.body.anomalies.map((a) => a.contractorId)).not.toContain(fx.user._id);
+    const full = await admin.api.get('/api/v1/admin/anomalies');
+    expect(full.body.anomalies.map((a) => a.contractorId)).toContain(fx.user._id);
+  });
+
+  it('cannot suspend a real contractor', async () => {
+    const res = await demoAdmin.api.post(`/api/v1/admin/users/${fx.user._id}/suspend`, {
+      reason: 'Testing it',
+    });
+    expect(res.status).toBe(404);
+    expect((await User.findById(fx.user._id)).status).toBe('active');
+  });
+
+  it('nobody can suspend a demo account, so the demo logins keep working', async () => {
+    for (const api of [admin.api, demoAdmin.api]) {
+      const res = await api.post(`/api/v1/admin/users/${demo.user._id}/suspend`, {
+        reason: 'Testing it',
+      });
+      expect(res.status).toBe(400);
+      expect(res.body.error).toMatch(/Demo accounts/);
+    }
+    expect((await User.findById(demo.user._id)).status).toBe('active');
+  });
+});

@@ -32,6 +32,10 @@ const activeContractorIds = (days) =>
     at: { $gte: new Date(Date.now() - days * DAY_MS) },
   });
 
+// Demo admins see only the demo accounts; `demoOnly` narrows a user lookup to them.
+const demoScope = (demoOnly) => (demoOnly ? { isDemo: true } : {});
+const demoContractorIds = () => User.distinct('_id', { isDemo: true, role: 'contractor' });
+
 const paidTotals = async (match = {}) => {
   const [row] = await Payment.aggregate([
     { $match: { ...match, voidedAt: null } },
@@ -120,8 +124,8 @@ export async function getGrowth({ weeks }) {
   return { weeks: [...rows.values()] };
 }
 
-export async function listUsers({ q, status, role, page, limit }) {
-  const filter = {};
+export async function listUsers({ q, status, role, page, limit }, { demoOnly } = {}) {
+  const filter = demoScope(demoOnly);
   if (status) filter.status = status;
   if (role) filter.role = role;
   if (q) {
@@ -159,8 +163,10 @@ export async function listUsers({ q, status, role, page, limit }) {
   return pageResult(data, total, { page, limit });
 }
 
-export async function getUser(userId) {
-  const user = await User.findById(userId).select(USER_FIELDS).lean();
+export async function getUser(userId, { demoOnly } = {}) {
+  const user = await User.findOne({ _id: userId, ...demoScope(demoOnly) })
+    .select(USER_FIELDS)
+    .lean();
   if (!user) throw httpError(404, 'User not found');
   const scope = { contractorId: user._id };
   const [sites, workers, activeWorkers, attendanceRecords, paid, dues] = await Promise.all([
@@ -187,10 +193,12 @@ export async function getUser(userId) {
 }
 
 async function setStatus(ctx, userId, status, reason) {
-  const user = await User.findById(userId).select(USER_FIELDS);
+  const user = await User.findOne({ _id: userId, ...demoScope(ctx.demoOnly) }).select(USER_FIELDS);
   if (!user) throw httpError(404, 'User not found');
   if (user.role === 'admin' || String(user._id) === ctx.actor.id)
     throw httpError(400, 'Admins cannot be suspended here');
+  if (user.isDemo)
+    throw httpError(400, 'Demo accounts are shared with everyone and cannot be suspended');
   const before = { status: user.status, suspendedReason: user.suspendedReason };
   user.status = status;
   user.suspendedReason = status === 'suspended' ? reason : undefined;
@@ -212,9 +220,17 @@ async function setStatus(ctx, userId, status, reason) {
 export const suspendUser = (ctx, userId, reason) => setStatus(ctx, userId, 'suspended', reason);
 export const reactivateUser = (ctx, userId) => setStatus(ctx, userId, 'active');
 
-export async function listActivity({ contractorId, action, from, to, page, limit }) {
+export async function listActivity(
+  { contractorId, action, from, to, page, limit },
+  { demoOnly } = {}
+) {
   const filter = {};
-  if (contractorId) filter.contractorId = contractorId;
+  if (demoOnly) {
+    const ids = await demoContractorIds();
+    filter.contractorId = {
+      $in: contractorId ? ids.filter((id) => String(id) === contractorId) : ids,
+    };
+  } else if (contractorId) filter.contractorId = contractorId;
   if (action) filter.action = action;
   if (from || to)
     filter.at = {
@@ -251,7 +267,7 @@ const workerLookup = [
 ];
 
 // Rows that break the platform's own rules; most can only appear through manual database edits.
-export async function findAnomalies() {
+export async function findAnomalies({ demoOnly } = {}) {
   const [inactive, beforeJoin, overpaid, upi, noSite, duplicates] = await Promise.all([
     Attendance.aggregate([
       ...workerLookup,
@@ -313,6 +329,7 @@ export async function findAnomalies() {
   ]);
 
   const id = (v) => (v ? String(v) : undefined);
+  const visible = demoOnly ? new Set((await demoContractorIds()).map(String)) : null;
   const anomalies = [
     ...inactive.map((r) => ({
       type: 'attendance_inactive_worker',
@@ -354,7 +371,9 @@ export async function findAnomalies() {
       workerId: id(d.ids[0]),
       detail: `${d.n} workers named "${d._id.name}" with phone ${d._id.phone}`,
     })),
-  ].slice(0, MAX_ANOMALIES);
+  ]
+    .filter((a) => !visible || visible.has(a.contractorId))
+    .slice(0, MAX_ANOMALIES);
 
   const counts = {};
   for (const a of anomalies) counts[a.type] = (counts[a.type] ?? 0) + 1;
@@ -441,8 +460,9 @@ const maskUpi = (upi) => {
 };
 
 // Read-only view of a contractor's workers for admins; contact details are masked.
-export async function listContractorWorkers(userId, { status, page, limit }) {
-  if (!(await User.exists({ _id: userId }))) throw httpError(404, 'User not found');
+export async function listContractorWorkers(userId, { status, page, limit }, { demoOnly } = {}) {
+  if (!(await User.exists({ _id: userId, ...demoScope(demoOnly) })))
+    throw httpError(404, 'User not found');
   const filter = { contractorId: userId };
   if (status !== 'all') filter.isActive = status === 'active';
   const [workers, total] = await Promise.all([

@@ -174,6 +174,13 @@ describe('login and refresh', () => {
     expect(locked.body.error).toMatch(/Too many failed attempts/);
   });
 
+  it('never locks a demo account, whose password is public', async () => {
+    const { user } = await registerContractor();
+    await User.updateOne({ _id: user._id }, { isDemo: true });
+    for (let i = 0; i < 6; i++) expect((await login(user.email, 'Wrong1234')).status).toBe(401);
+    expect((await login(user.email, DEFAULT_PASSWORD)).status).toBe(200);
+  });
+
   it('a successful login clears earlier failures', async () => {
     const { user } = await registerContractor();
     for (let i = 0; i < 4; i++) await login(user.email, 'Wrong1234');

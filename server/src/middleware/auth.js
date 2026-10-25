@@ -14,11 +14,11 @@ export async function requireAuth(req, _res, next) {
     return next(httpError(401, SESSION_EXPIRED));
   }
 
-  const user = await User.findById(claims.sub).select('role status email').lean();
+  const user = await User.findById(claims.sub).select('role status email isDemo').lean();
   if (!user) return next(httpError(401, SESSION_EXPIRED));
   if (user.status === 'suspended') return next(httpError(401, SUSPENDED));
 
-  req.user = { id: String(user._id), role: user.role, email: user.email };
+  req.user = { id: String(user._id), role: user.role, email: user.email, isDemo: !!user.isDemo };
   next();
 }
 

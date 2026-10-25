@@ -94,7 +94,10 @@ async function recordFailedLogin(email) {
 }
 
 export async function login({ email, password }, { ip } = {}) {
-  const attempt = await LoginAttempt.findOne({ email }).lean();
+  const user = await User.findOne({ email }).select('+passwordHash');
+  // Demo passwords are public: a lockout would only let anyone shut everyone else out of the demo.
+  const lockable = !user?.isDemo;
+  const attempt = lockable && (await LoginAttempt.findOne({ email }).lean());
   if (attempt?.lockoutUntil && attempt.lockoutUntil > new Date()) {
     const minutes = Math.ceil((attempt.lockoutUntil - Date.now()) / 60000);
     throw httpError(
@@ -103,10 +106,9 @@ export async function login({ email, password }, { ip } = {}) {
     );
   }
 
-  const user = await User.findOne({ email }).select('+passwordHash');
   const matches = await bcrypt.compare(password, user?.passwordHash ?? getDummyHash());
   if (!user || !matches) {
-    await recordFailedLogin(email);
+    if (lockable) await recordFailedLogin(email);
     throw httpError(401, INVALID_LOGIN);
   }
   await LoginAttempt.deleteOne({ email });
