@@ -8,6 +8,8 @@ import NotFoundPage from './pages/NotFoundPage.jsx';
 
 const DashboardPage = lazy(() => import('./pages/DashboardPage.jsx'));
 const SitesPage = lazy(() => import('./pages/SitesPage.jsx'));
+const WorkersPage = lazy(() => import('./pages/WorkersPage.jsx'));
+const WorkerProfilePage = lazy(() => import('./pages/WorkerProfilePage.jsx'));
 
 const Placeholder = ({ name }) => <h1 className="text-2xl font-bold">{name}</h1>;
 
@@ -44,7 +46,8 @@ export const routes = [
           contractorOnly([
             { path: '/', element: <DashboardPage /> },
             { path: '/attendance', element: <Placeholder name="Attendance" /> },
-            { path: '/workers', element: <Placeholder name="Workers" /> },
+            { path: '/workers', element: <WorkersPage /> },
+            { path: '/workers/:id', element: <WorkerProfilePage /> },
             { path: '/payments', element: <Placeholder name="Payments" /> },
             { path: '/wages', element: <Placeholder name="Wages" /> },
             { path: '/sites', element: <SitesPage /> },

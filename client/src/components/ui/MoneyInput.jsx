@@ -1,4 +1,5 @@
 import { forwardRef, useEffect, useState } from 'react';
+import { Controller } from 'react-hook-form';
 import { useT } from '../../lib/i18n.jsx';
 import { paiseToInput, parseRupeesInput } from '../../lib/format.js';
 import { controlClass } from './Input.jsx';
@@ -52,3 +53,22 @@ export const MoneyInput = forwardRef(function MoneyInput(
     </div>
   );
 });
+
+// MoneyInput bound to react-hook-form; extra props (id, aria-*) from <Field> reach the input.
+export function MoneyField({ control, name, ...rest }) {
+  return (
+    <Controller
+      name={name}
+      control={control}
+      render={({ field }) => (
+        <MoneyInput
+          ref={field.ref}
+          value={field.value}
+          onChange={field.onChange}
+          onBlur={field.onBlur}
+          {...rest}
+        />
+      )}
+    />
+  );
+}
