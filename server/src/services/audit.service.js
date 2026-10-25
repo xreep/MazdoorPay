@@ -38,3 +38,17 @@ export async function recordAudit({
     console.error(`audit write failed for ${action}:`, err.message);
   }
 }
+
+export async function recordAuditMany(entries, { session } = {}) {
+  if (!entries.length) return;
+  try {
+    const docs = entries.map(({ actor, ...rest }) => ({
+      actorId: actor?.id,
+      actorRole: actor?.role,
+      ...rest,
+    }));
+    await AuditLog.insertMany(docs, session ? { session } : undefined);
+  } catch (err) {
+    console.error(`audit write failed for ${entries.length} entries:`, err.message);
+  }
+}
