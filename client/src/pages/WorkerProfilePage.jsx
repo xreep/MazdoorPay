@@ -60,8 +60,8 @@ function BalanceCard({ balance }) {
           </p>
         )}
       </div>
-      <div className={`p-5 ${owed ? 'bg-ink text-white' : 'bg-brand-soft text-ink'}`}>
-        <p className={`text-sm font-medium ${owed ? 'text-white/70' : 'text-brand-ink'}`}>
+      <div className={`p-5 ${owed ? 'bg-ink text-on-ink' : 'bg-brand-soft text-ink'}`}>
+        <p className={`text-sm font-medium ${owed ? 'text-on-ink/70' : 'text-brand-ink'}`}>
           {owed ? t('workers.balanceDue') : t('workers.advanceOutstanding')}
         </p>
         <p className="num mt-1 text-[1.75rem] font-bold leading-tight">
@@ -110,7 +110,7 @@ export default function WorkerProfilePage() {
           icon={UserX}
           title={t('workers.notFound')}
           action={
-            <Link to="/workers" className={`${linkButton} bg-brand text-ink`}>
+            <Link to="/workers" className={`${linkButton} bg-brand text-on-brand`}>
               {t('workers.backToList')}
             </Link>
           }
@@ -146,7 +146,7 @@ export default function WorkerProfilePage() {
         title={
           <span className="flex items-center gap-4">
             <span
-              className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-ink text-lg font-bold text-white"
+              className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-ink text-lg font-bold text-on-ink"
               aria-hidden="true"
             >
               {initials(worker.name)}
@@ -160,7 +160,7 @@ export default function WorkerProfilePage() {
           <>
             <Link
               to={`/payments?record=1&workerId=${worker._id}`}
-              className={`${linkButton} bg-brand text-ink`}
+              className={`${linkButton} bg-brand text-on-brand`}
             >
               <HandCoins className="h-5 w-5" aria-hidden="true" />
               {t('dashboard.recordPayment')}

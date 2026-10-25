@@ -33,7 +33,7 @@ export function UpiPayAssist({ worker, amount, type }) {
       {touch ? (
         <a
           href={link}
-          className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-control bg-ink px-5 font-semibold text-white"
+          className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-control bg-ink px-5 font-semibold text-on-ink"
         >
           <Smartphone className="h-5 w-5" aria-hidden="true" />
           {t('payments.payInUpiApp', { amount: money })}

@@ -23,7 +23,7 @@ export function Tabs({ tabs, value, onChange, label, className = '' }) {
             {tab.label}
             {tab.count != null && (
               <span
-                className={`num rounded-full px-2 py-0.5 text-xs ${selected ? 'bg-ink text-white' : 'bg-surface-2 text-ink-muted'}`}
+                className={`num rounded-full px-2 py-0.5 text-xs ${selected ? 'bg-ink text-on-ink' : 'bg-surface-2 text-ink-muted'}`}
               >
                 {tab.count}
               </span>

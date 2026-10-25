@@ -2,8 +2,8 @@ import { addDays, dayOfWeek, eachDay, todayIST } from '@mazdoorpay/shared';
 import { useFormat, useT } from '../../lib/i18n.jsx';
 
 const CELL = {
-  present: 'bg-present text-white',
-  'half-day': 'bg-half text-white',
+  present: 'bg-present text-on-solid',
+  'half-day': 'bg-half text-on-solid',
   absent: 'bg-absent-soft text-absent',
 };
 const STATUS_KEY = {

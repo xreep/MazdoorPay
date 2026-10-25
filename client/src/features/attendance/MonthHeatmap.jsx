@@ -18,7 +18,7 @@ const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const shade = (d) => {
   if (!d.marked) return 'bg-surface-2 text-ink-muted';
   const ratio = (d.present + d.halfDay / 2) / d.marked;
-  if (ratio >= 0.8) return 'bg-present text-white';
+  if (ratio >= 0.8) return 'bg-present text-on-solid';
   if (ratio >= 0.5) return 'bg-present/60 text-ink';
   return 'bg-present/25 text-ink';
 };

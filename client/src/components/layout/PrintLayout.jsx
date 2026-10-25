@@ -21,7 +21,7 @@ export function PrintLayout({
     document.title = `${title} · MazdoorPay`;
   }, [title]);
   return (
-    <div className="min-h-dvh bg-white text-black">
+    <div className="theme-light min-h-dvh bg-white text-black">
       <style>{`@page { size: ${paper} ${landscape ? 'landscape' : 'portrait'}; margin: ${paper === 'A5' ? 8 : 12}mm; }`}</style>
       <div className="no-print sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-border bg-surface px-4 py-3">
         <button
@@ -37,7 +37,7 @@ export function PrintLayout({
           <button
             type="button"
             onClick={() => window.print()}
-            className="inline-flex h-11 items-center gap-2 rounded-control bg-brand px-4 font-semibold text-ink"
+            className="inline-flex h-11 items-center gap-2 rounded-control bg-brand px-4 font-semibold text-on-brand"
           >
             <Printer className="h-5 w-5" aria-hidden="true" />
             {t('print.print')}

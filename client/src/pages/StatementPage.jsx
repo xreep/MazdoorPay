@@ -81,13 +81,13 @@ function Statement({ data }) {
 
       <section
         aria-label={heading}
-        className={`rounded-card p-5 ${owed > 0 ? 'bg-ink text-white' : 'bg-brand-soft text-ink'}`}
+        className={`rounded-card p-5 ${owed > 0 ? 'bg-ink text-on-ink' : 'bg-brand-soft text-ink'}`}
       >
-        <p className={`text-sm font-medium ${owed > 0 ? 'text-white/70' : 'text-brand-ink'}`}>
+        <p className={`text-sm font-medium ${owed > 0 ? 'text-on-ink/70' : 'text-brand-ink'}`}>
           {heading}
         </p>
         <p className="num mt-1 text-4xl font-bold">{formatINR(Math.abs(owed))}</p>
-        <p className={`mt-2 text-sm ${owed > 0 ? 'text-white/70' : 'text-ink-muted'}`}>
+        <p className={`mt-2 text-sm ${owed > 0 ? 'text-on-ink/70' : 'text-ink-muted'}`}>
           {t('statement.balanceNote')}
         </p>
       </section>

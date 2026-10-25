@@ -83,7 +83,7 @@ function SiteProgress({ site }) {
       </dl>
       <Link
         to={`/attendance?siteId=${site.siteId}`}
-        className={`${linkButton} mt-4 ${done ? 'border border-border bg-surface hover:bg-surface-2' : 'bg-ink text-white hover:bg-ink/90'}`}
+        className={`${linkButton} mt-4 ${done ? 'border border-border bg-surface hover:bg-surface-2' : 'bg-ink text-on-ink hover:bg-ink/90'}`}
       >
         <ClipboardCheck className="h-5 w-5" aria-hidden="true" />
         {done ? t('dashboard.review') : t('dashboard.markAttendance')}
@@ -154,7 +154,7 @@ export default function DashboardPage() {
             title={t('dashboard.emptyTitle')}
             body={t('dashboard.emptyBody')}
             action={
-              <Link to="/sites?new=1" className={`${linkButton} bg-brand text-ink`}>
+              <Link to="/sites?new=1" className={`${linkButton} bg-brand text-on-brand`}>
                 {t('dashboard.addFirstSite')}
               </Link>
             }

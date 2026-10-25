@@ -2,8 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Design tokens: HSL triplets so Tailwind can apply alpha. Light = concrete canvas, steel ink, hi-vis orange. */
-:root {
+/* Design tokens: HSL triplets so Tailwind can apply alpha. Light = concrete canvas, steel ink, hi-vis orange.
+   .theme-light puts the light tokens back inside a dark page: printed sheets are always black on white. */
+:root,
+.theme-light {
   --bg: 40 9% 92%; /* #EEECE8 concrete */
   --surface: 40 20% 99%; /* #FDFCFA */
   --surface-2: 40 10% 96%;
@@ -21,6 +23,10 @@
   --half: 32 80% 29%;
   --half-soft: 42 90% 91%;
   --focus: 214 90% 52%;
+  /* Text on filled surfaces: ink panels, the orange brand, and solid status colours. */
+  --on-ink: 0 0% 100%;
+  --on-brand: 215 26% 15%;
+  --on-solid: 0 0% 100%;
   color-scheme: light;
 }
 
@@ -42,6 +48,9 @@
   --half: 40 85% 60%;
   --half-soft: 40 45% 16%;
   --focus: 214 95% 66%;
+  --on-ink: 216 22% 9%;
+  --on-brand: 216 22% 9%;
+  --on-solid: 216 22% 9%;
   color-scheme: dark;
 }
 

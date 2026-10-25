@@ -24,6 +24,9 @@ export default {
         half: token('half'),
         'half-soft': token('half-soft'),
         focus: token('focus'),
+        'on-ink': token('on-ink'),
+        'on-brand': token('on-brand'),
+        'on-solid': token('on-solid'),
       },
       fontFamily: {
         sans: [

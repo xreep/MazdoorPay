@@ -2,7 +2,7 @@
 
 **Product:** MazdoorPay — daily wage labour attendance and payment platform
 **Live:** https://mazdoorpay.vercel.app
-**Status:** Phase 1 released (October 2026)
+**Status:** Released (October 2026) — every requirement in the brief, plus the extras in section 6
 
 ## 1. Problem
 
@@ -110,6 +110,7 @@ Construction contractors in India manage daily wage workers — masons, labourer
 | Hindi                      | Every screen in simple, everyday Hindi, switched with one tap (sidebar, phone header or login page) and saved to the account so it follows the user to any device. Dates follow the language. Receipts and wage slips print in the worker's own language, whatever the contractor uses. The Devanagari font is self-hosted and downloads only when Hindi is on screen. Messages from the server (such as validation errors) stay in English.                                 |
 | Worker statement link      | From the worker's profile, the contractor makes a private link and sends it (copy or WhatsApp). The worker opens it without an account and sees, in their own language, their all-time balance (the same figure the contractor sees) and the last 90 days of attendance, earnings and payments. Nothing else is shown: no other workers, no contractor contact details. A new link replaces the old one, "Stop link" ends it, and the profile shows when it was last opened. |
 | Installable app            | "Add to home screen" on Android and iPhone opens MazdoorPay full-screen like an app, with its own icon. A service worker caches the app shell only: the app opens quickly, and without a connection it says it cannot reach the server instead of showing old figures. Nothing is saved offline.                                                                                                                                                                             |
+| Dark mode                  | Follows the phone's or computer's setting by default; a one-tap switch (sidebar, phone header, login page) overrides it and is remembered on the device. Every text and colour pair meets WCAG AA contrast in both themes, and printed papers stay black on white.                                                                                                                                                                                                           |
 | **6**                      | **Admin**                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |                                                                                                                                                                       |
 | 6.1                        | Manage users and contractors                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Users list with search; read-only contractor detail; suspend (ends their sessions) and reactivate                                                                     |
 | 6.2                        | Monitor system usage                                                                                                                                                                                                                                                                                                                                                                                                                                                         | Overview totals, weekly sign-ups, activity per day, full activity log with filters                                                                                    |
@@ -120,14 +121,14 @@ Construction contractors in India manage daily wage workers — masons, labourer
 
 ## 7. Non-functional requirements
 
-| Requirement                                     | Target                                                                      | Result                                                                                                                                           |
-| ----------------------------------------------- | --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Security** — secure authentication            | Industry-standard auth, no privilege escalation, no cross-contractor access | bcrypt, lockout, rotating httpOnly refresh cookies with theft detection, role checks on every request, tenant isolation tested across ~20 routes |
-| **Usability** — simple for low digital literacy | One tap per worker, plain words, no typing to mark attendance               | 15 workers marked and saved in under 1 s of scripted use; status always shown as colour + icon + word                                            |
-| **Accessibility** — mobile-responsive           | Works from 360 px phones; WCAG 2.1 AA                                       | Phone layouts tested at 412 and 360 px; 48 px tap targets; Lighthouse accessibility 100 (login page); axe: 0 serious/critical issues on 17 pages |
-| **Performance** — fast                          | Lighthouse mobile ≥ 90; API p95 < 300 ms                                    | Lighthouse performance 96–98 (login page); p99 under 90 ms for six read endpoints in a local load test                                           |
-| **Data** — secure storage                       | Encrypted at rest, no plain secrets, correct money                          | Atlas encryption and TLS; hashed passwords and tokens; integer paise; append-only payments; audit log; streaming backup and guarded restore      |
-| **Scalability**                                 | Grows with users                                                            | Stateless API, contractor-scoped indexes, pagination, aggregation pipelines, versioned API                                                       |
+| Requirement                                     | Target                                                                      | Result                                                                                                                                                                        |
+| ----------------------------------------------- | --------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Security** — secure authentication            | Industry-standard auth, no privilege escalation, no cross-contractor access | bcrypt, lockout, rotating httpOnly refresh cookies with theft detection, role checks on every request, tenant isolation tested across ~20 routes                              |
+| **Usability** — simple for low digital literacy | One tap per worker, plain words, no typing to mark attendance               | 15 workers marked and saved in under 1 s of scripted use; status always shown as colour + icon + word                                                                         |
+| **Accessibility** — mobile-responsive           | Works from 360 px phones; WCAG 2.1 AA                                       | Phone layouts tested at 412 and 360 px; 48 px tap targets; Lighthouse accessibility 100 (login page); axe: 0 serious/critical issues on 18 pages, also in Hindi and dark mode |
+| **Performance** — fast                          | Lighthouse mobile ≥ 90; API p95 < 300 ms                                    | Lighthouse performance 96–98 (login page); p99 under 90 ms for six read endpoints in a local load test                                                                        |
+| **Data** — secure storage                       | Encrypted at rest, no plain secrets, correct money                          | Atlas encryption and TLS; hashed passwords and tokens; integer paise; append-only payments; audit log; streaming backup and guarded restore                                   |
+| **Scalability**                                 | Grows with users                                                            | Stateless API, contractor-scoped indexes, pagination, aggregation pipelines, versioned API                                                                                    |
 
 Details and measurements: [TECHNICAL.md](TECHNICAL.md).
 
@@ -167,13 +168,13 @@ All are computed live from the data on the admin **Analytics** page and exportab
 
 ## 11. Release
 
-| Phase       | Content                                                                                                              | Status      |
-| ----------- | -------------------------------------------------------------------------------------------------------------------- | ----------- |
-| 1 — Backend | API, rules, security, tests                                                                                          | Done        |
-| 2 — Web app | 8 pages, print views                                                                                                 | Done        |
-| 3 — Quality | End-to-end tests, accessibility, performance, CI                                                                     | Done        |
-| 4 — Launch  | Deployment, demo data, documentation                                                                                 | Done        |
-| 5 — Extras  | WhatsApp messages, UPI pay-assist, wage slip, QR attendance, Hindi, statement links, installable app; dark mode next | In progress |
+| Phase       | Content                                                                                                         | Status |
+| ----------- | --------------------------------------------------------------------------------------------------------------- | ------ |
+| 1 — Backend | API, rules, security, tests                                                                                     | Done   |
+| 2 — Web app | 8 pages, print views                                                                                            | Done   |
+| 3 — Quality | End-to-end tests, accessibility, performance, CI                                                                | Done   |
+| 4 — Launch  | Deployment, demo data, documentation                                                                            | Done   |
+| 5 — Extras  | WhatsApp messages, UPI pay-assist, wage slip, QR attendance, Hindi, statement links, installable app, dark mode | Done   |
 
 ## 12. Risks
 
@@ -190,9 +191,8 @@ All are computed live from the data on the admin **Analytics** page and exportab
 Designed but not built yet:
 
 1. **Offline marking** — mark attendance without signal and sync later (the app already installs to the home screen).
-2. **Dark mode** — the colour system already has a dark palette.
-3. **Overtime hours and piece-rate work.**
-4. **Biometric or GPS attendance.**
-5. **Digital payouts** through a payment gateway (UPI, bank transfer).
-6. **Government compliance filing** (PF, ESIC, BOCW welfare board).
-7. **Native mobile app** for on-site use.
+2. **Overtime hours and piece-rate work.**
+3. **Biometric or GPS attendance.**
+4. **Digital payouts** through a payment gateway (UPI, bank transfer).
+5. **Government compliance filing** (PF, ESIC, BOCW welfare board).
+6. **Native mobile app** for on-site use.

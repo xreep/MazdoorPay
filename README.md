@@ -26,6 +26,7 @@ The demo admin sees only the demo accounts, and demo accounts cannot be suspende
 
 - **Statement link** — a private link the worker opens without an account to see their own balance, attendance and payments.
 - **Installable** — add it to the phone's home screen and it opens like an app.
+- **Dark mode** — follows the phone's setting, with a one-tap switch.
 - **Hindi or English** — one tap switches every screen; receipts and wage slips print in each worker's own language.
 
 - **Dashboard** — today's attendance progress per site, wages pending, advances outstanding, money paid this week, and a 30-day trend.
@@ -49,8 +50,8 @@ The demo admin sees only the demo accounts, and demo accounts cannot be suspende
 
 ## Quality
 
-- **Tests:** 179 API tests (98% line coverage), 126 app tests, and 13 Playwright end-to-end runs covering the full contractor journey, the admin flow, the demo admin's limits, the production Content-Security-Policy, a 15-worker speed check, phone layouts at 412 and 360 px, and accessibility scans of every page.
-- **Accessibility:** Lighthouse 100 on the login page; axe finds no serious or critical issues on any of the 17 pages scanned; 48 px tap targets; status always shown as colour, icon and word.
+- **Tests:** 197 API tests (98% line coverage), 185 app tests, and 21 Playwright end-to-end runs covering the full contractor journey, the admin flow, the demo admin's limits, the production Content-Security-Policy, the card scanner, statement links, Hindi, dark mode, the installable app, a 15-worker speed check, phone layouts at 412 and 360 px, and accessibility scans of every page.
+- **Accessibility:** Lighthouse 100 on the login page; axe finds no serious or critical issues on any of the 18 pages scanned, also in Hindi and in dark mode; 48 px tap targets; status always shown as colour, icon and word.
 - **Performance:** Lighthouse mobile performance 96–98 on the login page; in a local load test of six read endpoints, p99 stayed under 90 ms.
 - **Security:** rotating httpOnly refresh cookies with theft detection, login lockout, rate limits a forged proxy header cannot reset, role checks on every request, strict per-contractor data isolation, validation on every endpoint, audit log of every write.
 - **CI:** GitHub Actions runs lint, all test suites, the production build, the dependency audit and the end-to-end tests on every push.

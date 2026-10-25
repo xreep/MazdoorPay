@@ -72,6 +72,7 @@ export const en = {
     loadFailed: 'Could not load this. {message}',
     language: 'Language',
     switchLanguage: 'हिन्दी में देखें',
+    darkMode: 'Dark mode',
   },
   status: { present: 'Present', absent: 'Absent', halfDay: 'Half-day', notMarked: 'Not marked' },
   money: { advance: '{amount} advance' },

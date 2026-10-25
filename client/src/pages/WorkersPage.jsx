@@ -30,7 +30,7 @@ function WorkerRow({ worker, siteName }) {
         className="flex items-center gap-4 px-4 py-3.5 transition hover:bg-surface-2 sm:px-5"
       >
         <span
-          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-sm font-bold ${worker.isActive ? 'bg-ink text-white' : 'bg-surface-2 text-ink-muted'}`}
+          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-sm font-bold ${worker.isActive ? 'bg-ink text-on-ink' : 'bg-surface-2 text-ink-muted'}`}
         >
           {initials(worker.name)}
         </span>

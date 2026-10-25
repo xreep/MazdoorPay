@@ -73,6 +73,7 @@ export const hi = {
     loadFailed: 'यह खुल नहीं पाया। {message}',
     language: 'भाषा',
     switchLanguage: 'English में देखें',
+    darkMode: 'डार्क मोड',
   },
   status: { present: 'हाज़िर', absent: 'ग़ैरहाज़िर', halfDay: 'आधा दिन', notMarked: 'नहीं लगी' },
   money: { advance: '{amount} एडवांस' },

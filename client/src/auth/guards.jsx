@@ -17,7 +17,7 @@ function ServerUnreachable({ onRetry }) {
       <button
         type="button"
         onClick={onRetry}
-        className="h-12 rounded-control bg-brand px-6 font-semibold text-ink"
+        className="h-12 rounded-control bg-brand px-6 font-semibold text-on-brand"
       >
         {t('common.retry')}
       </button>

@@ -13,7 +13,7 @@ export default function NotFoundPage() {
       </div>
       <Link
         to="/"
-        className="flex h-12 items-center rounded-control bg-brand px-5 font-semibold text-ink"
+        className="flex h-12 items-center rounded-control bg-brand px-5 font-semibold text-on-brand"
       >
         {t('notFound.home')}
       </Link>

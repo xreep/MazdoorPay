@@ -12,7 +12,7 @@ function CrashScreen() {
       <button
         type="button"
         onClick={() => window.location.reload()}
-        className="mt-6 h-12 rounded-control bg-brand px-5 font-semibold text-ink"
+        className="mt-6 h-12 rounded-control bg-brand px-5 font-semibold text-on-brand"
       >
         {translate(en, 'errors.reload')}
       </button>

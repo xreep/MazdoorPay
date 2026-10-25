@@ -1,8 +1,8 @@
 // MazdoorPay service worker: caches the app shell only, so the app opens quickly and installs.
 // API calls are never cached or replayed; without a connection the app says it cannot reach the
 // server rather than showing old data or saving anything.
-const CACHE = 'mazdoorpay-shell-v1';
-const SHELL = ['/', '/favicon.svg', '/manifest.webmanifest', '/icon-192.png'];
+const CACHE = 'mazdoorpay-shell-v2';
+const SHELL = ['/', '/theme.js', '/favicon.svg', '/manifest.webmanifest', '/icon-192.png'];
 const MAX_ASSETS = 80;
 
 self.addEventListener('install', (event) => {
@@ -47,6 +47,12 @@ self.addEventListener('fetch', (event) => {
         })
         .catch(() => caches.match('/'))
     );
+    return;
+  }
+
+  // Small shell files (like the theme script): the latest when online, the cached copy offline.
+  if (SHELL.includes(url.pathname)) {
+    event.respondWith(fetch(request).catch(() => caches.match(url.pathname)));
     return;
   }
 

@@ -147,7 +147,7 @@ function AttendanceSheet({ siteId, day, onDirtyChange }) {
           action={
             <Link
               to={`/workers?new=1&siteId=${siteId}`}
-              className="inline-flex h-12 items-center rounded-control bg-brand px-5 font-semibold text-ink"
+              className="inline-flex h-12 items-center rounded-control bg-brand px-5 font-semibold text-on-brand"
             >
               {t('workers.addTitle')}
             </Link>
@@ -178,7 +178,7 @@ function AttendanceSheet({ siteId, day, onDirtyChange }) {
             exit={{ y: 24, opacity: 0 }}
             className="sticky bottom-[5.25rem] z-20 mt-4 lg:bottom-6"
           >
-            <div className="flex items-center gap-2 rounded-card bg-ink p-2.5 pl-4 text-white shadow-lift sm:gap-3 sm:p-3 sm:pl-5">
+            <div className="flex items-center gap-2 rounded-card bg-ink p-2.5 pl-4 text-on-ink shadow-lift sm:gap-3 sm:p-3 sm:pl-5">
               <p
                 className="num min-w-0 flex-1 text-sm font-semibold leading-tight sm:text-base"
                 aria-live="polite"
@@ -190,7 +190,7 @@ function AttendanceSheet({ siteId, day, onDirtyChange }) {
               </p>
               <Button
                 variant="ghost"
-                className="shrink-0 px-3 text-white hover:bg-white/10"
+                className="shrink-0 px-3 text-on-ink hover:bg-on-ink/10"
                 onClick={draft.undo}
                 disabled={!draft.canUndo}
                 aria-label={t('attendance.undo')}
@@ -290,7 +290,7 @@ export default function AttendancePage() {
             action={
               <Link
                 to="/sites?new=1"
-                className="inline-flex h-12 items-center rounded-control bg-brand px-5 font-semibold text-ink"
+                className="inline-flex h-12 items-center rounded-control bg-brand px-5 font-semibold text-on-brand"
               >
                 {t('dashboard.addFirstSite')}
               </Link>

@@ -23,6 +23,7 @@ import { ConfirmDialog } from '../ui/ConfirmDialog.jsx';
 import { useUnsavedCount } from '../../lib/unsaved.js';
 import { SkeletonRows } from '../ui/Skeleton.jsx';
 import { LanguageToggle } from './LanguageToggle.jsx';
+import { ThemeToggle } from './ThemeToggle.jsx';
 import { Logo } from './Logo.jsx';
 import { ErrorBoundary } from './ErrorBoundary.jsx';
 
@@ -54,7 +55,7 @@ function SideLink({ item }) {
       end={item.end}
       className={({ isActive }) =>
         `flex h-12 items-center gap-3 rounded-control px-3 font-medium transition ${
-          isActive ? 'bg-ink text-white' : 'text-ink-muted hover:bg-ink/5 hover:text-ink'
+          isActive ? 'bg-ink text-on-ink' : 'text-ink-muted hover:bg-ink/5 hover:text-ink'
         }`
       }
     >
@@ -82,7 +83,7 @@ function TabLink({ item }) {
       {({ isActive }) => (
         <>
           <span
-            className={`flex h-8 w-12 items-center justify-center rounded-full transition ${isActive ? 'bg-brand text-ink' : ''}`}
+            className={`flex h-8 w-12 items-center justify-center rounded-full transition ${isActive ? 'bg-brand text-on-brand' : ''}`}
           >
             <Icon className="h-5 w-5" aria-hidden="true" />
           </span>
@@ -146,7 +147,7 @@ export function AppShell() {
           </nav>
           <div className="mt-auto border-t border-border pt-4">
             <div className="flex items-center gap-3 px-2">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-ink text-sm font-bold text-white">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-ink text-sm font-bold text-on-ink">
                 {initials(user?.name)}
               </span>
               <div className="min-w-0">
@@ -157,6 +158,7 @@ export function AppShell() {
               </div>
             </div>
             <LanguageToggle className="mt-3 w-full" />
+            <ThemeToggle className="w-full" />
             <button
               type="button"
               onClick={onLogout}
@@ -173,8 +175,9 @@ export function AppShell() {
             <Logo />
             <div className="flex items-center gap-1">
               <LanguageToggle className="px-2 text-sm" />
+              <ThemeToggle compact />
               <span
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-ink text-xs font-bold text-white"
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-ink text-xs font-bold text-on-ink"
                 aria-label={user?.name}
               >
                 {initials(user?.name)}

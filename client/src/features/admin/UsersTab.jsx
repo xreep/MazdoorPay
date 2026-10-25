@@ -73,7 +73,7 @@ export function UsersTab() {
                 aria-labelledby={titleId}
                 className="flex items-center gap-4 px-4 py-3.5 sm:px-5"
               >
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-ink text-sm font-bold text-white">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-ink text-sm font-bold text-on-ink">
                   {initials(u.name)}
                 </span>
                 <div className="min-w-0 flex-1">
@@ -82,7 +82,7 @@ export function UsersTab() {
                       {u.name}
                     </span>
                     <span
-                      className={`rounded-full px-2 py-0.5 text-xs font-semibold ${u.role === 'admin' ? 'bg-ink text-white' : 'bg-surface-2 text-ink-muted'}`}
+                      className={`rounded-full px-2 py-0.5 text-xs font-semibold ${u.role === 'admin' ? 'bg-ink text-on-ink' : 'bg-surface-2 text-ink-muted'}`}
                     >
                       {u.role === 'admin' ? t('nav.roleAdmin') : t('nav.roleContractor')}
                     </span>

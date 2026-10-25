@@ -8,7 +8,7 @@ export function Logo({ inverted = false }) {
           fill={inverted ? '#1C2430' : '#FF6A13'}
         />
       </svg>
-      <span className={`text-xl font-bold tracking-tight ${inverted ? 'text-white' : 'text-ink'}`}>
+      <span className={`text-xl font-bold tracking-tight ${inverted ? 'text-on-ink' : 'text-ink'}`}>
         MazdoorPay
       </span>
     </div>

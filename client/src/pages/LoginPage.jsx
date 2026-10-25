@@ -11,6 +11,7 @@ import { Button } from '../components/ui/Button.jsx';
 import { Field } from '../components/ui/Field.jsx';
 import { Input } from '../components/ui/Input.jsx';
 import { LanguageToggle } from '../components/layout/LanguageToggle.jsx';
+import { ThemeToggle } from '../components/layout/ThemeToggle.jsx';
 import { Logo } from '../components/layout/Logo.jsx';
 import { applyServerErrors } from '../lib/forms.js';
 
@@ -136,15 +137,15 @@ export default function LoginPage() {
 
   return (
     <div className="grid min-h-dvh lg:grid-cols-[1.05fr_1fr]">
-      <aside className="relative hidden flex-col justify-between overflow-hidden bg-ink p-12 text-white lg:flex">
+      <aside className="relative hidden flex-col justify-between overflow-hidden bg-ink p-12 text-on-ink lg:flex">
         <Logo inverted />
         <div className="max-w-lg pb-16">
           <h1 className="text-display">{t('auth.heroTitle')}</h1>
-          <p className="mt-5 text-lg leading-relaxed text-white/75">{t('auth.heroBody')}</p>
+          <p className="mt-5 text-lg leading-relaxed text-on-ink/75">{t('auth.heroBody')}</p>
           <ul className="mt-10 space-y-4">
             {['heroPoint1', 'heroPoint2', 'heroPoint3'].map((k) => (
-              <li key={k} className="flex items-start gap-3 text-white/90">
-                <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand text-ink">
+              <li key={k} className="flex items-start gap-3 text-on-ink/90">
+                <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand text-on-brand">
                   <Check className="h-4 w-4" aria-hidden="true" />
                 </span>
                 {t(`auth.${k}`)}
@@ -156,7 +157,10 @@ export default function LoginPage() {
       </aside>
 
       <main className="relative flex flex-col items-center justify-center px-4 py-10 sm:px-8">
-        <LanguageToggle className="absolute right-3 top-3" />
+        <div className="absolute right-3 top-3 flex items-center gap-1">
+          <LanguageToggle />
+          <ThemeToggle compact />
+        </div>
         <div className="w-full max-w-md">
           <div className="mb-8 lg:hidden">
             <Logo />

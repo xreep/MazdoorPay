@@ -2,10 +2,11 @@ import { forwardRef } from 'react';
 import { Loader2 } from 'lucide-react';
 
 const VARIANTS = {
-  primary: 'bg-brand text-ink font-semibold shadow-sm hover:brightness-95 active:brightness-90',
+  primary:
+    'bg-brand text-on-brand font-semibold shadow-sm hover:brightness-95 active:brightness-90',
   secondary: 'bg-surface text-ink border border-border hover:bg-surface-2',
   ghost: 'text-ink hover:bg-ink/5',
-  danger: 'bg-absent text-white font-semibold hover:brightness-95',
+  danger: 'bg-absent text-on-solid font-semibold hover:brightness-95',
 };
 const SIZES = {
   sm: 'h-12 px-4 text-sm',

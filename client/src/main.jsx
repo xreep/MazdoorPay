@@ -7,10 +7,13 @@ import { I18nProvider } from './lib/i18n.jsx';
 import { createQueryClient } from './lib/queryClient.js';
 import { AuthProvider } from './auth/AuthProvider.jsx';
 import { routes } from './App.jsx';
+import { followSystemTheme } from './lib/theme.js';
 import '@fontsource-variable/inter';
 // Hindi text; its unicode-range means it downloads only when Devanagari is on screen.
 import '@fontsource-variable/noto-sans-devanagari';
 import './index.css';
+
+followSystemTheme(window.matchMedia('(prefers-color-scheme: dark)'));
 
 const queryClient = createQueryClient();
 const router = createBrowserRouter(routes);
