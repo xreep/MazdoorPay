@@ -177,6 +177,7 @@ export async function setActive(ctx, workerId, isActive) {
   const worker = await findOwnedWorker(ctx.contractorId, workerId);
   const before = { isActive: worker.isActive };
   worker.isActive = isActive;
+  worker.deactivatedOn = isActive ? null : todayIST();
   await worker.save();
   await recordAudit({
     ...ctx,

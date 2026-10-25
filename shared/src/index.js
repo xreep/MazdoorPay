@@ -9,3 +9,4 @@ export * from './schemas/attendance.js';
 export * from './schemas/payment.js';
 export * from './schemas/wage.js';
 export * from './schemas/report.js';
+export * from './schemas/admin.js';

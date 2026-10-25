@@ -25,6 +25,8 @@ const workerSchema = new Schema(
     preferredLanguage: { type: String, enum: LANGUAGES, default: 'en' },
     joinedOn: { type: String, required: true },
     isActive: { type: Boolean, default: true },
+    // IST day the worker was last deactivated; cleared on reactivation.
+    deactivatedOn: { type: String, default: null },
     qrVersion: { type: Number, default: 1 },
     // Bumped inside every money-affecting transaction so concurrent writers conflict.
     ledgerVersion: { type: Number, default: 0 },
