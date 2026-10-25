@@ -14,6 +14,18 @@ const { runSeed } = await import('../seed/runSeed.js');
 
 await connectDB(config.mongoUri);
 await runSeed({ log: (line) => console.log(line) });
+
+// Optional real (non-demo) admin, for the end-to-end tests: the demo admin only sees demo accounts.
+if (process.env.DEV_ADMIN_EMAIL && process.env.DEV_ADMIN_PASSWORD) {
+  const bcrypt = (await import('bcryptjs')).default;
+  const { User } = await import('../models/User.js');
+  await User.create({
+    name: 'Operations Admin',
+    email: process.env.DEV_ADMIN_EMAIL,
+    role: 'admin',
+    passwordHash: await bcrypt.hash(process.env.DEV_ADMIN_PASSWORD, config.bcryptCost),
+  });
+}
 createApp().listen(config.port, () =>
   console.log(`MazdoorPay API (in-memory DB) on http://localhost:${config.port}`)
 );

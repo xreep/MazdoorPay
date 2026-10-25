@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { DEMO, apiContractor, login } from './helpers.js';
+import { DEMO, OPS_ADMIN, apiContractor, login } from './helpers.js';
 
 // The spec's admin flow: Manage users → Monitor activity → Generate reports.
 test('an admin suspends a contractor, sees it in the activity log, and reactivates them', async ({
@@ -7,7 +7,7 @@ test('an admin suspends a contractor, sees it in the activity log, and reactivat
   request,
 }) => {
   const target = await apiContractor(request, { name: 'Rogue Builders' });
-  await login(page, DEMO.admin);
+  await login(page, OPS_ADMIN);
   await expect(page.getByRole('heading', { name: 'Overview' })).toBeVisible();
   await expect(page.getByRole('region', { name: 'Contractors' })).toBeVisible();
 
@@ -45,6 +45,24 @@ test('an admin suspends a contractor, sees it in the activity log, and reactivat
     data: { email: target.email, password: target.password },
   });
   expect(back.status()).toBe(200);
+});
+
+test('the public demo admin sees only demo accounts and cannot suspend them', async ({
+  page,
+  request,
+}) => {
+  const real = await apiContractor(request, { name: 'Private Builders' });
+  await login(page, DEMO.admin);
+  await page.goto('/admin/users');
+  await expect(page.getByRole('button', { name: 'View Ravi Kumar' })).toBeVisible();
+  await page.getByRole('searchbox', { name: 'Search name or email' }).fill(real.email);
+  await expect(page.getByRole('button', { name: 'View Private Builders' })).toHaveCount(0);
+
+  await page.getByRole('searchbox', { name: 'Search name or email' }).fill('ravi.kumar');
+  await page.getByRole('button', { name: 'View Ravi Kumar' }).click();
+  const drawer = page.getByRole('dialog', { name: 'Ravi Kumar' });
+  await expect(drawer.getByText(/Demo accounts are shared with everyone/)).toBeVisible();
+  await expect(drawer.getByRole('button', { name: 'Suspend contractor' })).toHaveCount(0);
 });
 
 test('data checks and KPIs load for the admin', async ({ page }) => {

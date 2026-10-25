@@ -1,9 +1,6 @@
 import { expect } from '@playwright/test';
 
-export const DEMO = {
-  contractor: { email: 'ravi.kumar@mazdoorpay.in', password: 'Demo@2026' },
-  admin: { email: 'admin@mazdoorpay.in', password: 'Admin@2026' },
-};
+export { DEMO, OPS_ADMIN } from './accounts.js';
 
 let counter = 0;
 export const uniqueEmail = (prefix) => `${prefix}.${Date.now()}.${++counter}@e2e.mazdoorpay.test`;
