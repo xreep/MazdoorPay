@@ -7,6 +7,7 @@ import LoginPage from './pages/LoginPage.jsx';
 import NotFoundPage from './pages/NotFoundPage.jsx';
 
 const DashboardPage = lazy(() => import('./pages/DashboardPage.jsx'));
+const SitesPage = lazy(() => import('./pages/SitesPage.jsx'));
 
 const Placeholder = ({ name }) => <h1 className="text-2xl font-bold">{name}</h1>;
 
@@ -46,7 +47,7 @@ export const routes = [
             { path: '/workers', element: <Placeholder name="Workers" /> },
             { path: '/payments', element: <Placeholder name="Payments" /> },
             { path: '/wages', element: <Placeholder name="Wages" /> },
-            { path: '/sites', element: <Placeholder name="Sites" /> },
+            { path: '/sites', element: <SitesPage /> },
           ]),
           {
             path: '/admin/*',

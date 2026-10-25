@@ -2,6 +2,7 @@ import { render } from '@testing-library/react';
 import { createMemoryRouter, Outlet, RouterProvider, useLocation } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { vi } from 'vitest';
+import { Toaster } from 'sonner';
 import { createQueryClient } from '../lib/queryClient.js';
 import { I18nProvider } from '../lib/i18n.jsx';
 import { AuthContext, AuthProvider } from '../auth/AuthProvider.jsx';
@@ -93,6 +94,7 @@ export function renderWithProviders(
       <I18nProvider lang="en">
         <AuthContext.Provider value={auth}>
           <RouterProvider router={router} />
+          <Toaster />
         </AuthContext.Provider>
       </I18nProvider>
     </QueryClientProvider>

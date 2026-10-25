@@ -11,24 +11,13 @@ import { Button } from '../components/ui/Button.jsx';
 import { Field } from '../components/ui/Field.jsx';
 import { Input } from '../components/ui/Input.jsx';
 import { Logo } from '../components/layout/Logo.jsx';
+import { applyServerErrors } from '../lib/forms.js';
 
 const DEMO = [
   { key: 'demoContractor', email: 'ravi.kumar@mazdoorpay.in', password: 'Demo@2026' },
   { key: 'demoContractor2', email: 'sunita.patil@mazdoorpay.in', password: 'Demo@2026' },
   { key: 'demoAdmin', email: 'admin@mazdoorpay.in', password: 'Admin@2026' },
 ];
-
-// Maps API `details` onto form fields, returns true if any matched.
-export function applyServerErrors(error, setError, fields) {
-  let matched = false;
-  for (const d of error?.details ?? []) {
-    if (fields.includes(d.path)) {
-      setError(d.path, { message: d.message });
-      matched = true;
-    }
-  }
-  return matched;
-}
 
 const PasswordInput = forwardRef(function PasswordInput(props, ref) {
   const t = useT();
