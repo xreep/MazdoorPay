@@ -2,11 +2,13 @@ import { Router } from 'express';
 import { requireAuth, requireRole } from '../../middleware/auth.js';
 import authRoutes from './auth.js';
 import siteRoutes from './sites.js';
+import workerRoutes from './workers.js';
 
 const router = Router();
 const contractor = [requireAuth, requireRole('contractor')];
 
 router.use('/auth', authRoutes);
 router.use('/sites', contractor, siteRoutes);
+router.use('/workers', contractor, workerRoutes);
 
 export default router;

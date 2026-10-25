@@ -22,14 +22,12 @@ const createSite = (api, body = {}) =>
   });
 
 const insertWorker = (contractorId, siteId, isActive = true) =>
-  mongoose.connection
-    .collection('workers')
-    .insertOne({
-      contractorId: new mongoose.Types.ObjectId(contractorId),
-      siteId: new mongoose.Types.ObjectId(siteId),
-      name: 'Ramesh',
-      isActive,
-    });
+  mongoose.connection.collection('workers').insertOne({
+    contractorId: new mongoose.Types.ObjectId(contractorId),
+    siteId: new mongoose.Types.ObjectId(siteId),
+    name: 'Ramesh',
+    isActive,
+  });
 
 describe('sites', () => {
   it('create, list with worker counts, get with stats', async () => {

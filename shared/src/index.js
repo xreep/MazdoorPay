@@ -4,3 +4,4 @@ export * from './money.js';
 export * from './schemas/common.js';
 export * from './schemas/auth.js';
 export * from './schemas/site.js';
+export * from './schemas/worker.js';

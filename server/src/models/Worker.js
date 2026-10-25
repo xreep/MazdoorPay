@@ -1,40 +1,38 @@
 import { Schema, model } from 'mongoose';
+import { LANGUAGES, WORKER_ROLES } from '@mazdoorpay/shared';
 
-const WORKER_ROLES = [
-  'mason',
-  'labourer',
-  'electrician',
-  'plumber',
-  'carpenter',
-  'painter',
-  'welder',
-  'helper',
-  'other',
-];
+const rateEntrySchema = new Schema(
+  {
+    rate: { type: Number, required: true },
+    effectiveFrom: { type: String, required: true },
+    setAt: { type: Date, default: Date.now },
+    setBy: { type: Schema.Types.ObjectId, ref: 'User' },
+  },
+  { _id: false }
+);
 
 const workerSchema = new Schema(
   {
-    name: { type: String, required: [true, 'Worker name is required'], trim: true, maxlength: 150 },
-    role: {
-      type: String,
-      enum: WORKER_ROLES,
-      required: [true, 'Role is required'],
-    },
-    dailyWageRate: {
-      type: Number,
-      required: [true, 'Daily wage rate is required'],
-      min: [0, 'Wage rate must be positive'],
-    },
-    phone: { type: String, trim: true, maxlength: 20 },
-    siteId: { type: Schema.Types.ObjectId, ref: 'Site', index: true },
-    contractorId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
+    contractorId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    siteId: { type: Schema.Types.ObjectId, ref: 'Site', default: null },
+    name: { type: String, required: true, trim: true, maxlength: 150 },
+    role: { type: String, enum: WORKER_ROLES, required: true },
+    // Current rate (paise); always equals the latest rateHistory entry.
+    dailyRate: { type: Number, required: true },
+    rateHistory: { type: [rateEntrySchema], default: [] },
+    phone: { type: String, trim: true },
+    upiId: { type: String, trim: true },
+    preferredLanguage: { type: String, enum: LANGUAGES, default: 'en' },
+    joinedOn: { type: String, required: true },
     isActive: { type: Boolean, default: true },
-    joinedAt: { type: Date, default: Date.now },
+    qrVersion: { type: Number, default: 1 },
+    // Bumped inside every money-affecting transaction so concurrent writers conflict.
+    ledgerVersion: { type: Number, default: 0 },
   },
   { timestamps: true }
 );
 
+workerSchema.index({ contractorId: 1, isActive: 1, name: 1 });
 workerSchema.index({ contractorId: 1, siteId: 1 });
-workerSchema.index({ contractorId: 1, isActive: 1 });
 
 export const Worker = model('Worker', workerSchema);
