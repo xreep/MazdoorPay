@@ -1,4 +1,5 @@
 import { forwardRef } from 'react';
+import { Controller } from 'react-hook-form';
 import { ChevronDown } from 'lucide-react';
 import { controlClass } from './Input.jsx';
 
@@ -27,3 +28,26 @@ export const Select = forwardRef(function Select(
     </div>
   );
 });
+
+// Select bound to react-hook-form as a controlled field, so a value set before the
+// options load is kept; extra props (id, aria-*) from <Field> reach the select.
+export function SelectField({ control, name, onValueChange, ...rest }) {
+  return (
+    <Controller
+      name={name}
+      control={control}
+      render={({ field }) => (
+        <Select
+          ref={field.ref}
+          value={field.value ?? ''}
+          onBlur={field.onBlur}
+          onChange={(event) => {
+            field.onChange(event.target.value);
+            onValueChange?.(event.target.value);
+          }}
+          {...rest}
+        />
+      )}
+    />
+  );
+}
