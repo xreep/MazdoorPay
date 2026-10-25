@@ -139,6 +139,33 @@ describe('request hardening', () => {
       expect((await request(limited).get('/api/v1/auth/me')).status).toBe(401);
   });
 
+  it('a forged X-Forwarded-For cannot dodge the auth limiter', async () => {
+    // Behind Vercel → Render (trust proxy 2) the client address comes from X-Forwarded-For,
+    // which a caller hitting Render directly can forge. The hop Render appends cannot be.
+    const limited = createApp({ trustProxy: 2, authRateLimitMax: 2 });
+    const attempt = (i) =>
+      request(limited)
+        .post('/api/v1/auth/login')
+        .set('X-Forwarded-For', `198.51.100.${i}, 203.0.113.9`)
+        .send({ email: `spoof${i}@example.com`, password: DEFAULT_PASSWORD });
+    const statuses = [];
+    for (let i = 0; i < 11; i++) statuses.push((await attempt(i)).status);
+    expect(statuses.slice(0, 10)).toEqual(Array(10).fill(401));
+    expect(statuses[10]).toBe(429);
+  });
+
+  it('distinct clients behind the same proxy each get their own auth allowance', async () => {
+    const limited = createApp({ trustProxy: 2, authRateLimitMax: 2 });
+    const attempt = (client) =>
+      request(limited)
+        .post('/api/v1/auth/login')
+        .set('X-Forwarded-For', `${client}, 203.0.113.9`)
+        .send({ email: 'shared@example.com', password: DEFAULT_PASSWORD });
+    for (const client of ['198.51.100.1', '198.51.100.2'])
+      for (let i = 0; i < 2; i++) expect((await attempt(client)).status).not.toBe(429);
+    expect((await attempt('198.51.100.1')).status).toBe(429);
+  });
+
   it('trust proxy is configurable', () => {
     expect(createApp({ trustProxy: 2 }).get('trust proxy')).toBe(2);
   });
