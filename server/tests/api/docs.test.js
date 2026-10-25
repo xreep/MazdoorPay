@@ -1,3 +1,6 @@
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import request from 'supertest';
 import { useTestDb } from '../helpers/db.js';
 import { app } from '../helpers/factory.js';
@@ -43,5 +46,57 @@ describe('API documentation', () => {
     const res = await request(app()).get('/api/v1/docs/');
     expect(res.status).toBe(200);
     expect(res.text).toMatch(/swagger-ui/i);
+  });
+});
+
+describe('API documentation coverage', () => {
+  // The route list in docs/openapi.js is kept by hand; this keeps it honest against the routers.
+  const ROUTES_DIR = path.resolve(
+    path.dirname(fileURLToPath(import.meta.url)),
+    '../../src/routes/v1'
+  );
+  const routed = async () => {
+    const files = (await fs.readdir(ROUTES_DIR)).filter((f) => f !== 'index.js');
+    const found = ['get /health'];
+    for (const file of files) {
+      const source = await fs.readFile(path.join(ROUTES_DIR, file), 'utf8');
+      for (const [, method, sub] of source.matchAll(
+        /router\.(get|post|put|patch|delete)\(\s*'([^']*)'/g
+      )) {
+        const full = `/${file.replace('.js', '')}${sub === '/' ? '' : sub}`.replace(
+          /:(\w+)/g,
+          '{$1}'
+        );
+        found.push(`${method} ${full}`);
+      }
+    }
+    return found.sort();
+  };
+  const documented = (doc) =>
+    Object.entries(doc.paths)
+      .flatMap(([p, ops]) => Object.keys(ops).map((m) => `${m} ${p}`))
+      .sort();
+
+  it('documents exactly the routes the API serves', async () => {
+    const doc = (await request(app()).get('/api/v1/docs/openapi.json')).body;
+    expect(documented(doc)).toEqual(await routed());
+  });
+
+  it('lists the status codes routes really return', async () => {
+    const { paths } = (await request(app()).get('/api/v1/docs/openapi.json')).body;
+    expect(Object.keys(paths['/sites'].post.responses)).toEqual(
+      expect.arrayContaining(['201', '409', '429'])
+    );
+    expect(paths['/sites'].post.responses['200']).toBeUndefined();
+    expect(Object.keys(paths['/payments'].post.responses)).toEqual(
+      expect.arrayContaining(['200', '201', '409'])
+    );
+    expect(Object.keys(paths['/auth/login'].post.responses)).toEqual(
+      expect.arrayContaining(['200', '401', '403', '423', '429'])
+    );
+    expect(paths['/auth/register'].post.responses['201']).toBeDefined();
+    expect(paths['/admin/users'].get.responses['403'].description).toMatch(/admin/i);
+    expect(paths['/workers'].get.responses['403'].description).toMatch(/contractor/i);
+    expect(paths['/health'].get.responses['503']).toBeDefined();
   });
 });

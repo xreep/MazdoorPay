@@ -1,8 +1,9 @@
 import { z } from 'zod';
 import * as s from '@mazdoorpay/shared';
 
-// OpenAPI 3.1 description of /api/v1, built from the same Zod schemas the routes validate with,
-// so the documentation cannot drift from what the API accepts.
+// OpenAPI 3.1 description of /api/v1. Request bodies and query parameters are generated from the
+// Zod schemas the routes validate with; the route list below is kept by hand, and a test checks it
+// against the routers. Response bodies are described in words only.
 const json = (schema) =>
   z.toJSONSchema(schema, { io: 'input', unrepresentable: 'any', target: 'draft-2020-12' });
 
@@ -27,29 +28,49 @@ const pathParams = (path) =>
 const PUBLIC = [];
 const BEARER = [{ bearerAuth: [] }];
 
-// [method, path, tag, summary, { body, query, auth = true, csv }]
+// [method, path, tag, summary, { body, query, auth = true, csv, created, errors }]
+// `created`: success is 201; `errors`: extra status codes the route returns, with their meaning.
 const ROUTES = [
-  ['get', '/health', 'System', 'Liveness and database status', { auth: false }],
+  [
+    'get',
+    '/health',
+    'System',
+    'Liveness and database status',
+    { auth: false, errors: { 503: 'Database not connected' } },
+  ],
   [
     'post',
     '/auth/register',
     'Auth',
     'Create a contractor account (never an admin)',
-    { body: s.registerSchema, auth: false },
+    {
+      body: s.registerSchema,
+      auth: false,
+      created: true,
+      errors: { 409: 'An account with this email already exists' },
+    },
   ],
   [
     'post',
     '/auth/login',
     'Auth',
     'Log in; sets the httpOnly refresh cookie',
-    { body: s.loginSchema, auth: false },
+    {
+      body: s.loginSchema,
+      auth: false,
+      errors: {
+        401: 'Wrong email or password',
+        403: 'Account suspended',
+        423: 'Locked for a while after repeated failed attempts',
+      },
+    },
   ],
   [
     'post',
     '/auth/refresh',
     'Auth',
     'Rotate the refresh cookie and get a new access token',
-    { auth: false },
+    { auth: false, errors: { 401: 'No valid session' } },
   ],
   ['post', '/auth/logout', 'Auth', 'End this login session', { auth: false }],
   ['get', '/auth/me', 'Auth', 'The signed-in user'],
@@ -63,16 +84,28 @@ const ROUTES = [
   ],
 
   ['get', '/sites', 'Sites', 'List sites with worker counts', { query: s.siteListQuerySchema }],
-  ['post', '/sites', 'Sites', 'Create a site', { body: s.siteCreateSchema }],
+  [
+    'post',
+    '/sites',
+    'Sites',
+    'Create a site',
+    { body: s.siteCreateSchema, created: true, errors: { 409: 'A site with this name exists' } },
+  ],
   ['get', '/sites/{id}', 'Sites', 'One site with stats'],
   [
     'patch',
     '/sites/{id}',
     'Sites',
     'Rename, move or mark a site inactive',
-    { body: s.siteUpdateSchema },
+    { body: s.siteUpdateSchema, errors: { 409: 'A site with this name exists' } },
   ],
-  ['delete', '/sites/{id}', 'Sites', 'Delete a site that has no workers or records'],
+  [
+    'delete',
+    '/sites/{id}',
+    'Sites',
+    'Delete a site that has no workers or records',
+    { errors: { 409: 'The site has workers or records' } },
+  ],
 
   [
     'get',
@@ -81,7 +114,7 @@ const ROUTES = [
     'Search and page through workers',
     { query: s.workerListQuerySchema },
   ],
-  ['post', '/workers', 'Workers', 'Add a worker', { body: s.workerCreateSchema }],
+  ['post', '/workers', 'Workers', 'Add a worker', { body: s.workerCreateSchema, created: true }],
   ['get', '/workers/{id}', 'Workers', 'One worker with their site'],
   [
     'get',
@@ -148,7 +181,14 @@ const ROUTES = [
     '/payments',
     'Payments',
     'Record a wage payment or advance (idempotent per request key)',
-    { body: s.paymentCreateSchema },
+    {
+      body: s.paymentCreateSchema,
+      created: true,
+      errors: {
+        200: 'This request key was seen before: the original payment, not a new one',
+        409: 'The request key was already used for a different payment',
+      },
+    },
   ],
   ['get', '/payments', 'Payments', 'Payment history', { query: s.paymentListQuerySchema }],
   [
@@ -164,7 +204,7 @@ const ROUTES = [
     '/payments/{id}/void',
     'Payments',
     'Void a mistaken payment with a reason',
-    { body: s.voidPaymentSchema },
+    { body: s.voidPaymentSchema, errors: { 409: 'Already void' } },
   ],
 
   [
@@ -254,32 +294,45 @@ const errorSchema = {
   },
 };
 
+const errorContent = { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } };
+
+// Which role a signed-in route needs, from where it is mounted.
+const roleError = (path) => {
+  if (path.startsWith('/admin/')) return 'Signed in, but not an admin';
+  if (path.startsWith('/auth/')) return null;
+  return 'Signed in, but not a contractor';
+};
+
 function operation([, path, tag, summary, opts = {}]) {
-  const { body, query, auth = true, csv = false } = opts;
+  const { body, query, auth = true, csv = false, created = false, errors = {} } = opts;
+  const success = {
+    description: created ? 'Created' : 'OK',
+    content: {
+      'application/json': { schema: { type: 'object' } },
+      ...(csv ? { 'text/csv': { schema: { type: 'string' } } } : {}),
+    },
+  };
+  const failure = (description) => ({ description, content: errorContent });
+  const responses = {
+    [created ? 201 : 200]: success,
+    400: { description: 'Validation failed', content: errorContent },
+  };
+  if (auth) {
+    responses[401] = failure('Not signed in or session expired');
+    const forbidden = roleError(path);
+    if (forbidden) responses[403] = failure(forbidden);
+    // Ids arrive in the path, the query or the body; another contractor's ids look missing.
+    if (path.includes('{') || query || body) responses[404] = failure('Not found (or not yours)');
+  }
+  responses[429] = failure('Too many requests; wait a few minutes');
+  for (const [code, description] of Object.entries(errors))
+    responses[code] = Number(code) < 300 ? { ...success, description } : failure(description);
   const op = {
     tags: [tag],
     summary,
     security: auth ? BEARER : PUBLIC,
     parameters: [...pathParams(path), ...(query ? queryParams(query) : [])],
-    responses: {
-      200: {
-        description: 'OK',
-        content: {
-          'application/json': { schema: { type: 'object' } },
-          ...(csv ? { 'text/csv': { schema: { type: 'string' } } } : {}),
-        },
-      },
-      400: {
-        description: 'Validation failed',
-        content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
-      },
-      ...(auth
-        ? {
-            401: { description: 'Not signed in or session expired' },
-            404: { description: 'Not found (or not yours)' },
-          }
-        : {}),
-    },
+    responses,
   };
   if (body)
     op.requestBody = { required: true, content: { 'application/json': { schema: json(body) } } };
