@@ -43,7 +43,7 @@ With a real database (local MongoDB replica set or Atlas):
 
 ```bash
 npm run seed         # replaces only the demo accounts; real users are never touched
-npm run dev:server   # API on http://localhost:5000
+npm run dev:server   # API on http://localhost:5055
 ```
 
 Create a real admin account:

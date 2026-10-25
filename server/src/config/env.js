@@ -5,7 +5,7 @@ const intFrom = (fallback) => z.coerce.number().int().positive().default(fallbac
 
 const schema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
-  PORT: intFrom(5000),
+  PORT: intFrom(5055),
   MONGODB_URI: z.string().min(1, 'MONGODB_URI is required'),
   JWT_ACCESS_SECRET: z.string().min(16, 'JWT_ACCESS_SECRET must be at least 16 characters'),
   JWT_ACCESS_TTL: z.string().default('15m'),
