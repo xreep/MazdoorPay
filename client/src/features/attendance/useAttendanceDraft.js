@@ -44,10 +44,16 @@ export function useAttendanceDraft(sheet) {
     });
   }, []);
 
-  // After a save: keep only the changes the server refused, forget the undo trail.
-  const retain = useCallback((workerIds) => {
-    const keep = new Set(workerIds);
-    setDraft((d) => Object.fromEntries(Object.entries(d).filter(([id]) => keep.has(id))));
+  // After a save: drop the marks the server accepted, but keep refused ones and any mark
+  // that was tapped (or changed again) while the request was in flight.
+  const settle = useCallback((sent, refusedIds) => {
+    const refused = new Set(refusedIds);
+    const sentStatus = new Map(sent.map((c) => [c.workerId, c.status]));
+    setDraft((d) =>
+      Object.fromEntries(
+        Object.entries(d).filter(([id, status]) => refused.has(id) || sentStatus.get(id) !== status)
+      )
+    );
     setHistory([]);
   }, []);
 
@@ -65,7 +71,7 @@ export function useAttendanceDraft(sheet) {
     canUndo: history.length > 0,
     changes,
     dirtyCount: changes.length,
-    retain,
+    settle,
     reset,
   };
 }

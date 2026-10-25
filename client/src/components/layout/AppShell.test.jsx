@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AppShell } from './AppShell.jsx';
+import { setUnsavedCount } from '../../lib/unsaved.js';
 import { admin, renderWithProviders } from '../../test/render.jsx';
 
 describe('AppShell', () => {
@@ -31,5 +32,27 @@ describe('AppShell', () => {
     expect(within(sheet).getByRole('link', { name: 'Sites' })).toBeInTheDocument();
     await userEvent.click(within(sheet).getByRole('button', { name: 'Log out' }));
     expect(auth.logout).toHaveBeenCalled();
+  });
+
+  it('asks before logging out when there are unsaved attendance marks', async () => {
+    setUnsavedCount(2);
+    const { auth } = renderWithProviders(<AppShell />);
+    await userEvent.click(
+      within(screen.getByRole('navigation', { name: 'Quick' })).getByRole('button', {
+        name: 'More',
+      })
+    );
+    await userEvent.click(
+      within(await screen.findByRole('dialog', { name: 'More' })).getByRole('button', {
+        name: 'Log out',
+      })
+    );
+    const confirm = await screen.findByRole('dialog', {
+      name: 'Log out and lose 2 unsaved changes?',
+    });
+    expect(auth.logout).not.toHaveBeenCalled();
+    await userEvent.click(within(confirm).getByRole('button', { name: 'Log out' }));
+    expect(auth.logout).toHaveBeenCalled();
+    setUnsavedCount(0);
   });
 });

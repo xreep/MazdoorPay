@@ -15,7 +15,7 @@ export function PrintLayout({ title, subtitle, meta, landscape = false, children
       <div className="no-print sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-border bg-surface px-4 py-3">
         <button
           type="button"
-          onClick={() => window.history.back()}
+          onClick={() => (window.history.length > 1 ? window.history.back() : window.close())}
           className="inline-flex h-11 items-center gap-2 rounded-control px-3 font-medium hover:bg-ink/5"
         >
           <ArrowLeft className="h-5 w-5" aria-hidden="true" />

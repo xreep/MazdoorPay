@@ -14,7 +14,7 @@ export function SegmentedControl({ options, value, onChange, label, className = 
             role="radio"
             aria-checked={checked}
             onClick={() => onChange(o.value)}
-            className={`h-10 rounded-[0.6rem] px-4 text-sm font-semibold transition ${checked ? 'bg-ink text-white shadow-sm' : 'text-ink-muted hover:bg-ink/5 hover:text-ink'}`}
+            className={`h-12 rounded-[0.6rem] px-4 text-sm font-semibold transition ${checked ? 'bg-ink text-white shadow-sm' : 'text-ink-muted hover:bg-ink/5 hover:text-ink'}`}
           >
             {o.label}
           </button>

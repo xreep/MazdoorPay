@@ -18,8 +18,18 @@ function useSiteMutation(fn) {
   return useMutation({
     mutationFn: fn,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['sites'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      // Site names appear on most screens.
+      for (const key of [
+        'sites',
+        'dashboard',
+        'workers',
+        'worker',
+        'dues',
+        'attendance-sheet',
+        'wages',
+      ]) {
+        queryClient.invalidateQueries({ queryKey: [key] });
+      }
     },
   });
 }

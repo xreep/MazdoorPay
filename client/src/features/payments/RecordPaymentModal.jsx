@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
+import { Link } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
 import { HandCoins } from 'lucide-react';
@@ -26,6 +28,8 @@ export function RecordPaymentModal({ open, workerId: initialWorkerId, onClose })
   const [workerId, setWorkerId] = useState(initialWorkerId ?? '');
   const [overDues, setOverDues] = useState(null);
   const [serverError, setServerError] = useState(null);
+  const [maybeSaved, setMaybeSaved] = useState(false);
+  const queryClient = useQueryClient();
   const inFlight = useRef(false);
   const record = useRecordPayment();
   const { data: workersPage, isPending: workersLoading } = useWorkers({
@@ -80,6 +84,13 @@ export function RecordPaymentModal({ open, workerId: initialWorkerId, onClose })
       onClose();
     } catch (err) {
       inFlight.current = false;
+      // No answer (network) or "key already used" (a retry after a lost answer): the first try may have been saved.
+      if (err.status === 0 || err.status === 409) {
+        setMaybeSaved(true);
+        queryClient.invalidateQueries({ queryKey: ['payments'] });
+        queryClient.invalidateQueries({ queryKey: ['dues'] });
+        return;
+      }
       const aboveDues =
         err.status === 400 && values.type === 'wage' && err.details?.[0]?.path === 'amount';
       if (aboveDues) setOverDues({ message: err.message, amount: values.amount });
@@ -224,6 +235,17 @@ export function RecordPaymentModal({ open, workerId: initialWorkerId, onClose })
             >
               {t('payments.switchToAdvance', { amount: formatINR(overDues.amount) })}
             </Button>
+          </div>
+        )}
+        {maybeSaved && (
+          <div role="alert" className="space-y-2 rounded-control bg-half-soft p-4 sm:col-span-2">
+            <p className="font-medium text-ink">{t('payments.maybeSaved')}</p>
+            <Link
+              to={`/payments?tab=history&workerId=${workerId}`}
+              className="inline-flex h-12 items-center font-semibold text-brand-ink underline"
+            >
+              {t('payments.checkHistory')}
+            </Link>
           </div>
         )}
         {serverError && (

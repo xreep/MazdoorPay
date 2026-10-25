@@ -20,7 +20,15 @@ function useWorkerMutation(fn) {
   return useMutation({
     mutationFn: fn,
     onSuccess: () => {
-      for (const key of ['workers', 'worker', 'sites', 'dashboard', 'dues', 'attendance-sheet']) {
+      for (const key of [
+        'workers',
+        'worker',
+        'sites',
+        'dashboard',
+        'dues',
+        'attendance-sheet',
+        'wages',
+      ]) {
         queryClient.invalidateQueries({ queryKey: [key] });
       }
     },

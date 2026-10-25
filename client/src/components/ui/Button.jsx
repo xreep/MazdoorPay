@@ -8,7 +8,7 @@ const VARIANTS = {
   danger: 'bg-absent text-white font-semibold hover:brightness-95',
 };
 const SIZES = {
-  sm: 'h-10 px-3 text-sm',
+  sm: 'h-12 px-4 text-sm',
   md: 'h-12 px-5 text-[0.95rem]',
   lg: 'h-14 px-6 text-base',
 };

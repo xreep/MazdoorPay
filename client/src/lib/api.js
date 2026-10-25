@@ -104,20 +104,21 @@ async function parse(res, as) {
 }
 
 // Single-flight: every caller during a refresh shares the same request.
+// Resolves to the session, or null when there is none; throws ApiError when the server can't be reached.
 export function refreshSession() {
   if (!refreshing) {
     refreshing = (async () => {
       try {
         const res = await send('POST', '/auth/refresh');
-        if (!res.ok) {
+        // Only the server saying "no session" ends it; an outage or network blip must not log anyone out.
+        if (res.status === 401 || res.status === 403) {
           accessToken = null;
           return null;
         }
+        if (!res.ok) return parse(res);
         const data = await res.json();
         accessToken = data.accessToken;
         return data;
-      } catch {
-        return null;
       } finally {
         refreshing = null;
       }

@@ -5,7 +5,7 @@ export function Pagination({ page, pages, onChange }) {
   const t = useT();
   if (!pages || pages <= 1) return null;
   const btn =
-    'flex h-11 w-11 items-center justify-center rounded-control border border-border bg-surface disabled:opacity-40 hover:bg-surface-2';
+    'flex h-12 w-12 items-center justify-center rounded-control border border-border bg-surface disabled:opacity-40 hover:bg-surface-2';
   return (
     <nav
       className="flex items-center justify-between gap-3 pt-4"

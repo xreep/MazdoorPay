@@ -30,7 +30,7 @@ export function MonthHeatmap({ siteId, onPickDay }) {
   const [month, setMonth] = useState(today.slice(0, 7));
   const { data, isPending, isError, error, refetch } = useAttendanceCalendar(siteId, month);
   const navBtn =
-    'flex h-11 w-11 items-center justify-center rounded-control border border-border bg-surface hover:bg-surface-2 disabled:opacity-40';
+    'flex h-12 w-12 items-center justify-center rounded-control border border-border bg-surface hover:bg-surface-2 disabled:opacity-40';
 
   return (
     <div>

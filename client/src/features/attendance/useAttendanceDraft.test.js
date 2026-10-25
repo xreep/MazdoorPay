@@ -42,4 +42,26 @@ describe('useAttendanceDraft', () => {
     act(() => result.current.reset());
     expect(result.current.dirtyCount).toBe(0);
   });
+
+  it('after a save keeps marks made while the request was in flight', () => {
+    const { result } = renderHook(() => useAttendanceDraft(sheet));
+    act(() => result.current.set('a', 'absent'));
+    act(() => result.current.set('b', 'half-day'));
+    const sent = result.current.changes;
+    act(() => result.current.set('c', 'present'));
+    act(() => result.current.set('b', 'absent'));
+    act(() => result.current.settle(sent, []));
+    expect(result.current.changes).toEqual([
+      { workerId: 'b', status: 'absent' },
+      { workerId: 'c', status: 'present' },
+    ]);
+  });
+
+  it('after a save keeps the refused marks', () => {
+    const { result } = renderHook(() => useAttendanceDraft(sheet));
+    act(() => result.current.set('b', 'present'));
+    const sent = result.current.changes;
+    act(() => result.current.settle(sent, ['b']));
+    expect(result.current.changes).toEqual([{ workerId: 'b', status: 'present' }]);
+  });
 });

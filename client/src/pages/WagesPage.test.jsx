@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { API, HttpResponse, http, server } from '../test/server.js';
@@ -125,4 +125,25 @@ describe('WagesPage', () => {
       `/print/wage-register?from=${from}&to=${to}&siteId=${S1}`
     );
   });
+
+  it('on a phone shows each worker as a card with the money visible', async () => {
+    const original = window.matchMedia;
+    window.matchMedia = vi.fn((query) => ({
+      matches: query.includes('max-width'),
+      media: query,
+      addEventListener() {},
+      removeEventListener() {},
+    }));
+    server.use(...handlers([]));
+    render();
+    const list = await screen.findByRole('list', { name: 'Wages per worker' });
+    expect(screen.queryByRole('table')).toBeNull();
+    const card = within(list).getAllByRole('listitem')[0];
+    expect(within(card).getByText('Ramesh Kumar')).toBeInTheDocument();
+    expect(within(card).getByText('₹5,225')).toBeInTheDocument();
+    expect(within(card).getByText('₹1,225')).toBeInTheDocument();
+    window.matchMedia = original;
+  });
 });
+
+afterEach(() => vi.restoreAllMocks());

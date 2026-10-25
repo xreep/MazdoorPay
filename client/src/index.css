@@ -8,16 +8,17 @@
   --surface: 40 20% 99%; /* #FDFCFA */
   --surface-2: 40 10% 96%;
   --border: 36 8% 84%;
+  --control-border: 220 8% 56%; /* 3:1 against the surface for inputs */
   --ink: 215 26% 15%; /* #1C2430 steel navy */
   --ink-muted: 216 11% 40%;
   --brand: 22 100% 54%; /* #FF6A13 hi-vis orange; carries ink-coloured text */
   --brand-ink: 20 88% 36%; /* orange dark enough for text on light surfaces */
   --brand-soft: 25 100% 94%;
-  --present: 145 63% 31%;
+  --present: 145 63% 26%;
   --present-soft: 140 45% 92%;
-  --absent: 3 64% 48%;
+  --absent: 3 66% 43%;
   --absent-soft: 4 80% 95%;
-  --half: 36 78% 36%;
+  --half: 32 80% 29%;
   --half-soft: 42 90% 91%;
   --focus: 214 90% 52%;
   color-scheme: light;
@@ -28,6 +29,7 @@
   --surface: 216 20% 13%;
   --surface-2: 216 18% 17%;
   --border: 216 14% 24%;
+  --control-border: 216 10% 46%;
   --ink: 216 20% 92%;
   --ink-muted: 216 10% 66%;
   --brand: 24 100% 56%;

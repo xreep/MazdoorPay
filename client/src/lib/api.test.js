@@ -96,6 +96,36 @@ describe('api', () => {
     off();
   });
 
+  it('a network error during refresh keeps the session', async () => {
+    const expired = vi.fn();
+    const off = onSessionExpired(expired);
+    server.use(
+      http.post(API('/auth/refresh'), () => HttpResponse.error()),
+      http.get(API('/sites'), () =>
+        HttpResponse.json({ error: 'Please log in again' }, { status: 401 })
+      )
+    );
+    await expect(api.get('/sites')).rejects.toMatchObject({ status: 0 });
+    expect(expired).not.toHaveBeenCalled();
+    off();
+  });
+
+  it('a server error during refresh keeps the session', async () => {
+    const expired = vi.fn();
+    const off = onSessionExpired(expired);
+    server.use(
+      http.post(API('/auth/refresh'), () =>
+        HttpResponse.json({ error: 'Bad gateway' }, { status: 502 })
+      ),
+      http.get(API('/sites'), () =>
+        HttpResponse.json({ error: 'Please log in again' }, { status: 401 })
+      )
+    );
+    await expect(api.get('/sites')).rejects.toMatchObject({ status: 502 });
+    expect(expired).not.toHaveBeenCalled();
+    off();
+  });
+
   it('maps error bodies to ApiError with details', async () => {
     server.use(
       http.post(API('/workers'), () =>

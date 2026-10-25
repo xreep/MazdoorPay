@@ -89,6 +89,18 @@ describe('LoginPage', () => {
     await waitFor(() => expect(screen.getByTestId('location')).toHaveTextContent(/^\/login$/));
   });
 
+  it('when the server cannot be reached at start-up it offers a retry instead of the login page', async () => {
+    server.use(
+      http.post(API('/auth/refresh'), () =>
+        HttpResponse.json({ error: 'Service unavailable' }, { status: 503 })
+      )
+    );
+    renderApp('/payments');
+    expect(await screen.findByRole('button', { name: 'Try again' })).toBeInTheDocument();
+    expect(screen.getByText('Could not reach MazdoorPay')).toBeInTheDocument();
+    expect(screen.getByTestId('location')).toHaveTextContent('/payments');
+  });
+
   it('protected pages send anonymous users to login with next', async () => {
     server.use(noSession);
     renderApp('/payments');

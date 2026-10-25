@@ -3,7 +3,7 @@ import { Link, useBlocker, useSearchParams } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { Building2, CheckCheck, ChevronLeft, ChevronRight, Save, Undo2 } from 'lucide-react';
-import { addDays, diffDays, isValidDay, todayIST } from '@mazdoorpay/shared';
+import { LIMITS, addDays, diffDays, isValidDay, todayIST } from '@mazdoorpay/shared';
 import { useT } from '../lib/i18n.jsx';
 import { formatDayLong } from '../lib/format.js';
 import { PageHeader } from '../components/layout/PageHeader.jsx';
@@ -24,6 +24,7 @@ import { useAttendanceDraft } from '../features/attendance/useAttendanceDraft.js
 import { AttendanceGrid } from '../features/attendance/AttendanceGrid.jsx';
 import { MonthHeatmap } from '../features/attendance/MonthHeatmap.jsx';
 import { AttendanceReports } from '../features/attendance/AttendanceReports.jsx';
+import { setUnsavedCount } from '../lib/unsaved.js';
 
 const unsavedLabel = (t, n) =>
   n === 1 ? t('attendance.unsavedOne') : t('attendance.unsavedMany', { n });
@@ -85,7 +86,7 @@ function AttendanceSheet({ siteId, day, onDirtyChange }) {
   const mark = useMarkAttendance(siteId);
   const [errors, setErrors] = useState(new Map());
   const [askReason, setAskReason] = useState(false);
-  const needsReason = diffDays(day, todayIST()) > 7;
+  const needsReason = diffDays(day, todayIST()) > LIMITS.BACKDATE_REASON_DAYS;
 
   useEffect(() => onDirtyChange(draft.dirtyCount), [draft.dirtyCount, onDirtyChange]);
   useEffect(() => {
@@ -100,13 +101,13 @@ function AttendanceSheet({ siteId, day, onDirtyChange }) {
 
   const save = async (reason) => {
     try {
-      const result = await mark.mutateAsync({
-        day,
-        records: draft.changes,
-        ...(reason ? { reason } : {}),
-      });
+      const sent = draft.changes;
+      const result = await mark.mutateAsync({ day, records: sent, ...(reason ? { reason } : {}) });
       setErrors(new Map(result.errors.map((e) => [e.workerId, e.error])));
-      draft.retain(result.errors.map((e) => e.workerId));
+      draft.settle(
+        sent,
+        result.errors.map((e) => e.workerId)
+      );
       if (result.saved)
         toast.success(
           result.saved === 1
@@ -225,6 +226,12 @@ export default function AttendancePage() {
       dirty > 0 && currentLocation.pathname !== nextLocation.pathname
   );
   const siteName = siteOptions.find((o) => o.value === siteId)?.label;
+
+  // Lets the shell ask before logging out with unsaved marks.
+  useEffect(() => {
+    setUnsavedCount(dirty);
+    return () => setUnsavedCount(0);
+  }, [dirty]);
 
   const apply = (next) =>
     setParams(Object.fromEntries(Object.entries(next).filter(([, v]) => v)), { replace: true });

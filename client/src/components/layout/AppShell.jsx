@@ -19,6 +19,8 @@ import { useAuth } from '../../auth/AuthProvider.jsx';
 import { useT } from '../../lib/i18n.jsx';
 import { initials } from '../../lib/format.js';
 import { Modal } from '../ui/Modal.jsx';
+import { ConfirmDialog } from '../ui/ConfirmDialog.jsx';
+import { useUnsavedCount } from '../../lib/unsaved.js';
 import { SkeletonRows } from '../ui/Skeleton.jsx';
 import { Logo } from './Logo.jsx';
 import { ErrorBoundary } from './ErrorBoundary.jsx';
@@ -118,9 +120,12 @@ export function AppShell() {
   useEffect(() => setMoreOpen(false), [pathname]);
 
   // RequireAuth moves a logged-out user to /login.
+  const unsaved = useUnsavedCount();
+  const [confirmLogout, setConfirmLogout] = useState(false);
   const onLogout = () => {
     setMoreOpen(false);
-    logout();
+    if (unsaved > 0) setConfirmLogout(true);
+    else logout();
   };
 
   return (
@@ -151,7 +156,7 @@ export function AppShell() {
           <button
             type="button"
             onClick={onLogout}
-            className="mt-3 flex h-11 w-full items-center gap-3 rounded-control px-3 text-ink-muted hover:bg-ink/5 hover:text-ink"
+            className="mt-3 flex h-12 w-full items-center gap-3 rounded-control px-3 text-ink-muted hover:bg-ink/5 hover:text-ink"
           >
             <LogOut className="h-5 w-5" aria-hidden="true" />
             {t('nav.logout')}
@@ -220,6 +225,17 @@ export function AppShell() {
           {t('nav.logout')}
         </button>
       </Modal>
+      <ConfirmDialog
+        open={confirmLogout}
+        title={t('nav.logoutUnsaved', { n: unsaved })}
+        body={t('attendance.discardBody')}
+        confirmLabel={t('nav.logout')}
+        onConfirm={() => {
+          setConfirmLogout(false);
+          logout();
+        }}
+        onCancel={() => setConfirmLogout(false)}
+      />
     </div>
   );
 }

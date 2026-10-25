@@ -172,7 +172,7 @@ export default function LoginPage() {
                   type="button"
                   aria-selected={mode === tab.id}
                   onClick={() => setMode(tab.id)}
-                  className={`h-11 rounded-[0.6rem] text-sm font-semibold transition ${mode === tab.id ? 'bg-surface text-ink shadow-sm' : 'text-ink-muted hover:text-ink'}`}
+                  className={`h-12 rounded-[0.6rem] text-sm font-semibold transition ${mode === tab.id ? 'bg-surface text-ink shadow-sm' : 'text-ink-muted hover:text-ink'}`}
                 >
                   {tab.label}
                 </button>

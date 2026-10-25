@@ -116,6 +116,31 @@ describe('AttendancePage', () => {
     expect(await screen.findByText('Attendance saved for 2 workers')).toBeInTheDocument();
   });
 
+  it('keeps a tap made while the save is still in flight', async () => {
+    let release;
+    const gate = new Promise((r) => (release = r));
+    server.use(
+      http.put(API('/attendance'), async ({ request }) => {
+        const body = await request.json();
+        await gate;
+        return HttpResponse.json({ saved: body.records.length, unchanged: 0, errors: [] });
+      }),
+      ...handlers()
+    );
+    render();
+    await screen.findByRole('group', { name: 'Ramesh Kumar' });
+    await userEvent.click(within(row('Suresh Mehta')).getByRole('button', { name: 'Half-day' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Save attendance' }));
+    await userEvent.click(within(row('Vijay Patel')).getByRole('button', { name: 'Absent' }));
+    release();
+    expect(await screen.findByText('Attendance saved for 1 worker')).toBeInTheDocument();
+    expect(within(row('Vijay Patel')).getByRole('button', { name: 'Absent' })).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    );
+    expect(screen.getByText('1 unsaved change')).toBeInTheDocument();
+  });
+
   it('mark all present and undo', async () => {
     server.use(...handlers());
     render();

@@ -10,16 +10,21 @@ export function AuthProvider({ children }) {
   const queryClient = useQueryClient();
   const [state, setState] = useState({ status: 'loading', user: null });
 
+  const boot = useCallback(() => {
+    setState((s) => (s.status === 'error' ? { status: 'loading', user: null } : s));
+    return refreshSession().then(
+      (session) =>
+        session
+          ? { status: 'authenticated', user: session.user }
+          : { status: 'anonymous', user: null },
+      // The server could not be reached: whether there is a session is still unknown.
+      () => ({ status: 'error', user: null })
+    );
+  }, []);
+
   useEffect(() => {
     let alive = true;
-    refreshSession().then((session) => {
-      if (alive)
-        setState(
-          session
-            ? { status: 'authenticated', user: session.user }
-            : { status: 'anonymous', user: null }
-        );
-    });
+    boot().then((next) => alive && setState(next));
     const off = onSessionExpired(() => {
       setAccessToken(null);
       queryClient.clear();
@@ -29,7 +34,7 @@ export function AuthProvider({ children }) {
       alive = false;
       off();
     };
-  }, [queryClient]);
+  }, [queryClient, boot]);
 
   const startSession = useCallback((data) => {
     setAccessToken(data.accessToken);
@@ -54,8 +59,9 @@ export function AuthProvider({ children }) {
         }
       },
       updateUser: (user) => setState((s) => ({ ...s, user })),
+      retry: () => boot().then(setState),
     }),
-    [state, startSession, queryClient]
+    [state, startSession, queryClient, boot]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

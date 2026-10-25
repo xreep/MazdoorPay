@@ -103,7 +103,7 @@ export function UsersTab() {
                   type="button"
                   onClick={() => setOpen(u._id)}
                   aria-label={t('admin.viewUser', { name: u.name })}
-                  className="flex h-11 w-11 items-center justify-center rounded-control hover:bg-ink/5"
+                  className="flex h-12 w-12 items-center justify-center rounded-control hover:bg-ink/5"
                 >
                   <ChevronRight className="h-5 w-5" aria-hidden="true" />
                 </button>

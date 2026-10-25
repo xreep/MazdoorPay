@@ -20,6 +20,8 @@ import { useSiteOptions } from '../features/sites/useSites.js';
 import { PeriodPicker, periodRange } from '../features/wages/PeriodPicker.jsx';
 import { useWageSummary } from '../features/wages/useWageSummary.js';
 import { WageTable } from '../features/wages/WageTable.jsx';
+import { WageCards } from '../features/wages/WageCards.jsx';
+import { useMediaQuery } from '../lib/hooks.js';
 import { BucketChart } from '../features/wages/BucketChart.jsx';
 
 export default function WagesPage() {
@@ -31,6 +33,7 @@ export default function WagesPage() {
   const [groupBy, setGroupBy] = useState('week');
   const [siteId, setSiteId] = useState('');
   const [downloading, setDownloading] = useState(false);
+  const narrow = useMediaQuery('(max-width: 767px)');
   const { options: siteOptions } = useSiteOptions();
   const query = { from: period.from, to: period.to, groupBy, siteId };
   const { data, isPending, isError, error, refetch, isFetching } = useWageSummary(query);
@@ -152,7 +155,7 @@ export default function WagesPage() {
                 </Card>
               )}
               <Card className="overflow-hidden">
-                <WageTable data={data} />
+                {narrow ? <WageCards data={data} /> : <WageTable data={data} />}
               </Card>
             </>
           )}

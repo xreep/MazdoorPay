@@ -144,6 +144,35 @@ describe('RecordPaymentModal', () => {
     await waitFor(() => expect(posts.at(-1).idempotencyKey).not.toBe(firstKey));
   });
 
+  it('after a lost response it warns that the payment may already be saved', async () => {
+    server.use(
+      ...handlers({
+        respond: (_body, n) =>
+          n === 1
+            ? HttpResponse.error()
+            : HttpResponse.json(
+                { error: 'This request key was already used for a different payment' },
+                { status: 409 }
+              ),
+      })
+    );
+    render();
+    const dialog = await screen.findByRole('dialog', { name: 'Record payment' });
+    await waitFor(() => expect(within(dialog).getByLabelText('Amount')).toHaveValue('1400'));
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Save payment' }));
+    expect(await within(dialog).findByText(/may already be saved/)).toBeInTheDocument();
+    const amount = within(dialog).getByLabelText('Amount');
+    await userEvent.clear(amount);
+    await userEvent.type(amount, '1300');
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Save payment' }));
+    expect(await within(dialog).findByText(/may already be saved/)).toBeInTheDocument();
+    expect(within(dialog).queryByText(/request key/)).toBeNull();
+    expect(within(dialog).getByRole('link', { name: 'Check payment history' })).toHaveAttribute(
+      'href',
+      `/payments?tab=history&workerId=${W1}`
+    );
+  });
+
   it('lets you choose the worker when none was given', async () => {
     server.use(...handlers());
     render(null);

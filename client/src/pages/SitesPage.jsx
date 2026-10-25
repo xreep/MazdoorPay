@@ -67,7 +67,7 @@ function SiteCard({ site, onEdit, onDelete }) {
           type="button"
           onClick={() => onDelete(site)}
           aria-label={t('sites.delete')}
-          className="ml-auto flex h-10 w-10 items-center justify-center rounded-control text-ink-muted hover:bg-absent-soft hover:text-absent"
+          className="ml-auto flex h-12 w-12 items-center justify-center rounded-control text-ink-muted hover:bg-absent-soft hover:text-absent"
         >
           <Trash2 className="h-5 w-5" aria-hidden="true" />
         </button>

@@ -68,7 +68,7 @@ export function WageTable({ data }) {
                       aria-expanded={expanded}
                       aria-label={t('wages.showBreakdown', { name: w.name })}
                       onClick={() => toggle(w.workerId)}
-                      className="flex h-10 w-10 items-center justify-center rounded-control hover:bg-ink/5"
+                      className="flex h-12 w-12 items-center justify-center rounded-control hover:bg-ink/5"
                     >
                       <ChevronDown
                         className={`h-5 w-5 transition-transform ${expanded ? 'rotate-180' : ''}`}

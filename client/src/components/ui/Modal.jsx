@@ -126,7 +126,7 @@ export function Modal({ open, onClose, title, description, children, footer, var
                 type="button"
                 onClick={() => onClose?.()}
                 aria-label={t('common.close')}
-                className="-mr-2 -mt-1 flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-ink-muted hover:bg-ink/5 hover:text-ink"
+                className="-mr-2 -mt-1 flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-ink-muted hover:bg-ink/5 hover:text-ink"
               >
                 <X className="h-5 w-5" aria-hidden="true" />
               </button>

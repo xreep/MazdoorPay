@@ -11,6 +11,7 @@ export default {
         surface: token('surface'),
         'surface-2': token('surface-2'),
         border: token('border'),
+        'control-border': token('control-border'),
         ink: token('ink'),
         'ink-muted': token('ink-muted'),
         brand: token('brand'),
