@@ -7,6 +7,7 @@ export function ConfirmDialog({
   title,
   body,
   confirmLabel,
+  cancelLabel,
   tone = 'danger',
   loading = false,
   onConfirm,
@@ -23,7 +24,7 @@ export function ConfirmDialog({
       footer={
         <>
           <Button variant="secondary" onClick={onCancel} disabled={loading}>
-            {t('common.cancel')}
+            {cancelLabel ?? t('common.cancel')}
           </Button>
           <Button
             variant={tone === 'danger' ? 'danger' : 'primary'}

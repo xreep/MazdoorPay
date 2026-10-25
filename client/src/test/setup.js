@@ -29,3 +29,9 @@ if (!window.ResizeObserver) {
   };
 }
 window.scrollTo = () => {};
+
+// Downloads create object URLs; jsdom has none.
+if (!URL.createObjectURL) {
+  URL.createObjectURL = () => 'blob:mock';
+  URL.revokeObjectURL = () => {};
+}

@@ -3,7 +3,7 @@ export function Tabs({ tabs, value, onChange, label, className = '' }) {
     <div
       role="tablist"
       aria-label={label}
-      className={`flex gap-1 overflow-x-auto border-b border-border ${className}`}
+      className={`flex gap-1 overflow-x-auto overflow-y-hidden border-b border-border [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${className}`}
     >
       {tabs.map((tab) => {
         const selected = tab.id === value;
