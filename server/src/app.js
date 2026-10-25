@@ -10,6 +10,8 @@ import { sanitize } from './middleware/sanitize.js';
 import { createAuthLimiter, createGlobalLimiter } from './middleware/rateLimits.js';
 import { errorHandler } from './middleware/error.js';
 import v1Routes from './routes/v1/index.js';
+import swaggerUi from 'swagger-ui-express';
+import { buildOpenApi } from './docs/openapi.js';
 
 export function createApp(overrides = {}) {
   const settings = { ...config, ...overrides };
@@ -46,6 +48,14 @@ export function createApp(overrides = {}) {
       db: connected ? 'connected' : 'disconnected',
     });
   });
+
+  const openApi = buildOpenApi();
+  app.get('/api/v1/docs/openapi.json', (_req, res) => res.json(openApi));
+  app.use(
+    '/api/v1/docs',
+    swaggerUi.serve,
+    swaggerUi.setup(openApi, { customSiteTitle: 'MazdoorPay API' })
+  );
 
   app.use('/api/v1', v1Routes);
 
