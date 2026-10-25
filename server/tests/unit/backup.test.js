@@ -28,7 +28,7 @@ it('backs up every collection and restores it exactly, types included', async ()
     dir,
     now: new Date('2026-10-25T10:30:00Z'),
   });
-  expect(path.basename(file)).toBe('mazdoorpay-2026-10-25T10-30-00Z.json.gz');
+  expect(path.basename(file)).toBe('mazdoorpay-2026-10-25T10-30-00Z.jsonl.gz');
   expect(counts).toMatchObject({ sites: 1, payments: 1 });
 
   await Site.deleteMany({});
@@ -45,4 +45,45 @@ it('backs up every collection and restores it exactly, types included', async ()
   expect(site.createdAt).toBeInstanceOf(Date);
   expect((await Payment.findOne().lean()).amount).toBe(45000);
   await fs.rm(dir, { recursive: true, force: true });
+});
+
+const backupNow = async () => {
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'mp-backup-'));
+  const result = await backupDatabase(mongoose.connection.db, { dir });
+  return { ...result, cleanup: () => fs.rm(dir, { recursive: true, force: true }) };
+};
+
+it('streams large collections through in batches', async () => {
+  const docs = Array.from({ length: 2500 }, (_, i) => ({ contractorId, name: `Site ${i}` }));
+  await Site.collection.insertMany(docs);
+  const { file, counts, cleanup } = await backupNow();
+  expect(counts.sites).toBe(2500);
+  await Site.deleteMany({});
+  expect(await restoreDatabase(mongoose.connection.db, { file, confirm: true })).toMatchObject({
+    sites: 2500,
+  });
+  expect(await Site.countDocuments()).toBe(2500);
+  await cleanup();
+});
+
+it('refuses to restore into a different database unless forced', async () => {
+  await Site.create({ contractorId, name: 'Prestige Lakeside' });
+  const { file, cleanup } = await backupNow();
+  const other = mongoose.connection.client.db(`${mongoose.connection.db.databaseName}-other`);
+  await expect(restoreDatabase(other, { file, confirm: true })).rejects.toThrow(/force/);
+  expect(await other.collection('sites').countDocuments()).toBe(0);
+  await restoreDatabase(other, { file, confirm: true, force: true });
+  expect(await other.collection('sites').countDocuments()).toBe(1);
+  await other.dropDatabase();
+  await cleanup();
+});
+
+it('a damaged backup is rejected before anything is deleted', async () => {
+  await Site.create({ contractorId, name: 'Prestige Lakeside' });
+  const { file, cleanup } = await backupNow();
+  const bytes = await fs.readFile(file);
+  await fs.writeFile(file, bytes.subarray(0, Math.floor(bytes.length / 2)));
+  await expect(restoreDatabase(mongoose.connection.db, { file, confirm: true })).rejects.toThrow();
+  expect(await Site.countDocuments()).toBe(1);
+  await cleanup();
 });
