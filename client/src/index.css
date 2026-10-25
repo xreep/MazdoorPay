@@ -1,0 +1,88 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Design tokens: HSL triplets so Tailwind can apply alpha. Light = concrete canvas, steel ink, hi-vis orange. */
+:root {
+  --bg: 40 9% 92%; /* #EEECE8 concrete */
+  --surface: 40 20% 99%; /* #FDFCFA */
+  --surface-2: 40 10% 96%;
+  --border: 36 8% 84%;
+  --ink: 215 26% 15%; /* #1C2430 steel navy */
+  --ink-muted: 216 11% 40%;
+  --brand: 22 100% 54%; /* #FF6A13 hi-vis orange; carries ink-coloured text */
+  --brand-ink: 20 88% 36%; /* orange dark enough for text on light surfaces */
+  --brand-soft: 25 100% 94%;
+  --present: 145 63% 31%;
+  --present-soft: 140 45% 92%;
+  --absent: 3 64% 48%;
+  --absent-soft: 4 80% 95%;
+  --half: 36 78% 36%;
+  --half-soft: 42 90% 91%;
+  --focus: 214 90% 52%;
+  color-scheme: light;
+}
+
+.dark {
+  --bg: 216 22% 9%;
+  --surface: 216 20% 13%;
+  --surface-2: 216 18% 17%;
+  --border: 216 14% 24%;
+  --ink: 216 20% 92%;
+  --ink-muted: 216 10% 66%;
+  --brand: 24 100% 56%;
+  --brand-ink: 26 100% 66%;
+  --brand-soft: 22 45% 18%;
+  --present: 145 50% 55%;
+  --present-soft: 145 35% 16%;
+  --absent: 3 75% 64%;
+  --absent-soft: 3 40% 18%;
+  --half: 40 85% 60%;
+  --half-soft: 40 45% 16%;
+  --focus: 214 95% 66%;
+  color-scheme: dark;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    font-feature-settings: 'cv11', 'ss01';
+  }
+  body {
+    @apply bg-bg text-ink font-sans antialiased;
+    min-height: 100dvh;
+  }
+  :focus-visible {
+    outline: 3px solid hsl(var(--focus));
+    outline-offset: 2px;
+    border-radius: 0.5rem;
+  }
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+}
+
+@layer components {
+  .num {
+    font-variant-numeric: tabular-nums;
+  }
+  /* Reflective safety tape: the one decorative motif, used at the top of the shell and on the login panel. */
+  .hivis-tape {
+    background: repeating-linear-gradient(
+      -45deg,
+      hsl(var(--brand)) 0 14px,
+      hsl(var(--ink)) 14px 28px
+    );
+  }
+}
+
+@media print {
+  body {
+    background: white;
+  }
+  .no-print {
+    display: none !important;
+  }
+}
