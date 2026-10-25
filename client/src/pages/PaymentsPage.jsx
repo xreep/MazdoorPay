@@ -3,8 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Download, HandCoins, Printer, Receipt, Wallet } from 'lucide-react';
 import { PAYMENT_METHODS, dateRangeSchema, formatINR, todayIST } from '@mazdoorpay/shared';
-import { useT } from '../lib/i18n.jsx';
-import { formatDay } from '../lib/format.js';
+import { useFormat, useT } from '../lib/i18n.jsx';
 import { downloadCsv } from '../lib/download.js';
 import { PageHeader } from '../components/layout/PageHeader.jsx';
 import { Button } from '../components/ui/Button.jsx';
@@ -116,6 +115,7 @@ function DuesTab({ kind, onPay }) {
 
 function PaymentItem({ payment, onVoid }) {
   const t = useT();
+  const { formatDay } = useFormat();
   const voided = Boolean(payment.voidedAt);
   const titleId = `pay-${payment._id}`;
   return (

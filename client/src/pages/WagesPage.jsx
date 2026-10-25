@@ -3,8 +3,7 @@ import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Calculator, Download, Printer } from 'lucide-react';
 import { formatINR } from '@mazdoorpay/shared';
-import { useT } from '../lib/i18n.jsx';
-import { formatDay } from '../lib/format.js';
+import { useFormat, useT } from '../lib/i18n.jsx';
 import { downloadCsv } from '../lib/download.js';
 import { PageHeader } from '../components/layout/PageHeader.jsx';
 import { Button } from '../components/ui/Button.jsx';
@@ -26,6 +25,7 @@ import { BucketChart } from '../features/wages/BucketChart.jsx';
 
 export default function WagesPage() {
   const t = useT();
+  const { formatDay } = useFormat();
   const [period, setPeriod] = useState(() => ({
     preset: 'this-week',
     ...periodRange('this-week'),

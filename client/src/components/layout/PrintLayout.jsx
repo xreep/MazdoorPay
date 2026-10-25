@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { ArrowLeft, Printer } from 'lucide-react';
-import { useT } from '../../lib/i18n.jsx';
+import { I18nProvider, useLang, useT } from '../../lib/i18n.jsx';
+import { localeFor } from '../../lib/format.js';
 import { Logo } from './Logo.jsx';
 
 // A plain sheet for printing or saving as PDF: no app chrome, black on white.
@@ -15,6 +16,7 @@ export function PrintLayout({
   children,
 }) {
   const t = useT();
+  const lang = useLang();
   useEffect(() => {
     document.title = `${title} · MazdoorPay`;
   }, [title]);
@@ -57,7 +59,7 @@ export function PrintLayout({
             <div className="border-t border-black pt-2">{t('print.contractorSignature')}</div>
             <div className="border-t border-black pt-2">
               {t('print.generated', {
-                at: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
+                at: new Date().toLocaleString(localeFor(lang), { timeZone: 'Asia/Kolkata' }),
               })}
             </div>
           </footer>
@@ -69,3 +71,13 @@ export function PrintLayout({
 
 export const printTable =
   'w-full border-collapse text-sm [&_td]:border [&_td]:border-neutral-400 [&_td]:px-2 [&_td]:py-1.5 [&_th]:border [&_th]:border-neutral-400 [&_th]:bg-neutral-100 [&_th]:px-2 [&_th]:py-1.5 [&_th]:text-left';
+
+// Papers handed to a worker (receipt, wage slip) are printed in the worker's language.
+export function WorkerLanguage({ worker, children }) {
+  const lang = worker?.preferredLanguage === 'hi' ? 'hi' : 'en';
+  return (
+    <I18nProvider lang={lang}>
+      <div lang={lang}>{children}</div>
+    </I18nProvider>
+  );
+}

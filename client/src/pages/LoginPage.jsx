@@ -10,6 +10,7 @@ import { useT } from '../lib/i18n.jsx';
 import { Button } from '../components/ui/Button.jsx';
 import { Field } from '../components/ui/Field.jsx';
 import { Input } from '../components/ui/Input.jsx';
+import { LanguageToggle } from '../components/layout/LanguageToggle.jsx';
 import { Logo } from '../components/layout/Logo.jsx';
 import { applyServerErrors } from '../lib/forms.js';
 
@@ -154,7 +155,8 @@ export default function LoginPage() {
         <div className="hivis-tape absolute inset-x-0 bottom-0 h-5" aria-hidden="true" />
       </aside>
 
-      <main className="flex flex-col items-center justify-center px-4 py-10 sm:px-8">
+      <main className="relative flex flex-col items-center justify-center px-4 py-10 sm:px-8">
+        <LanguageToggle className="absolute right-3 top-3" />
         <div className="w-full max-w-md">
           <div className="mb-8 lg:hidden">
             <Logo />

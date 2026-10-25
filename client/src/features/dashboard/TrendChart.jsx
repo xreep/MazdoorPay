@@ -9,13 +9,13 @@ import {
   YAxis,
 } from 'recharts';
 import { formatINR } from '@mazdoorpay/shared';
-import { useT } from '../../lib/i18n.jsx';
-import { formatDay } from '../../lib/format.js';
+import { useFormat, useT } from '../../lib/i18n.jsx';
 
 const color = (name) => `hsl(var(--${name}))`;
 
 function TrendTooltip({ active, payload, label }) {
   const t = useT();
+  const { formatDay } = useFormat();
   if (!active || !payload?.length) return null;
   const row = payload[0].payload;
   return (

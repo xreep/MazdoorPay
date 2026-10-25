@@ -26,7 +26,14 @@ export default {
         focus: token('focus'),
       },
       fontFamily: {
-        sans: ['"Inter Variable"', 'Inter', 'system-ui', '"Noto Sans Devanagari"', 'sans-serif'],
+        sans: [
+          '"Inter Variable"',
+          '"Noto Sans Devanagari Variable"',
+          'Inter',
+          'system-ui',
+          '"Noto Sans Devanagari"',
+          'sans-serif',
+        ],
       },
       borderRadius: { card: '1rem', control: '0.75rem' },
       boxShadow: {

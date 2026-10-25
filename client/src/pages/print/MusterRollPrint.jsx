@@ -2,14 +2,14 @@ import { useQuery } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
 import { formatINR } from '@mazdoorpay/shared';
 import { api } from '../../lib/api.js';
-import { useT } from '../../lib/i18n.jsx';
-import { formatMonth } from '../../lib/format.js';
+import { useFormat, useT } from '../../lib/i18n.jsx';
 import { PrintLayout, printTable } from '../../components/layout/PrintLayout.jsx';
 import { SkeletonRows } from '../../components/ui/Skeleton.jsx';
 import { QueryError } from '../../components/ui/QueryError.jsx';
 
 export default function MusterRollPrint() {
   const t = useT();
+  const { formatMonth } = useFormat();
   const [params] = useSearchParams();
   const month = params.get('month');
   const siteId = params.get('siteId');

@@ -1,6 +1,5 @@
 import { ShieldCheck } from 'lucide-react';
-import { useT } from '../../lib/i18n.jsx';
-import { formatDay } from '../../lib/format.js';
+import { useFormat, useT } from '../../lib/i18n.jsx';
 import { Card } from '../../components/ui/Card.jsx';
 import { EmptyState } from '../../components/ui/EmptyState.jsx';
 import { QueryError } from '../../components/ui/QueryError.jsx';
@@ -18,6 +17,7 @@ const TYPES = [
 
 export function AccuracyTab() {
   const t = useT();
+  const { formatDay } = useFormat();
   const { data, isPending, isError, error, refetch } = useAnomalies();
   if (isPending) return <SkeletonRows n={4} className="h-24" />;
   if (isError) return <QueryError error={error} onRetry={refetch} />;

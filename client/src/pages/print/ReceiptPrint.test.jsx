@@ -35,6 +35,14 @@ describe('ReceiptPrint', () => {
     expect(url.searchParams.get('text')).toMatch('UTR: 412345678901');
   });
 
+  it("is printed in the worker's language", async () => {
+    const data = receipt();
+    render({ ...data, worker: { ...data.worker, preferredLanguage: 'hi' } });
+    expect(await screen.findByRole('heading', { name: 'भुगतान की रसीद' })).toBeInTheDocument();
+    expect(screen.getByText('शनिवार, 24 अक्टूबर 2026')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'WhatsApp पर भेजें' })).toBeInTheDocument();
+  });
+
   it('does not offer WhatsApp for a voided payment', async () => {
     render(receipt({ voidedAt: '2026-10-24T10:00:00Z', voidReason: 'Wrong amount' }));
     expect(await screen.findByText('Wrong amount')).toBeInTheDocument();

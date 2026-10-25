@@ -1,11 +1,10 @@
 import { Fragment, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronDown } from 'lucide-react';
-import { useT } from '../../lib/i18n.jsx';
-import { formatDay } from '../../lib/format.js';
+import { useFormat, useT } from '../../lib/i18n.jsx';
 import { Money } from '../../components/ui/Money.jsx';
 
-const bucketLabel = (bucket, groupBy) =>
+const bucketLabel = (bucket, groupBy, formatDay) =>
   groupBy === 'day'
     ? formatDay(bucket.start)
     : `${formatDay(bucket.start)} – ${formatDay(bucket.end)}`;
@@ -14,6 +13,7 @@ const slipHref = (workerId, data) => `/print/wage-slip/${workerId}?from=${data.f
 
 export function WageTable({ data }) {
   const t = useT();
+  const { formatDay } = useFormat();
   const [open, setOpen] = useState(() => new Set());
   const toggle = (id) =>
     setOpen((s) => {
@@ -102,7 +102,7 @@ export function WageTable({ data }) {
                           >
                             <span>
                               <span className="block font-medium">
-                                {bucketLabel(data.buckets[i], data.groupBy)}
+                                {bucketLabel(data.buckets[i], data.groupBy, formatDay)}
                               </span>
                               <span className="num text-ink-muted">
                                 {t('wages.bucketCounts', {

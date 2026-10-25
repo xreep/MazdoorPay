@@ -27,6 +27,7 @@ export const registerSchema = z.object({
   email: emailSchema,
   password: passwordSchema,
   phone: phoneSchema,
+  preferredLanguage: z.enum(LANGUAGES).optional(),
 });
 
 export const loginSchema = z.object({

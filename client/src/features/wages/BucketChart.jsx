@@ -1,10 +1,10 @@
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { formatINR } from '@mazdoorpay/shared';
-import { useT } from '../../lib/i18n.jsx';
-import { formatDay } from '../../lib/format.js';
+import { useFormat, useT } from '../../lib/i18n.jsx';
 
 export function BucketChart({ buckets, groupBy }) {
   const t = useT();
+  const { formatDay } = useFormat();
   const total = buckets.reduce((s, b) => s + b.earned, 0);
   const tick = (start) =>
     groupBy === 'day' ? String(Number(start.slice(8))) : formatDay(start).split(',')[0];

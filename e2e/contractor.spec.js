@@ -63,7 +63,8 @@ test('a new contractor goes from sign-up to a printed receipt', async ({ page })
   const row = page.getByRole('article', { name: /Shankar Jadhav/ });
   const receiptHref = await row.getByRole('link', { name: 'Receipt' }).getAttribute('href');
   await page.goto(receiptHref);
-  await expect(page.getByRole('heading', { name: 'Payment receipt' })).toBeVisible();
+  // New workers default to Hindi, and a receipt is printed in the worker's language.
+  await expect(page.getByRole('heading', { name: 'भुगतान की रसीद' })).toBeVisible();
   await expect(page.getByText('₹800')).toBeVisible();
   await expect(page.getByText('Meena Construction')).toBeVisible();
 });

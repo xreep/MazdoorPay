@@ -3,8 +3,7 @@ import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Download, Printer } from 'lucide-react';
 import { dateRangeSchema, todayIST } from '@mazdoorpay/shared';
-import { useT } from '../../lib/i18n.jsx';
-import { formatMonth } from '../../lib/format.js';
+import { useFormat, useT } from '../../lib/i18n.jsx';
 import { downloadCsv } from '../../lib/download.js';
 import { Button } from '../../components/ui/Button.jsx';
 import { Card } from '../../components/ui/Card.jsx';
@@ -23,6 +22,7 @@ const printLink =
 
 export function AttendanceReports({ siteId, siteName }) {
   const t = useT();
+  const { formatMonth } = useFormat();
   const today = todayIST();
   const [month, setMonth] = useState(today.slice(0, 7));
   const [from, setFrom] = useState(`${today.slice(0, 7)}-01`);

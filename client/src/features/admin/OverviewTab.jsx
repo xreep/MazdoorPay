@@ -11,8 +11,7 @@ import {
   YAxis,
 } from 'recharts';
 import { formatINR } from '@mazdoorpay/shared';
-import { useT } from '../../lib/i18n.jsx';
-import { formatDay } from '../../lib/format.js';
+import { useFormat, useT } from '../../lib/i18n.jsx';
 import { Card } from '../../components/ui/Card.jsx';
 import { Stat } from '../../components/ui/Stat.jsx';
 import { Skeleton } from '../../components/ui/Skeleton.jsx';
@@ -28,6 +27,7 @@ const axis = {
 
 export function OverviewTab() {
   const t = useT();
+  const { formatDay } = useFormat();
   const overview = useAdminOverview();
   const growth = useAdminGrowth(12);
   const daily = useDailyActivity(30);

@@ -6,20 +6,35 @@ const asUTC = (day) => {
   return new Date(Date.UTC(y, m - 1, d ?? 1));
 };
 
-const fmt = (options) => new Intl.DateTimeFormat('en-IN', { timeZone: 'UTC', ...options });
-const shortDay = fmt({ day: 'numeric', month: 'short' });
-const weekday = fmt({ weekday: 'short' });
-const longDay = fmt({ weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-const monthYear = fmt({ month: 'long', year: 'numeric' });
+export const localeFor = (lang) => (lang === 'hi' ? 'hi-IN' : 'en-IN');
 
-export const formatDay = (day) => `${shortDay.format(asUTC(day))}, ${weekday.format(asUTC(day))}`;
+const cache = new Map();
 
-export const formatDayLong = (day) => {
-  const parts = Object.fromEntries(longDay.formatToParts(asUTC(day)).map((p) => [p.type, p.value]));
-  return `${parts.weekday}, ${parts.day} ${parts.month} ${parts.year}`;
-};
+// Day and month formatters for one language, built once and reused.
+export function dateFormatters(lang = 'en') {
+  if (cache.has(lang)) return cache.get(lang);
+  const fmt = (options) =>
+    new Intl.DateTimeFormat(localeFor(lang), { timeZone: 'UTC', ...options });
+  const shortDay = fmt({ day: 'numeric', month: 'short' });
+  const weekday = fmt({ weekday: 'short' });
+  const longDay = fmt({ weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  const monthYear = fmt({ month: 'long', year: 'numeric' });
+  const formatters = {
+    formatDay: (day) => `${shortDay.format(asUTC(day))}, ${weekday.format(asUTC(day))}`,
+    formatDayLong: (day) => {
+      const parts = Object.fromEntries(
+        longDay.formatToParts(asUTC(day)).map((p) => [p.type, p.value])
+      );
+      return `${parts.weekday}, ${parts.day} ${parts.month} ${parts.year}`;
+    },
+    formatMonth: (month) => monthYear.format(asUTC(month)),
+  };
+  cache.set(lang, formatters);
+  return formatters;
+}
 
-export const formatMonth = (month) => monthYear.format(asUTC(month));
+// English versions, for code outside React (CSV names, tests).
+export const { formatDay, formatDayLong, formatMonth } = dateFormatters('en');
 
 const RUPEES = /^\d+(\.\d{1,2})?$/;
 

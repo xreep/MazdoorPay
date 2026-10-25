@@ -2,9 +2,8 @@ import { useQuery } from '@tanstack/react-query';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { formatINR } from '@mazdoorpay/shared';
 import { api } from '../../lib/api.js';
-import { useT } from '../../lib/i18n.jsx';
-import { formatDay, formatDayLong } from '../../lib/format.js';
-import { PrintLayout, printTable } from '../../components/layout/PrintLayout.jsx';
+import { useFormat, useT } from '../../lib/i18n.jsx';
+import { PrintLayout, WorkerLanguage, printTable } from '../../components/layout/PrintLayout.jsx';
 import { SkeletonRows } from '../../components/ui/Skeleton.jsx';
 import { QueryError } from '../../components/ui/QueryError.jsx';
 
@@ -23,7 +22,6 @@ function Line({ label, children, strong = false }) {
 
 // One worker's wages for a period: previous balance + earned − paid = balance at the end.
 export default function WageSlipPrint() {
-  const t = useT();
   const { id } = useParams();
   const [params] = useSearchParams();
   const query = { from: params.get('from'), to: params.get('to') };
@@ -44,6 +42,16 @@ export default function WageSlipPrint() {
       </div>
     );
 
+  return (
+    <WorkerLanguage worker={data.worker}>
+      <WageSlip data={data} />
+    </WorkerLanguage>
+  );
+}
+
+function WageSlip({ data }) {
+  const t = useT();
+  const { formatDay, formatDayLong } = useFormat();
   const { worker, site, contractor, days, payments, totals, openingBalance, closingBalance } = data;
   return (
     <PrintLayout

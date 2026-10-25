@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { todayIST } from '@mazdoorpay/shared';
-import { useT } from '../../lib/i18n.jsx';
-import { formatDay } from '../../lib/format.js';
+import { useFormat, useT } from '../../lib/i18n.jsx';
 import { Modal } from '../../components/ui/Modal.jsx';
 import { Field } from '../../components/ui/Field.jsx';
 import { Input } from '../../components/ui/Input.jsx';
@@ -18,6 +17,7 @@ const latestFrom = (worker) =>
 
 export function RateChangeDialog({ open, worker, onClose }) {
   const t = useT();
+  const { formatDay } = useFormat();
   const change = useChangeRate();
   const today = todayIST();
   const [rate, setRate] = useState(worker.dailyRate);

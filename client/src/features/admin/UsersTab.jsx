@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ChevronRight, Search } from 'lucide-react';
-import { useT } from '../../lib/i18n.jsx';
-import { formatDay, initials } from '../../lib/format.js';
+import { useFormat, useT } from '../../lib/i18n.jsx';
+import { initials } from '../../lib/format.js';
 import { useDebouncedValue } from '../../lib/hooks.js';
 import { Card } from '../../components/ui/Card.jsx';
 import { Input } from '../../components/ui/Input.jsx';
@@ -16,6 +16,7 @@ const istDay = (iso) => new Date(new Date(iso).getTime() + 330 * 60000).toISOStr
 
 export function UsersTab() {
   const t = useT();
+  const { formatDay } = useFormat();
   const [q, setQ] = useState('');
   const [status, setStatus] = useState('');
   const [page, setPage] = useState(1);

@@ -70,6 +70,8 @@ export const en = {
     optional: 'optional',
     retry: 'Try again',
     loadFailed: 'Could not load this. {message}',
+    language: 'Language',
+    switchLanguage: 'हिन्दी में देखें',
   },
   status: { present: 'Present', absent: 'Absent', halfDay: 'Half-day', notMarked: 'Not marked' },
   money: { advance: '{amount} advance' },

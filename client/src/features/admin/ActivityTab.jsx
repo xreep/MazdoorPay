@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { dateRangeSchema } from '@mazdoorpay/shared';
-import { useT } from '../../lib/i18n.jsx';
+import { localeFor } from '../../lib/format.js';
+import { useLang, useT } from '../../lib/i18n.jsx';
 import { Card } from '../../components/ui/Card.jsx';
 import { Field } from '../../components/ui/Field.jsx';
 import { Input } from '../../components/ui/Input.jsx';
@@ -30,8 +31,8 @@ export const ACTIONS = [
   'admin.reactivate',
 ];
 
-const whenIST = (iso) =>
-  new Date(iso).toLocaleString('en-IN', {
+const whenIST = (iso, lang) =>
+  new Date(iso).toLocaleString(localeFor(lang), {
     timeZone: 'Asia/Kolkata',
     day: 'numeric',
     month: 'short',
@@ -41,6 +42,7 @@ const whenIST = (iso) =>
 
 export function ActivityTab() {
   const t = useT();
+  const lang = useLang();
   const [filters, setFilters] = useState({ contractorId: '', action: '', from: '', to: '' });
   const [page, setPage] = useState(1);
   const { data: contractors } = useAdminUsers({ role: 'contractor', limit: 100 });
@@ -99,7 +101,7 @@ export function ActivityTab() {
                 className="grid gap-1 px-4 py-3 sm:grid-cols-[9rem_minmax(0,1fr)] sm:gap-4 sm:px-5"
               >
                 <time dateTime={e.at} className="num text-sm text-ink-muted">
-                  {whenIST(e.at)}
+                  {whenIST(e.at, lang)}
                 </time>
                 <div className="min-w-0">
                   <p>

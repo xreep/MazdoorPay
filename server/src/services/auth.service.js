@@ -57,7 +57,7 @@ const auditAuth = (user, action, ip) =>
     ip,
   });
 
-export async function register({ name, email, password, phone }, { ip } = {}) {
+export async function register({ name, email, password, phone, preferredLanguage }, { ip } = {}) {
   if (await User.exists({ email }))
     throw httpError(409, 'An account with this email already exists');
   const passwordHash = await bcrypt.hash(password, config.bcryptCost);
@@ -67,6 +67,7 @@ export async function register({ name, email, password, phone }, { ip } = {}) {
       name,
       email,
       phone,
+      preferredLanguage,
       passwordHash,
       role: 'contractor',
       lastLoginAt: new Date(),

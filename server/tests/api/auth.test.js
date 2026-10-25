@@ -166,6 +166,19 @@ describe('login and refresh', () => {
     expect((await refreshWith('garbage')).status).toBe(401);
   });
 
+  it('keeps the language chosen before signing up', async () => {
+    const res = await request(app())
+      .post('/api/v1/auth/register')
+      .send({
+        name: 'Sunil Rao',
+        email: uniqueEmail('lang'),
+        password: DEFAULT_PASSWORD,
+        preferredLanguage: 'hi',
+      });
+    expect(res.status).toBe(201);
+    expect(res.body.user.preferredLanguage).toBe('hi');
+  });
+
   it('locks after 5 failed logins with 423', async () => {
     const { user } = await registerContractor();
     for (let i = 0; i < 5; i++) expect((await login(user.email, 'Wrong1234')).status).toBe(401);

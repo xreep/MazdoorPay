@@ -2,8 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
 import { formatINR } from '@mazdoorpay/shared';
 import { api } from '../../lib/api.js';
-import { useT } from '../../lib/i18n.jsx';
-import { formatDay } from '../../lib/format.js';
+import { useFormat, useT } from '../../lib/i18n.jsx';
 import { PrintLayout, printTable } from '../../components/layout/PrintLayout.jsx';
 import { SkeletonRows } from '../../components/ui/Skeleton.jsx';
 import { QueryError } from '../../components/ui/QueryError.jsx';
@@ -12,6 +11,7 @@ const SUM_KEYS = ['present', 'halfDay', 'absent', 'gross', 'advancesPaid', 'wage
 
 export default function WageRegisterPrint() {
   const t = useT();
+  const { formatDay } = useFormat();
   const [params] = useSearchParams();
   const query = {
     from: params.get('from'),

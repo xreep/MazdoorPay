@@ -1,6 +1,5 @@
 import { addDays, dayOfWeek, eachDay, todayIST } from '@mazdoorpay/shared';
-import { useT } from '../../lib/i18n.jsx';
-import { formatDay } from '../../lib/format.js';
+import { useFormat, useT } from '../../lib/i18n.jsx';
 
 const CELL = {
   present: 'bg-present text-white',
@@ -17,6 +16,7 @@ const WEEKDAYS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 // Last `days` days as a Monday-first grid, one coloured cell per day.
 export function WorkerCalendar({ records, days = 60 }) {
   const t = useT();
+  const { formatDay } = useFormat();
   const today = todayIST();
   const from = addDays(today, -(days - 1));
   const byDay = new Map(records.map((r) => [r.day, r.status]));

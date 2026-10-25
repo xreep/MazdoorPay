@@ -2,8 +2,7 @@ import { Link } from 'react-router-dom';
 import { ArrowUpRight, Building2, ClipboardCheck, HandCoins, UserPlus, Wallet } from 'lucide-react';
 import { formatINR } from '@mazdoorpay/shared';
 import { useAuth } from '../auth/AuthProvider.jsx';
-import { useT } from '../lib/i18n.jsx';
-import { formatDayLong } from '../lib/format.js';
+import { useFormat, useT } from '../lib/i18n.jsx';
 import { useDashboard } from '../features/dashboard/useDashboard.js';
 import { TrendChart } from '../features/dashboard/TrendChart.jsx';
 import { PageHeader } from '../components/layout/PageHeader.jsx';
@@ -112,6 +111,7 @@ function DashboardSkeleton() {
 
 export default function DashboardPage() {
   const t = useT();
+  const { formatDayLong } = useFormat();
   const { user } = useAuth();
   const { data, isPending, isError, error, refetch } = useDashboard();
   const firstName = user?.name?.split(' ')[0] ?? '';

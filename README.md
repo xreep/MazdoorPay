@@ -24,6 +24,8 @@ The demo admin sees only the demo accounts, and demo accounts cannot be suspende
 
 **For contractors**
 
+- **Hindi or English** — one tap switches every screen; receipts and wage slips print in each worker's own language.
+
 - **Dashboard** — today's attendance progress per site, wages pending, advances outstanding, money paid this week, and a 30-day trend.
 - **Sites** — every site with its worker count.
 - **Workers** — search and filter; each worker's profile shows what they earned, what they were paid, and what is still due, with a 60-day attendance calendar and wage history.

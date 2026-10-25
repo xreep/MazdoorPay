@@ -22,6 +22,7 @@ import { Modal } from '../ui/Modal.jsx';
 import { ConfirmDialog } from '../ui/ConfirmDialog.jsx';
 import { useUnsavedCount } from '../../lib/unsaved.js';
 import { SkeletonRows } from '../ui/Skeleton.jsx';
+import { LanguageToggle } from './LanguageToggle.jsx';
 import { Logo } from './Logo.jsx';
 import { ErrorBoundary } from './ErrorBoundary.jsx';
 
@@ -155,10 +156,11 @@ export function AppShell() {
                 </p>
               </div>
             </div>
+            <LanguageToggle className="mt-3 w-full" />
             <button
               type="button"
               onClick={onLogout}
-              className="mt-3 flex h-12 w-full items-center gap-3 rounded-control px-3 text-ink-muted hover:bg-ink/5 hover:text-ink"
+              className="flex h-12 w-full items-center gap-3 rounded-control px-3 text-ink-muted hover:bg-ink/5 hover:text-ink"
             >
               <LogOut className="h-5 w-5" aria-hidden="true" />
               {t('nav.logout')}
@@ -169,12 +171,15 @@ export function AppShell() {
         <div className="min-w-0">
           <header className="no-print sticky top-1.5 z-30 flex h-14 items-center justify-between border-b border-border bg-bg/90 px-4 backdrop-blur lg:hidden">
             <Logo />
-            <span
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-ink text-xs font-bold text-white"
-              aria-label={user?.name}
-            >
-              {initials(user?.name)}
-            </span>
+            <div className="flex items-center gap-1">
+              <LanguageToggle className="px-2 text-sm" />
+              <span
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-ink text-xs font-bold text-white"
+                aria-label={user?.name}
+              >
+                {initials(user?.name)}
+              </span>
+            </div>
           </header>
           <main
             id="main"

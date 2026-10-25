@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { dayOfWeek, todayIST } from '@mazdoorpay/shared';
-import { useT } from '../../lib/i18n.jsx';
-import { formatDay, formatMonth } from '../../lib/format.js';
+import { useFormat, useT } from '../../lib/i18n.jsx';
 import { SkeletonRows } from '../../components/ui/Skeleton.jsx';
 import { QueryError } from '../../components/ui/QueryError.jsx';
 import { useAttendanceCalendar } from './useAttendance.js';
@@ -26,6 +25,7 @@ const shade = (d) => {
 
 export function MonthHeatmap({ siteId, onPickDay }) {
   const t = useT();
+  const { formatDay, formatMonth } = useFormat();
   const today = todayIST();
   const [month, setMonth] = useState(today.slice(0, 7));
   const { data, isPending, isError, error, refetch } = useAttendanceCalendar(siteId, month);

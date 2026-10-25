@@ -13,8 +13,7 @@ import {
   Undo2,
 } from 'lucide-react';
 import { LIMITS, addDays, diffDays, isValidDay, todayIST } from '@mazdoorpay/shared';
-import { useT } from '../lib/i18n.jsx';
-import { formatDayLong } from '../lib/format.js';
+import { useFormat, useT } from '../lib/i18n.jsx';
 import { PageHeader } from '../components/layout/PageHeader.jsx';
 import { Button, buttonClasses } from '../components/ui/Button.jsx';
 import { Card } from '../components/ui/Card.jsx';
@@ -226,6 +225,7 @@ function AttendanceSheet({ siteId, day, onDirtyChange }) {
 
 export default function AttendancePage() {
   const t = useT();
+  const { formatDayLong } = useFormat();
   const [params, setParams] = useSearchParams();
   const today = todayIST();
   const { options: siteOptions, isPending: sitesPending } = useSiteOptions();

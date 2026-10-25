@@ -1,8 +1,7 @@
 import { useParams } from 'react-router-dom';
 import { formatINR } from '@mazdoorpay/shared';
-import { useT } from '../../lib/i18n.jsx';
-import { formatDayLong } from '../../lib/format.js';
-import { PrintLayout } from '../../components/layout/PrintLayout.jsx';
+import { useFormat, useT } from '../../lib/i18n.jsx';
+import { PrintLayout, WorkerLanguage } from '../../components/layout/PrintLayout.jsx';
 import { WhatsAppLink } from '../../components/ui/WhatsAppLink.jsx';
 import { receiptMessage } from '../../lib/whatsapp.js';
 import { SkeletonRows } from '../../components/ui/Skeleton.jsx';
@@ -19,7 +18,6 @@ function Row({ label, children }) {
 }
 
 export default function ReceiptPrint() {
-  const t = useT();
   const { id } = useParams();
   const { data, isPending, isError, error } = usePayment(id);
   if (isPending)
@@ -34,6 +32,17 @@ export default function ReceiptPrint() {
         <QueryError error={error} />
       </div>
     );
+  // The receipt is the worker's, so it is in the worker's language.
+  return (
+    <WorkerLanguage worker={data.worker}>
+      <Receipt data={data} />
+    </WorkerLanguage>
+  );
+}
+
+function Receipt({ data }) {
+  const t = useT();
+  const { formatDayLong } = useFormat();
   const { payment, worker, site, contractor } = data;
   const voided = Boolean(payment.voidedAt);
   return (

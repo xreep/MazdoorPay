@@ -13,11 +13,11 @@ import {
   UserX,
 } from 'lucide-react';
 import { formatINR, todayIST, weekStart } from '@mazdoorpay/shared';
-import { useT } from '../lib/i18n.jsx';
+import { useFormat, useT } from '../lib/i18n.jsx';
 import { useAuth } from '../auth/AuthProvider.jsx';
 import { weeklySummaryMessage } from '../lib/whatsapp.js';
 import { WhatsAppLink } from '../components/ui/WhatsAppLink.jsx';
-import { formatDay, initials } from '../lib/format.js';
+import { initials } from '../lib/format.js';
 import { PageHeader } from '../components/layout/PageHeader.jsx';
 import { Button, buttonClasses } from '../components/ui/Button.jsx';
 import { Card } from '../components/ui/Card.jsx';
@@ -82,6 +82,7 @@ function Detail({ label, children }) {
 
 export default function WorkerProfilePage() {
   const t = useT();
+  const { formatDay } = useFormat();
   const { id } = useParams();
   const { user } = useAuth();
   const { data, isPending, isError, error, refetch } = useWorkerSummary(id);
