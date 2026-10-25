@@ -6,6 +6,7 @@ import { RefreshToken } from '../models/RefreshToken.js';
 import { LoginAttempt } from '../models/LoginAttempt.js';
 import { httpError } from '../utils/httpError.js';
 import { hashToken, newRefreshToken, signAccessToken } from '../utils/tokens.js';
+import { recordAudit } from './audit.service.js';
 
 const INVALID_LOGIN = 'Email or password is incorrect';
 export const SESSION_EXPIRED = 'Please log in again';
@@ -44,7 +45,17 @@ export const revokeAllForUser = async (userId) => {
   await RefreshToken.updateMany({ userId, revokedAt: null }, { revokedAt: new Date() });
 };
 
-export async function register({ name, email, password, phone }) {
+const auditAuth = (user, action, ip) =>
+  recordAudit({
+    actor: { id: user._id, role: user.role },
+    contractorId: user.role === 'contractor' ? user._id : undefined,
+    action,
+    entity: 'User',
+    entityId: user._id,
+    ip,
+  });
+
+export async function register({ name, email, password, phone }, { ip } = {}) {
   if (await User.exists({ email }))
     throw httpError(409, 'An account with this email already exists');
   const passwordHash = await bcrypt.hash(password, config.bcryptCost);
@@ -62,6 +73,7 @@ export async function register({ name, email, password, phone }) {
     if (err.code === 11000) throw httpError(409, 'An account with this email already exists');
     throw err;
   }
+  await auditAuth(user, 'auth.register', ip);
   return issueSession(user);
 }
 
@@ -79,7 +91,7 @@ async function recordFailedLogin(email) {
   }
 }
 
-export async function login({ email, password }) {
+export async function login({ email, password }, { ip } = {}) {
   const attempt = await LoginAttempt.findOne({ email }).lean();
   if (attempt?.lockoutUntil && attempt.lockoutUntil > new Date()) {
     const minutes = Math.ceil((attempt.lockoutUntil - Date.now()) / 60000);
@@ -99,6 +111,7 @@ export async function login({ email, password }) {
   if (user.status === 'suspended') throw httpError(403, SUSPENDED);
 
   await User.updateOne({ _id: user._id }, { lastLoginAt: new Date() });
+  await auditAuth(user, 'auth.login', ip);
   return issueSession(user);
 }
 
