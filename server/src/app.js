@@ -40,6 +40,8 @@ export function createApp(overrides = {}) {
     ['/api/v1/auth/login', '/api/v1/auth/register'],
     createAuthLimiter(settings.authRateLimitMax)
   );
+  // Public statement links: open to anyone with a link, so held to the same strict limit.
+  app.use('/api/v1/statements', createAuthLimiter(settings.authRateLimitMax));
 
   app.get('/api/v1/health', (_req, res) => {
     const connected = mongoose.connection.readyState === 1;

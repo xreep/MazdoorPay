@@ -57,6 +57,19 @@
           "value": "camera=(self), microphone=(), geolocation=(), payment=()"
         }
       ]
+    },
+    {
+      "source": "/s/(.*)",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "no-referrer"
+        }
+      ]
     }
   ]
 }

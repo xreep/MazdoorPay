@@ -1,4 +1,5 @@
 import { expect } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
 
 export { DEMO, OPS_ADMIN } from './accounts.js';
 
@@ -30,4 +31,22 @@ export async function apiContractor(request, overrides = {}) {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
   return { ...body, user, token: accessToken, call: authed };
+}
+
+// Spec 10: axe checks of every page with zero serious or critical violations.
+export async function expectAccessible(page, label) {
+  await page.waitForLoadState('networkidle');
+  await expect(page.getByRole('status', { name: 'Loading' })).toHaveCount(0);
+  const results = await new AxeBuilder({ page })
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+    .analyze();
+  const serious = results.violations.filter((v) => ['serious', 'critical'].includes(v.impact));
+  const summary = serious.map(
+    (v) =>
+      `${v.id} (${v.impact}): ${v.nodes
+        .map((n) => n.target.join(' '))
+        .slice(0, 3)
+        .join(', ')}`
+  );
+  expect(summary, `${label} has accessibility violations`).toEqual([]);
 }

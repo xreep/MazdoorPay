@@ -29,6 +29,7 @@ import { Skeleton, SkeletonRows } from '../components/ui/Skeleton.jsx';
 import { WorkerForm } from '../features/workers/WorkerForm.jsx';
 import { RateChangeDialog } from '../features/workers/RateChangeDialog.jsx';
 import { WorkerCalendar } from '../features/workers/WorkerCalendar.jsx';
+import { StatementLinkCard } from '../features/workers/StatementLinkCard.jsx';
 import {
   useReplaceCard,
   useSetWorkerActive,
@@ -320,6 +321,8 @@ export default function WorkerProfilePage() {
             </ul>
           )}
         </Card>
+
+        <StatementLinkCard worker={worker} />
       </div>
 
       <WorkerForm open={editOpen} worker={worker} onClose={() => setEditOpen(false)} />

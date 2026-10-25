@@ -50,3 +50,21 @@ export const useSetWorkerActive = () =>
 
 export const useReplaceCard = () =>
   useWorkerMutation((id) => api.post(`/workers/${id}/card/replace`));
+
+const linkKey = (id) => ['statement-link', id];
+
+export const useStatementLink = (id) =>
+  useQuery({ queryKey: linkKey(id), queryFn: () => api.get(`/workers/${id}/statement-link`) });
+
+function useLinkMutation(fn) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: fn,
+    onSuccess: (_result, id) => queryClient.invalidateQueries({ queryKey: linkKey(id) }),
+  });
+}
+
+export const useMakeStatementLink = () =>
+  useLinkMutation((id) => api.post(`/workers/${id}/statement-link`));
+export const useStopStatementLink = () =>
+  useLinkMutation((id) => api.del(`/workers/${id}/statement-link`));

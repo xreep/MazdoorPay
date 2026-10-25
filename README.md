@@ -24,6 +24,7 @@ The demo admin sees only the demo accounts, and demo accounts cannot be suspende
 
 **For contractors**
 
+- **Statement link** — a private link the worker opens without an account to see their own balance, attendance and payments.
 - **Hindi or English** — one tap switches every screen; receipts and wage slips print in each worker's own language.
 
 - **Dashboard** — today's attendance progress per site, wages pending, advances outstanding, money paid this week, and a 30-day trend.

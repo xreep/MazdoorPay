@@ -25,6 +25,7 @@ const PaymentsReportPrint = lazy(() => import('./pages/print/PaymentsReportPrint
 const AdminPage = lazy(() => import('./pages/AdminPage.jsx'));
 const MusterRollPrint = lazy(() => import('./pages/print/MusterRollPrint.jsx'));
 const AttendanceReportPrint = lazy(() => import('./pages/print/AttendanceReportPrint.jsx'));
+const StatementPage = lazy(() => import('./pages/StatementPage.jsx'));
 
 function RootLayout() {
   return (
@@ -50,6 +51,15 @@ export const routes = [
     errorElement: <RouteError />,
     children: [
       { path: '/login', element: <LoginPage /> },
+      {
+        // Public: a worker's own statement, opened from the private link they were sent.
+        path: '/s/:token',
+        element: (
+          <Suspense fallback={<FullPageSkeleton />}>
+            <StatementPage />
+          </Suspense>
+        ),
+      },
       {
         element: (
           <RequireAuth>

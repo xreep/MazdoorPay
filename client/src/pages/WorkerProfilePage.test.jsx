@@ -118,6 +118,43 @@ describe('WorkerProfilePage', () => {
     ).toBeInTheDocument();
   });
 
+  it('makes a private statement link to send the worker, and can stop it', async () => {
+    let active = false;
+    server.use(
+      ...base(),
+      http.get(API('/workers/w1/statement-link'), () =>
+        HttpResponse.json(
+          active ? { active, createdAt: '2026-10-25T05:00:00Z', lastViewedAt: null } : { active }
+        )
+      ),
+      http.post(API('/workers/w1/statement-link'), () => {
+        active = true;
+        return HttpResponse.json({ token: 'tok123', path: '/s/tok123' }, { status: 201 });
+      }),
+      http.delete(API('/workers/w1/statement-link'), () => {
+        active = false;
+        return HttpResponse.json({ active });
+      })
+    );
+    render();
+    const section = await screen.findByRole('region', { name: 'Statement link' });
+    expect(await within(section).findByText('No link yet.')).toBeInTheDocument();
+    await userEvent.click(within(section).getByRole('button', { name: 'Make statement link' }));
+
+    const field = await within(section).findByRole('textbox', {
+      name: 'Statement link for Ramesh Kumar',
+    });
+    expect(field).toHaveValue(`${window.location.origin}/s/tok123`);
+    const whatsapp = within(section).getByRole('link', { name: 'Send on WhatsApp' });
+    expect(new URL(whatsapp.getAttribute('href')).searchParams.get('text')).toContain(
+      `${window.location.origin}/s/tok123`
+    );
+
+    await userEvent.click(within(section).getByRole('button', { name: 'Stop link' }));
+    expect(await within(section).findByText('No link yet.')).toBeInTheDocument();
+    expect(within(section).queryByRole('textbox')).toBeNull();
+  });
+
   it('says "advance outstanding" when the balance is negative', async () => {
     server.use(
       ...base(

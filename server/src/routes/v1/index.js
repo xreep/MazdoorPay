@@ -9,11 +9,13 @@ import wageRoutes from './wages.js';
 import dashboardRoutes from './dashboard.js';
 import reportRoutes from './reports.js';
 import adminRoutes from './admin.js';
+import statementRoutes from './statements.js';
 
 const router = Router();
 const contractor = [requireAuth, requireRole('contractor')];
 
 router.use('/auth', authRoutes);
+router.use('/statements', statementRoutes);
 router.use('/sites', contractor, siteRoutes);
 router.use('/workers', contractor, workerRoutes);
 router.use('/attendance', contractor, attendanceRoutes);

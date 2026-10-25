@@ -18,6 +18,7 @@ const TEXT = {
     due: (amount) => `Balance due: ${amount}`,
     advance: (amount) => `Advance still to recover: ${amount}`,
     settled: 'All settled',
+    statement: 'See your attendance, wages and payments any time on this link:',
   },
   hi: {
     locale: 'hi-IN',
@@ -33,6 +34,7 @@ const TEXT = {
     due: (amount) => `बाकी: ${amount}`,
     advance: (amount) => `एडवांस बाकी: ${amount}`,
     settled: 'पूरा हिसाब बराबर',
+    statement: 'अपनी हाज़िरी, मज़दूरी और भुगतान कभी भी इस लिंक पर देखें:',
   },
 };
 
@@ -107,4 +109,9 @@ export function weeklySummaryMessage({
     owed > 0 ? text.due(formatINR(owed)) : owed < 0 ? text.advance(formatINR(-owed)) : text.settled,
     `— ${contractorName}`,
   ].join('\n');
+}
+
+export function statementMessage({ worker, url, contractorName }) {
+  const text = textFor(worker);
+  return [text.hello(worker.name), text.statement, url, `— ${contractorName}`].join('\n');
 }

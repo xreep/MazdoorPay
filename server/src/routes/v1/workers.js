@@ -10,6 +10,7 @@ import {
 } from '@mazdoorpay/shared';
 import { validate } from '../../middleware/validate.js';
 import * as ctrl from '../../controllers/worker.controller.js';
+import * as statement from '../../controllers/statement.controller.js';
 
 const router = Router();
 const byId = validate({ params: idParamSchema });
@@ -27,6 +28,9 @@ router.post(
   ctrl.changeRate
 );
 router.post('/:id/card/replace', byId, ctrl.replaceCard);
+router.get('/:id/statement-link', byId, statement.status);
+router.post('/:id/statement-link', byId, statement.create);
+router.delete('/:id/statement-link', byId, statement.revoke);
 router.post('/:id/deactivate', byId, ctrl.deactivate);
 router.post('/:id/reactivate', byId, ctrl.reactivate);
 

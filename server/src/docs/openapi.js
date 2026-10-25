@@ -123,6 +123,27 @@ const ROUTES = [
     { query: s.workerCardsQuerySchema },
   ],
   [
+    'get',
+    '/workers/{id}/statement-link',
+    'Workers',
+    "Whether the worker's statement link is active, and when it was last opened",
+  ],
+  [
+    'post',
+    '/workers/{id}/statement-link',
+    'Workers',
+    'Make a private statement link for the worker (replaces the old one; shown once)',
+    { created: true },
+  ],
+  ['delete', '/workers/{id}/statement-link', 'Workers', "Stop the worker's statement link"],
+  [
+    'get',
+    '/statements/{token}',
+    'Statements',
+    "A worker's own balance and last 90 days, opened from their private link",
+    { auth: false, errors: { 404: 'The link was stopped, replaced or never existed' } },
+  ],
+  [
     'post',
     '/workers/{id}/card/replace',
     'Workers',
