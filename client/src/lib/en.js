@@ -410,6 +410,10 @@ export const en = {
       hint: 'UPI and bank payments that carry a UTR or reference',
     },
   },
+  whatsapp: {
+    sendReceipt: 'Send on WhatsApp',
+    sendWeek: 'Send week on WhatsApp',
+  },
   print: {
     receiptTitle: 'Payment receipt',
     receiptNo: 'Receipt no. {no}',

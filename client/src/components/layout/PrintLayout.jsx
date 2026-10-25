@@ -4,7 +4,7 @@ import { useT } from '../../lib/i18n.jsx';
 import { Logo } from './Logo.jsx';
 
 // A plain sheet for printing or saving as PDF: no app chrome, black on white.
-export function PrintLayout({ title, subtitle, meta, landscape = false, children }) {
+export function PrintLayout({ title, subtitle, meta, landscape = false, actions, children }) {
   const t = useT();
   useEffect(() => {
     document.title = `${title} · MazdoorPay`;
@@ -21,14 +21,17 @@ export function PrintLayout({ title, subtitle, meta, landscape = false, children
           <ArrowLeft className="h-5 w-5" aria-hidden="true" />
           {t('print.back')}
         </button>
-        <button
-          type="button"
-          onClick={() => window.print()}
-          className="inline-flex h-11 items-center gap-2 rounded-control bg-brand px-4 font-semibold text-ink"
-        >
-          <Printer className="h-5 w-5" aria-hidden="true" />
-          {t('print.print')}
-        </button>
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          {actions}
+          <button
+            type="button"
+            onClick={() => window.print()}
+            className="inline-flex h-11 items-center gap-2 rounded-control bg-brand px-4 font-semibold text-ink"
+          >
+            <Printer className="h-5 w-5" aria-hidden="true" />
+            {t('print.print')}
+          </button>
+        </div>
       </div>
       <main className="mx-auto max-w-[1100px] px-6 py-8 print:max-w-none print:p-0">
         <header className="mb-6 flex items-start justify-between gap-6 border-b-2 border-black pb-4">

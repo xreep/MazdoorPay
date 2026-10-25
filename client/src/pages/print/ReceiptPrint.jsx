@@ -3,6 +3,8 @@ import { formatINR } from '@mazdoorpay/shared';
 import { useT } from '../../lib/i18n.jsx';
 import { formatDayLong } from '../../lib/format.js';
 import { PrintLayout } from '../../components/layout/PrintLayout.jsx';
+import { WhatsAppLink } from '../../components/ui/WhatsAppLink.jsx';
+import { receiptMessage } from '../../lib/whatsapp.js';
 import { SkeletonRows } from '../../components/ui/Skeleton.jsx';
 import { QueryError } from '../../components/ui/QueryError.jsx';
 import { usePayment } from '../../features/payments/usePayments.js';
@@ -39,6 +41,18 @@ export default function ReceiptPrint() {
       title={t('print.receiptTitle')}
       subtitle={t('print.receiptNo', { no: payment._id.slice(-8).toUpperCase() })}
       meta={contractor.phone ? `${contractor.name} · ${contractor.phone}` : contractor.name}
+      actions={
+        !voided &&
+        worker && (
+          <WhatsAppLink
+            phone={worker.phone}
+            message={receiptMessage({ payment, worker, contractor })}
+            className="h-11 px-4"
+          >
+            {t('whatsapp.sendReceipt')}
+          </WhatsAppLink>
+        )
+      }
     >
       <div className="relative mx-auto max-w-md">
         {voided && (

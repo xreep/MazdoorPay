@@ -2,8 +2,11 @@ import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { HandCoins, IndianRupee, Pencil, Phone, Power, UserX } from 'lucide-react';
-import { formatINR } from '@mazdoorpay/shared';
+import { formatINR, todayIST } from '@mazdoorpay/shared';
 import { useT } from '../lib/i18n.jsx';
+import { useAuth } from '../auth/AuthProvider.jsx';
+import { weeklySummaryMessage } from '../lib/whatsapp.js';
+import { WhatsAppLink } from '../components/ui/WhatsAppLink.jsx';
 import { formatDay, initials } from '../lib/format.js';
 import { PageHeader } from '../components/layout/PageHeader.jsx';
 import { Button } from '../components/ui/Button.jsx';
@@ -66,6 +69,7 @@ function Detail({ label, children }) {
 export default function WorkerProfilePage() {
   const t = useT();
   const { id } = useParams();
+  const { user } = useAuth();
   const { data, isPending, isError, error, refetch } = useWorkerSummary(id);
   const setActive = useSetWorkerActive();
   const [editOpen, setEditOpen] = useState(false);
@@ -143,6 +147,19 @@ export default function WorkerProfilePage() {
               <HandCoins className="h-5 w-5" aria-hidden="true" />
               {t('dashboard.recordPayment')}
             </Link>
+            <WhatsAppLink
+              phone={worker.phone}
+              message={weeklySummaryMessage({
+                worker,
+                contractorName: user.name,
+                today: todayIST(),
+                attendance: recentAttendance,
+                payments: recentPayments,
+                balance,
+              })}
+            >
+              {t('whatsapp.sendWeek')}
+            </WhatsAppLink>
             <Button variant="secondary" onClick={() => setEditOpen(true)}>
               <Pencil className="h-4 w-4" aria-hidden="true" />
               {t('common.edit')}

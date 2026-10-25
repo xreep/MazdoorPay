@@ -70,6 +70,19 @@ describe('WorkerProfilePage', () => {
     );
   });
 
+  it("offers this week's summary on WhatsApp, written in the worker's language", async () => {
+    server.use(...base());
+    render();
+    const link = await screen.findByRole('link', { name: 'Send week on WhatsApp' });
+    const url = new URL(link.getAttribute('href'));
+    expect(url.origin + url.pathname).toBe('https://wa.me/919876543210');
+    const text = url.searchParams.get('text');
+    expect(text.split('\n')[0]).toBe('नमस्ते Ramesh Kumar,');
+    expect(text).toMatch('बाकी: ₹1,400');
+    expect(text).toMatch('— Ravi Kumar');
+    expect(link).toHaveAttribute('target', '_blank');
+  });
+
   it('says "advance outstanding" when the balance is negative', async () => {
     server.use(
       ...base(

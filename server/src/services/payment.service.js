@@ -178,7 +178,7 @@ export async function getPayment(contractorId, paymentId) {
   const payment = await Payment.findOne({ _id: paymentId, contractorId }).lean();
   if (!payment) throw httpError(404, 'Payment not found');
   const [worker, site, contractor] = await Promise.all([
-    Worker.findById(payment.workerId).select('name role phone upiId').lean(),
+    Worker.findById(payment.workerId).select('name role phone upiId preferredLanguage').lean(),
     payment.siteId ? Site.findById(payment.siteId).select('name location').lean() : null,
     User.findById(contractorId).select('name phone').lean(),
   ]);

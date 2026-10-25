@@ -202,7 +202,12 @@ describe('reading', () => {
     const p = (await pay(a.api, { amount: 50000 })).body.payment;
     const res = await a.api.get(`/api/v1/payments/${p._id}`);
     expect(res.status).toBe(200);
-    expect(res.body.worker).toMatchObject({ name: 'Ramesh Yadav', role: 'mason' });
+    // The worker's language picks the language of the WhatsApp receipt message.
+    expect(res.body.worker).toMatchObject({
+      name: 'Ramesh Yadav',
+      role: 'mason',
+      preferredLanguage: expect.stringMatching(/^(en|hi)$/),
+    });
     expect(res.body.site).toMatchObject({ name: 'Prestige Lakeside' });
     expect(res.body.contractor).toEqual({ name: 'Ravi Kumar', phone: '9800000001' });
   });
