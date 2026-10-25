@@ -5,7 +5,7 @@ import { formatDay } from '../../lib/format.js';
 const CELL = {
   present: 'bg-present text-white',
   'half-day': 'bg-half text-white',
-  absent: 'bg-absent/25 text-absent',
+  absent: 'bg-absent-soft text-absent',
 };
 const STATUS_KEY = {
   present: 'status.present',
@@ -59,7 +59,7 @@ export function WorkerCalendar({ records, days = 60 }) {
           {t('status.halfDay')}
         </li>
         <li className="flex items-center gap-1.5">
-          <span className="h-3 w-3 rounded-sm bg-absent/25" />
+          <span className="h-3 w-3 rounded-sm bg-absent-soft ring-1 ring-absent/40" />
           {t('status.absent')}
         </li>
         <li className="flex items-center gap-1.5">

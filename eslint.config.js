@@ -38,6 +38,10 @@ export default [
     },
   },
   {
+    files: ['e2e/**/*.js', 'playwright.config.js'],
+    languageOptions: { globals: { ...globals.node, ...globals.browser } },
+  },
+  {
     files: ['client/**/*.test.{js,jsx}', 'client/src/test/**'],
     languageOptions: { globals: { ...globals.browser, ...globals.node } },
   },

@@ -222,7 +222,9 @@ describe('AttendancePage', () => {
     await userEvent.click(await screen.findByRole('tab', { name: 'Calendar' }));
     const month = todayIST().slice(0, 7);
     expect(
-      await screen.findByLabelText(new RegExp(`^1 .*: 12 present, 1 half-day, 3 absent`))
+      await screen.findByRole('button', {
+        name: new RegExp(`^1 .*: 12 present, 1 half-day, 3 absent`),
+      })
     ).toBeInTheDocument();
     expect(month).toBeTruthy();
   });

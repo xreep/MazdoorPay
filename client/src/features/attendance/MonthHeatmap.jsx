@@ -82,16 +82,18 @@ export function MonthHeatmap({ siteId, onPickDay }) {
                 <li key={d.day}>
                   <button
                     type="button"
-                    aria-label={label}
                     title={label}
                     disabled={future}
                     onClick={() => onPickDay(d.day)}
                     className={`num flex aspect-square w-full flex-col items-center justify-center rounded-control text-sm font-semibold transition hover:ring-2 hover:ring-ink/30 disabled:opacity-30 ${shade(d)} ${d.day === today ? 'ring-2 ring-ink' : ''}`}
                   >
-                    <span>{Number(d.day.slice(8))}</span>
+                    <span aria-hidden="true">{Number(d.day.slice(8))}</span>
                     {d.marked > 0 && (
-                      <span className="text-[0.65rem] font-medium opacity-90">{d.present}</span>
+                      <span aria-hidden="true" className="text-[0.65rem] font-medium opacity-90">
+                        {d.present}
+                      </span>
                     )}
+                    <span className="sr-only">{label}</span>
                   </button>
                 </li>
               );
