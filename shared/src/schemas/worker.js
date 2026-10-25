@@ -33,6 +33,7 @@ export const workerUpdateSchema = z.object({
   upiId: profileFields.upiId,
   siteId: profileFields.siteId,
   preferredLanguage: profileFields.preferredLanguage,
+  joinedOn: daySchema.optional(),
 });
 
 export const rateChangeSchema = z.object({

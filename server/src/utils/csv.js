@@ -3,11 +3,13 @@
 const BOM = String.fromCharCode(0xfeff);
 const FORMULA_START = /^[=+\-@\t\r]/;
 const NEEDS_QUOTES = /[",\r\n]/;
+// Plain numbers (including negatives such as an advance balance) stay numeric.
+const PLAIN_NUMBER = /^-?\d+(\.\d+)?$/;
 
 const cell = (value) => {
   if (value === null || value === undefined) return '';
   let text = String(value);
-  if (FORMULA_START.test(text)) text = `'${text}`;
+  if (FORMULA_START.test(text) && !PLAIN_NUMBER.test(text)) text = `'${text}`;
   return NEEDS_QUOTES.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
 };
 

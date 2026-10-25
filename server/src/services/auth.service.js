@@ -12,6 +12,8 @@ const INVALID_LOGIN = 'Email or password is incorrect';
 export const SESSION_EXPIRED = 'Please log in again';
 export const SUSPENDED = 'Your account is suspended';
 const DAY_MS = 24 * 60 * 60 * 1000;
+// A cookie rotated this recently is a parallel request from the same browser, not a stolen copy.
+const REUSE_GRACE_MS = 30 * 1000;
 
 // Compared against when the email is unknown, so both failures take the same time.
 let dummyHash;
@@ -122,6 +124,9 @@ export async function refresh(raw) {
 
   // A rotated token coming back means it was copied: end that whole session.
   if (current.revokedAt) {
+    if (current.replacedByHash && Date.now() - current.revokedAt.getTime() < REUSE_GRACE_MS) {
+      throw Object.assign(httpError(401, SESSION_EXPIRED), { keepCookie: true });
+    }
     await revokeFamily(current.family);
     throw httpError(401, SESSION_EXPIRED);
   }
@@ -138,7 +143,7 @@ export async function refresh(raw) {
     { _id: current._id, revokedAt: null },
     { revokedAt: new Date(), replacedByHash: hashToken(next) }
   );
-  if (!claimed) throw httpError(401, SESSION_EXPIRED);
+  if (!claimed) throw Object.assign(httpError(401, SESSION_EXPIRED), { keepCookie: true });
 
   await RefreshToken.create({
     userId: user._id,
@@ -161,11 +166,23 @@ export async function getMe(userId) {
   return publicUser(user);
 }
 
-export async function updateMe(userId, changes) {
+export async function updateMe(userId, changes, { ip } = {}) {
+  const before = await User.findById(userId).lean();
+  if (!before) throw httpError(401, SESSION_EXPIRED);
   const user = await User.findByIdAndUpdate(userId, changes, {
     new: true,
     runValidators: true,
   }).lean();
-  if (!user) throw httpError(401, SESSION_EXPIRED);
+  const fields = Object.keys(changes);
+  await recordAudit({
+    actor: { id: user._id, role: user.role },
+    contractorId: user.role === 'contractor' ? user._id : undefined,
+    action: 'user.update',
+    entity: 'User',
+    entityId: user._id,
+    before: Object.fromEntries(fields.map((f) => [f, before[f]])),
+    after: Object.fromEntries(fields.map((f) => [f, user[f]])),
+    ip,
+  });
   return publicUser(user);
 }

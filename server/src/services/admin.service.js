@@ -1,4 +1,4 @@
-import { PATTERNS, addDays, todayIST, weekStart } from '@mazdoorpay/shared';
+import { PATTERNS, addDays, eachDay, todayIST, weekStart } from '@mazdoorpay/shared';
 import { User } from '../models/User.js';
 import { Site } from '../models/Site.js';
 import { Worker } from '../models/Worker.js';
@@ -10,6 +10,7 @@ import { pageResult, skipFor } from '../utils/pagination.js';
 import { recordAudit } from './audit.service.js';
 import { revokeAllForUser } from './auth.service.js';
 import { getDues } from './payment.service.js';
+import { getBalances } from './ledger.service.js';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const IST_OFFSET_MS = 330 * 60 * 1000;
@@ -404,4 +405,61 @@ export async function getKpis() {
     paymentAccuracyPct: pct(accurate.length, payments.length),
     digitalReferencePct: pct(digital.filter((p) => p.reference).length, digital.length),
   };
+}
+
+// Platform activity per IST day: audit entries written and distinct contractors acting.
+export async function getDailyActivity({ days }) {
+  const today = todayIST();
+  const from = addDays(today, -(days - 1));
+  const rows = await AuditLog.aggregate([
+    { $match: { at: { $gte: istMidnight(from) } } },
+    {
+      $group: {
+        _id: istDayExpr('$at'),
+        actions: { $sum: 1 },
+        contractors: {
+          $addToSet: { $cond: [{ $eq: ['$actorRole', 'contractor'] }, '$actorId', '$$REMOVE'] },
+        },
+      },
+    },
+  ]);
+  const byDay = new Map(rows.map((r) => [r._id, r]));
+  return {
+    days: eachDay(from, today).map((day) => ({
+      day,
+      actions: byDay.get(day)?.actions ?? 0,
+      activeContractors: byDay.get(day)?.contractors.length ?? 0,
+    })),
+  };
+}
+
+const maskPhone = (phone) => (phone ? `${phone.slice(0, 2)}******${phone.slice(-2)}` : null);
+const maskUpi = (upi) => {
+  if (!upi) return null;
+  const [name, bank] = upi.split('@');
+  return `${name.slice(0, 2)}****@${bank}`;
+};
+
+// Read-only view of a contractor's workers for admins; contact details are masked.
+export async function listContractorWorkers(userId, { status, page, limit }) {
+  if (!(await User.exists({ _id: userId }))) throw httpError(404, 'User not found');
+  const filter = { contractorId: userId };
+  if (status !== 'all') filter.isActive = status === 'active';
+  const [workers, total] = await Promise.all([
+    Worker.find(filter)
+      .select('name role dailyRate siteId phone upiId joinedOn isActive')
+      .sort({ name: 1, _id: 1 })
+      .skip(skipFor({ page, limit }))
+      .limit(limit)
+      .lean(),
+    Worker.countDocuments(filter),
+  ]);
+  const balances = await getBalances(userId, { workerIds: workers.map((w) => w._id) });
+  const data = workers.map((w) => ({
+    ...w,
+    phone: maskPhone(w.phone),
+    upiId: maskUpi(w.upiId),
+    balance: balances.get(String(w._id)).balance,
+  }));
+  return pageResult(data, total, { page, limit });
 }

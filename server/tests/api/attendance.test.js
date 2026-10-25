@@ -81,6 +81,10 @@ describe('marking', () => {
     expect(entry.before).toMatchObject({ status: 'present' });
     expect(entry.after).toMatchObject({ status: 'absent', day: today });
     expect(await Attendance.countDocuments()).toBe(1);
+    const created = await AuditLog.findOne({ action: 'attendance.create' }).lean();
+    const record = await Attendance.findOne().lean();
+    expect(String(created.entityId)).toBe(String(record._id));
+    expect(String(entry.entityId)).toBe(String(record._id));
   });
 
   it('uses the IST day for "today" (Review Focus 1)', async () => {

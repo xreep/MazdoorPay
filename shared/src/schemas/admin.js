@@ -29,3 +29,11 @@ export const activityQuerySchema = paginationSchema
   .superRefine(checkDateRange);
 
 export const kpiQuerySchema = z.object({ format: z.enum(['json', 'csv']).default('json') });
+
+export const dailyActivityQuerySchema = z.object({
+  days: z.coerce.number().int().min(1).max(366).default(30),
+});
+
+export const adminWorkerListQuerySchema = paginationSchema.extend({
+  status: z.enum(['active', 'inactive', 'all']).default('all'),
+});

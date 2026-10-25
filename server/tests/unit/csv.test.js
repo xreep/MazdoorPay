@@ -9,7 +9,7 @@ describe('toCsv', () => {
     expect(csv.startsWith('﻿Name\r\n')).toBe(true);
     expect(csv).toContain(`"'=HYPERLINK(""http://x"")"`);
     expect(csv).toContain(`"Ram, ""Raju""\nKumar"`);
-    expect(csv).toContain(`'-5`);
+    expect(csv.endsWith('\r\n-5')).toBe(true);
   });
 
   it('prefixes every dangerous leading character', () => {
@@ -18,6 +18,16 @@ describe('toCsv', () => {
       .slice(1)
       .split('\r\n');
     expect(lines).toEqual(['N', "'+1", "'@SUM(A1)", "'\tx", `"'\rx"`, 'plain']);
+  });
+
+  it('keeps negative numbers numeric but still guards negative-looking text', () => {
+    const lines = toCsv(
+      [{ key: 'n', header: 'N' }],
+      [{ n: '-500.00' }, { n: -5 }, { n: '-2+3' }, { n: '-' }]
+    )
+      .slice(1)
+      .split('\r\n');
+    expect(lines).toEqual(['N', '-500.00', '-5', "'-2+3", "'-"]);
   });
 
   it('renders empty values and multiple columns with CRLF', () => {

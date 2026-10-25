@@ -10,6 +10,7 @@ import {
   DEFAULT_PASSWORD,
 } from '../helpers/factory.js';
 import { User } from '../../src/models/User.js';
+import { RefreshToken } from '../../src/models/RefreshToken.js';
 
 useTestDb();
 
@@ -103,12 +104,26 @@ describe('login and refresh', () => {
     expect((await refreshWith(first)).status).toBe(401);
   });
 
-  it('reusing a rotated token revokes the whole family', async () => {
+  it('reusing a rotated token after the grace window revokes the whole family', async () => {
     const { user } = await registerContractor();
     const a = cookieValue(await login(user.email, DEFAULT_PASSWORD));
     const b = cookieValue(await refreshWith(a));
+    await RefreshToken.updateMany(
+      { revokedAt: { $ne: null } },
+      { revokedAt: new Date(Date.now() - 60_000) }
+    );
     expect((await refreshWith(a)).status).toBe(401);
     expect((await refreshWith(b)).status).toBe(401);
+  });
+
+  it('a stale cookie inside the grace window (two tabs) keeps the session alive', async () => {
+    const { user } = await registerContractor();
+    const a = cookieValue(await login(user.email, DEFAULT_PASSWORD));
+    const b = cookieValue(await refreshWith(a));
+    const late = await refreshWith(a);
+    expect(late.status).toBe(401);
+    expect(late.headers['set-cookie']).toBeUndefined();
+    expect((await refreshWith(b)).status).toBe(200);
   });
 
   it('sessions are independent families', async () => {
@@ -174,6 +189,15 @@ describe('login and refresh', () => {
 });
 
 describe('me', () => {
+  it('PATCH /auth/me is audited', async () => {
+    const { token, user } = await registerContractor();
+    await authed(token).patch('/api/v1/auth/me', { name: 'Ravi K' });
+    const { AuditLog } = await import('../../src/models/AuditLog.js');
+    const entry = await AuditLog.findOne({ action: 'user.update' }).lean();
+    expect(String(entry.entityId)).toBe(user._id);
+    expect(entry.after).toMatchObject({ name: 'Ravi K' });
+  });
+
   it('GET /auth/me never returns passwordHash', async () => {
     const { token, user } = await registerContractor({ phone: '9876543210' });
     const res = await authed(token).get('/api/v1/auth/me');

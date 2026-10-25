@@ -131,6 +131,18 @@ describe('request hardening', () => {
     expect(blocked.body.error).toMatch(/Too many requests/);
   });
 
+  it('refresh and me are not counted by the strict auth limiter', async () => {
+    const limited = createApp({ authRateLimitMax: 2 });
+    for (let i = 0; i < 5; i++)
+      expect((await request(limited).post('/api/v1/auth/refresh')).status).toBe(401);
+    for (let i = 0; i < 5; i++)
+      expect((await request(limited).get('/api/v1/auth/me')).status).toBe(401);
+  });
+
+  it('trust proxy is configurable', () => {
+    expect(createApp({ trustProxy: 2 }).get('trust proxy')).toBe(2);
+  });
+
   it('errors never include stack traces', async () => {
     const res = await request(app())
       .post('/api/v1/auth/login')

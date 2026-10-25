@@ -16,6 +16,7 @@ const schema = z.object({
   LOGIN_LOCKOUT_MINUTES: intFrom(15),
   RATE_LIMIT_MAX: intFrom(300),
   AUTH_RATE_LIMIT_MAX: intFrom(30),
+  TRUST_PROXY: z.coerce.number().int().min(0).default(1),
   QR_SECRET: z.string().min(16, 'QR_SECRET must be at least 16 characters'),
 });
 
@@ -64,6 +65,7 @@ export function loadConfig(source = process.env) {
     rateLimitMax: env.RATE_LIMIT_MAX,
     authRateLimitMax: env.AUTH_RATE_LIMIT_MAX,
     qrSecret: env.QR_SECRET,
+    trustProxy: env.TRUST_PROXY,
   };
 }
 

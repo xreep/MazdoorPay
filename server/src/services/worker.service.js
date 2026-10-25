@@ -102,7 +102,9 @@ export async function updateWorker(ctx, workerId, changes) {
   const worker = await findOwnedWorker(ctx.contractorId, workerId);
   await assertOwnedSite(ctx.contractorId, changes.siteId);
   const before = pick(worker, AUDIT_FIELDS);
-  worker.set(changes);
+  const { joinedOn, ...profile } = changes;
+  if (joinedOn && joinedOn !== worker.joinedOn) await moveJoinDate(worker, joinedOn);
+  worker.set(profile);
   await worker.save();
   await recordAudit({
     ...ctx,
@@ -115,6 +117,26 @@ export async function updateWorker(ctx, workerId, changes) {
   return serializeWorker(worker);
 }
 
+// Corrects a mistyped joining date. The first rate entry moves with it, so it must stay
+// before any later rate change and after no existing attendance or payment.
+async function moveJoinDate(worker, joinedOn) {
+  const fail = (message) => httpError(400, message, [{ path: 'joinedOn', message }]);
+  if (joinedOn > todayIST()) throw fail('Joining date cannot be in the future');
+  const [first, ...later] = [...worker.rateHistory].sort((x, y) =>
+    x.effectiveFrom.localeCompare(y.effectiveFrom)
+  );
+  if (later.length && joinedOn >= later[0].effectiveFrom)
+    throw fail(`Joining date must be before the rate change on ${later[0].effectiveFrom}`);
+  const earlier = { workerId: worker._id, day: { $lt: joinedOn } };
+  const [attendance, payment] = await Promise.all([
+    Attendance.exists(earlier),
+    Payment.exists({ ...earlier, voidedAt: null }),
+  ]);
+  if (attendance || payment) throw fail('This worker has attendance or payments before that date');
+  first.effectiveFrom = joinedOn;
+  worker.joinedOn = joinedOn;
+}
+
 // Adds a rate starting on `effectiveFrom` and re-prices days already marked from then on.
 export async function changeRate(ctx, workerId, { dailyRate, effectiveFrom }) {
   const today = todayIST();
@@ -124,15 +146,20 @@ export async function changeRate(ctx, workerId, { dailyRate, effectiveFrom }) {
   await mongoose.connection.transaction(async (session) => {
     const worker = await findOwnedWorker(ctx.contractorId, workerId, { session });
     const latest = latestRateEntry(worker);
-    if (from <= latest.effectiveFrom || from > today) {
+    if (from < latest.effectiveFrom || from > today) {
       throw httpError(
         400,
-        `New rate must start after ${latest.effectiveFrom} and not in the future`,
+        `New rate must start on or after ${latest.effectiveFrom} and not in the future`,
         [{ path: 'effectiveFrom', message: 'Pick a later date' }]
       );
     }
     const before = { dailyRate: worker.dailyRate };
-    worker.rateHistory.push({ rate: dailyRate, effectiveFrom: from, setBy: ctx.actor.id });
+    if (from === latest.effectiveFrom) {
+      // Same start day: this corrects the latest rate (e.g. a typo) instead of adding one.
+      latest.set({ rate: dailyRate, setAt: new Date(), setBy: ctx.actor.id });
+    } else {
+      worker.rateHistory.push({ rate: dailyRate, effectiveFrom: from, setBy: ctx.actor.id });
+    }
     worker.dailyRate = dailyRate;
     worker.ledgerVersion += 1;
     await worker.save({ session });

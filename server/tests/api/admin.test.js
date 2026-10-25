@@ -177,6 +177,26 @@ it('activity filters by action and contractor', async () => {
   expect(none.body.total).toBe(0);
 });
 
+it('daily activity counts actions and active contractors per IST day', async () => {
+  const res = await admin.api.get('/api/v1/admin/activity/daily?days=7');
+  expect(res.status).toBe(200);
+  expect(res.body.days).toHaveLength(7);
+  const today = res.body.days.at(-1);
+  expect(today.actions).toBeGreaterThanOrEqual(5);
+  expect(today.activeContractors).toBe(1);
+  expect((await admin.api.get('/api/v1/admin/activity/daily?days=400')).status).toBe(400);
+});
+
+it("admin can list a contractor's workers read-only with masked contact details", async () => {
+  await Worker.updateOne({ _id: fx.w1._id }, { phone: '9876543210', upiId: 'ramesh@oksbi' });
+  const res = await admin.api.get(`/api/v1/admin/users/${fx.user._id}/workers`);
+  expect(res.status).toBe(200);
+  expect(res.body.total).toBe(2);
+  const ramesh = res.body.data.find((w) => w.name === 'Ramesh Yadav');
+  expect(ramesh).toMatchObject({ phone: '98******10', upiId: 'ra****@oksbi', balance: 197500 });
+  expect(JSON.stringify(res.body)).not.toMatch(/9876543210|ramesh@oksbi/);
+});
+
 describe('anomalies', () => {
   it('a clean dataset has none', async () => {
     const res = await admin.api.get('/api/v1/admin/anomalies');

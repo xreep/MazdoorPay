@@ -15,7 +15,8 @@ export function createApp(overrides = {}) {
   const settings = { ...config, ...overrides };
   const app = express();
 
-  app.set('trust proxy', 1);
+  // Number of proxy hops in front of the API (Render = 1; Vercel rewrite → Render = 2).
+  app.set('trust proxy', settings.trustProxy);
   app.disable('x-powered-by');
 
   app.use(helmet());
@@ -32,7 +33,11 @@ export function createApp(overrides = {}) {
   if (!settings.isTest) app.use(morgan(settings.isProd ? 'combined' : 'dev'));
 
   app.use('/api', createGlobalLimiter(settings.rateLimitMax));
-  app.use('/api/v1/auth', createAuthLimiter(settings.authRateLimitMax));
+  // The strict limiter guards password guessing only; refresh and me use the global one.
+  app.use(
+    ['/api/v1/auth/login', '/api/v1/auth/register'],
+    createAuthLimiter(settings.authRateLimitMax)
+  );
 
   app.get('/api/v1/health', (_req, res) => {
     const connected = mongoose.connection.readyState === 1;

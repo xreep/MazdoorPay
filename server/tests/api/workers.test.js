@@ -95,23 +95,45 @@ describe('read and update', () => {
     expect(res.body.site).toMatchObject({ _id: siteA._id, name: 'Prestige Lakeside' });
   });
 
-  it('PATCH changes profile fields but never the rate or joining date', async () => {
+  it('PATCH changes profile fields but never the rate', async () => {
     const w = (await newWorker(a.api)).body.worker;
     const res = await a.api.patch(`/api/v1/workers/${w._id}`, {
       name: 'Ramesh K Yadav',
       dailyRate: 99999,
-      joinedOn: '2020-01-01',
       phone: '9876543210',
     });
     expect(res.status).toBe(200);
     expect(res.body.worker).toMatchObject({
       name: 'Ramesh K Yadav',
       dailyRate: 80000,
-      joinedOn: w.joinedOn,
       phone: '9876543210',
     });
     const unassign = await a.api.patch(`/api/v1/workers/${w._id}`, { siteId: null });
     expect(unassign.body.worker.siteId).toBeNull();
+  });
+
+  it('PATCH joinedOn moves the first rate entry and is blocked by earlier records', async () => {
+    const joined = addDays(todayIST(), -10);
+    const w = (await newWorker(a.api, { joinedOn: joined })).body.worker;
+    const earlier = addDays(todayIST(), -20);
+    const moved = await a.api.patch(`/api/v1/workers/${w._id}`, { joinedOn: earlier });
+    expect(moved.status).toBe(200);
+    expect(moved.body.worker.joinedOn).toBe(earlier);
+    expect(moved.body.worker.rateHistory[0].effectiveFrom).toBe(earlier);
+    const marked = await a.api.put('/api/v1/attendance', {
+      day: addDays(todayIST(), -15),
+      records: [{ workerId: w._id, status: 'present' }],
+      reason: 'Late entry',
+    });
+    expect(marked.body.saved).toBe(1);
+    const blocked = await a.api.patch(`/api/v1/workers/${w._id}`, {
+      joinedOn: addDays(todayIST(), -5),
+    });
+    expect(blocked.status).toBe(400);
+    expect(blocked.body.error).toBe('This worker has attendance or payments before that date');
+    expect(
+      (await a.api.patch(`/api/v1/workers/${w._id}`, { joinedOn: addDays(todayIST(), 1) })).status
+    ).toBe(400);
   });
 
   it('deactivate and reactivate', async () => {
@@ -145,16 +167,45 @@ describe('rate changes', () => {
       }))
     );
 
-  it('rejects effectiveFrom on/before the latest entry or in the future', async () => {
+  it('rejects effectiveFrom before the latest entry or in the future', async () => {
     const w = (await newWorker(a.api, { joinedOn: joined, dailyRate: 45000 })).body.worker;
-    for (const effectiveFrom of [joined, addDays(joined, -1), addDays(today, 1)]) {
+    for (const effectiveFrom of [addDays(joined, -1), addDays(today, 1)]) {
       const res = await a.api.post(`/api/v1/workers/${w._id}/rate`, {
         dailyRate: 50000,
         effectiveFrom,
       });
       expect(res.status).toBe(400);
-      expect(res.body.error).toBe(`New rate must start after ${joined} and not in the future`);
+      expect(res.body.error).toBe(
+        `New rate must start on or after ${joined} and not in the future`
+      );
     }
+  });
+
+  it('a same-day rate change corrects the latest entry and re-prices from it', async () => {
+    const w = (await newWorker(a.api, { joinedOn: joined, dailyRate: 45000 })).body.worker;
+    await seedAttendance(w, [
+      [-30, 'present'],
+      [-2, 'half-day'],
+    ]);
+    const res = await a.api.post(`/api/v1/workers/${w._id}/rate`, {
+      dailyRate: 54000,
+      effectiveFrom: joined,
+    });
+    expect(res.status).toBe(200);
+    expect(res.body.repricedDays).toBe(2);
+    expect(res.body.worker.rateHistory.map((h) => [h.rate, h.effectiveFrom])).toEqual([
+      [54000, joined],
+    ]);
+    const rows = await Attendance.find({ workerId: w._id }).sort({ day: 1 }).lean();
+    expect(rows.map((r) => r.earned)).toEqual([54000, 27000]);
+  });
+
+  it('a worker added today can have a typo in the rate fixed today', async () => {
+    const w = (await newWorker(a.api, { dailyRate: 45000 })).body.worker;
+    const res = await a.api.post(`/api/v1/workers/${w._id}/rate`, { dailyRate: 54000 });
+    expect(res.status).toBe(200);
+    expect(res.body.worker).toMatchObject({ dailyRate: 54000 });
+    expect(res.body.worker.rateHistory).toHaveLength(1);
   });
 
   it('re-prices only days on or after effectiveFrom and reports repricedDays', async () => {

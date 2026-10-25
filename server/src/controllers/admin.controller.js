@@ -19,6 +19,9 @@ export const growth = async (req, res) => res.json(await admin.getGrowth(req.que
 export const users = async (req, res) => res.json(await admin.listUsers(req.query));
 export const user = async (req, res) => res.json(await admin.getUser(req.params.id));
 export const activity = async (req, res) => res.json(await admin.listActivity(req.query));
+export const dailyActivity = async (req, res) => res.json(await admin.getDailyActivity(req.query));
+export const userWorkers = async (req, res) =>
+  res.json(await admin.listContractorWorkers(req.params.id, req.query));
 export const anomalies = async (_req, res) => res.json(await admin.findAnomalies());
 
 export async function suspend(req, res) {

@@ -79,12 +79,17 @@ export async function markAttendance({
       }
       const rateSnapshot = prior?.rateSnapshot ?? rateOn(worker, day);
       const earned = earnedFor(status, rateSnapshot);
+      const recordId = prior?._id ?? new ObjectId();
       ops.push({
         updateOne: {
           filter: { workerId: worker._id, day },
           update: {
             $set: { status, rateSnapshot, earned, method, markedBy: actor.id },
-            $setOnInsert: { contractorId: worker.contractorId, siteId: worker.siteId },
+            $setOnInsert: {
+              _id: recordId,
+              contractorId: worker.contractorId,
+              siteId: worker.siteId,
+            },
           },
           upsert: true,
         },
@@ -96,7 +101,7 @@ export async function markAttendance({
         ip,
         action: prior ? 'attendance.update' : 'attendance.create',
         entity: 'Attendance',
-        entityId: prior?._id,
+        entityId: recordId,
         before: prior ? { status: prior.status, earned: prior.earned } : undefined,
         after: { workerId: worker._id, day, status, earned, method, ...(reason ? { reason } : {}) },
       });
