@@ -10,7 +10,7 @@
     "test": "vitest run"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": "^22.22.2 || >=24.15.0"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^7.0.1",
