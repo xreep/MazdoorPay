@@ -18,6 +18,8 @@ The login page has a **Use** button for each demo account. The demo data has 30 
 | Contractor — Pune and Mumbai, 2 sites | `sunita.patil@mazdoorpay.in` | `Demo@2026`  |
 | Platform admin                        | `admin@mazdoorpay.in`        | `Admin@2026` |
 
+The demo admin sees only the demo accounts, and demo accounts cannot be suspended or locked out, so the logins keep working for everyone.
+
 ## What it does
 
 **For contractors**
@@ -42,10 +44,10 @@ The login page has a **Use** button for each demo account. The demo data has 30 
 
 ## Quality
 
-- **Tests:** 164 API tests (98% line coverage), 125 app tests, and 10 Playwright end-to-end tests covering the full contractor journey, the admin flow, a 15-worker speed check, phone layouts and accessibility scans of every page.
-- **Accessibility:** Lighthouse 100; axe finds no serious or critical issues; 48 px tap targets; status always shown as colour, icon and word.
-- **Performance:** Lighthouse mobile performance 96–98; API p99 under 90 ms on every endpoint under load.
-- **Security:** rotating httpOnly refresh cookies with theft detection, login lockout, role checks on every request, strict per-contractor data isolation, validation on every endpoint, audit log of every write.
+- **Tests:** 179 API tests (98% line coverage), 126 app tests, and 13 Playwright end-to-end runs covering the full contractor journey, the admin flow, the demo admin's limits, the production Content-Security-Policy, a 15-worker speed check, phone layouts at 412 and 360 px, and accessibility scans of every page.
+- **Accessibility:** Lighthouse 100 on the login page; axe finds no serious or critical issues on any of the 17 pages scanned; 48 px tap targets; status always shown as colour, icon and word.
+- **Performance:** Lighthouse mobile performance 96–98 on the login page; in a local load test of six read endpoints, p99 stayed under 90 ms.
+- **Security:** rotating httpOnly refresh cookies with theft detection, login lockout, rate limits a forged proxy header cannot reset, role checks on every request, strict per-contractor data isolation, validation on every endpoint, audit log of every write.
 - **CI:** GitHub Actions runs lint, all test suites, the production build, the dependency audit and the end-to-end tests on every push.
 
 Details and numbers: [docs/TECHNICAL.md](docs/TECHNICAL.md).
@@ -72,7 +74,7 @@ Details and numbers: [docs/TECHNICAL.md](docs/TECHNICAL.md).
 
 ## Run locally
 
-Requires Node.js 20 or newer.
+Requires Node.js 22.22.2 or later (or 24.15 or later); the test tools need it.
 
 ```bash
 npm install

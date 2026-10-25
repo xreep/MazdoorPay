@@ -31,7 +31,7 @@ The repository is an npm workspace with three packages:
 
 1. `helmet`, strict CORS allow-list, compression, 100 kB JSON body limit, cookie parser.
 2. NoSQL-operator sanitising (`$` and `.` keys are stripped from body, query and params).
-3. Rate limits: 300 requests / 15 min per IP on `/api`; 30 / 15 min on login and register.
+3. Rate limits: 300 requests / 15 min per client on `/api`; 30 / 15 min on login and register. Each limit is also counted per nearest proxy hop, at five times the allowance. Behind Vercel → Render the client address comes from `X-Forwarded-For`, which a caller going straight to Render could forge; the address Render itself records cannot be.
 4. `requireAuth` verifies the access token and re-reads the user's role and status from the database on every request; `requireRole` guards contractor and admin routes.
 5. `validate` parses body, query and params with the shared Zod schemas and replaces them with the parsed values (unknown keys are dropped).
 6. Services enforce the domain rules; every write is recorded in the audit log.
@@ -71,7 +71,7 @@ All money is **integer paise** (₹1 = 100). All business days are **`YYYY-MM-DD
 
 - **Register** always creates a contractor; any `role` sent is ignored. Admins are created only by the seed or `npm run create-admin -w server`.
 - **Passwords:** 8–72 characters with a letter and a number, bcrypt cost 12.
-- **Lockout:** 5 failed logins lock that email for 15 minutes (HTTP 423). Wrong email and wrong password return the same message, and unknown emails are compared against a dummy hash so both take the same time.
+- **Lockout:** 5 failed logins lock that email for 15 minutes (HTTP 423). Wrong email and wrong password return the same message, and unknown emails are compared against a dummy hash so both take the same time. Demo accounts are never locked: their passwords are public, so a lockout would only let anyone shut everyone else out of the demo.
 - **Access token:** JWT (HS256), 15 minutes, returned in the response body and kept only in the app's memory.
 - **Refresh token:** 48 random bytes in an httpOnly, SameSite=Lax cookie scoped to `/api/v1/auth` (Secure in production), stored as a SHA-256 hash, valid 7 days, rotated on every refresh.
   - Each login starts a token **family**. Presenting a token that was rotated more than 30 seconds ago is treated as theft and revokes the whole family.
@@ -82,7 +82,7 @@ All money is **integer paise** (₹1 = 100). All business days are **`YYYY-MM-DD
 
 ## 5. API
 
-The full reference is generated from the same Zod schemas the routes validate with: **https://mazdoorpay-api.onrender.com/api/v1/docs/** (raw OpenAPI 3.1 at `/api/v1/docs/openapi.json`).
+Interactive reference: **https://mazdoorpay-api.onrender.com/api/v1/docs/** (raw OpenAPI 3.1 at `/api/v1/docs/openapi.json`). Request bodies and query parameters in it are generated from the same Zod schemas the routes validate with. The route list and each route's status codes are maintained by hand beside them, and a test fails if that list differs from the routes the API serves. Response bodies are described in words, not schemas.
 
 | Module     | Endpoints                                                                                                                                                              |
 | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -100,30 +100,30 @@ CSV exports start with a UTF-8 byte-order mark (so Excel shows ₹ correctly), u
 
 ## 6. Security checklist
 
-| Area                  | Measure                                                                                                                                                                                        |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Passwords             | bcrypt cost 12; length and complexity rules; lockout after 5 failures; unknown emails take as long to reject as wrong passwords                                                                |
-| Sessions              | short-lived access token in memory only; rotating, hashed, httpOnly refresh cookie with family revocation                                                                                      |
-| Authorization         | role re-checked from the database on every request; no API path to create or promote admins; admins cannot suspend themselves or other admins                                                  |
-| Tenant isolation      | every contractor query scoped by `contractorId`; cross-tenant ids return 404; covered by a security test that tries ~20 routes                                                                 |
-| Input                 | Zod validation with unknown keys stripped on every endpoint; NoSQL operator keys removed; 100 kB body limit; ObjectId and calendar-date validation (impossible dates like 30 Feb are rejected) |
-| Transport and headers | Helmet (CSP, nosniff, frame protection), strict CORS allow-list, `x-powered-by` removed, HTTPS on Vercel and Render                                                                            |
-| Rate limiting         | per-IP limits on the API and stricter limits on login and register; the proxy hop count is configurable (`TRUST_PROXY`)                                                                        |
-| Data                  | money as integers; append-only payments with voids; audit log of every write; phone and UPI masked in admin views; secrets only in environment variables                                       |
-| Redirects             | post-login `next` accepts only same-app paths (no `//`, backslashes or control characters)                                                                                                     |
-| Dependencies          | `npm audit --omit=dev` reports 0 vulnerabilities and runs in CI                                                                                                                                |
+| Area                  | Measure                                                                                                                                                                                                                           |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Passwords             | bcrypt cost 12; length and complexity rules; lockout after 5 failures; unknown emails take as long to reject as wrong passwords                                                                                                   |
+| Sessions              | short-lived access token in memory only; rotating, hashed, httpOnly refresh cookie with family revocation                                                                                                                         |
+| Authorization         | role re-checked from the database on every request; no API path to create or promote admins; admins cannot suspend themselves, other admins or the shared demo accounts; the demo admin (public password) sees only demo accounts |
+| Tenant isolation      | every contractor query scoped by `contractorId`; cross-tenant ids return 404; covered by a security test that tries ~20 routes                                                                                                    |
+| Input                 | Zod validation with unknown keys stripped on every endpoint; NoSQL operator keys removed; 100 kB body limit; ObjectId and calendar-date validation (impossible dates like 30 Feb are rejected)                                    |
+| Transport and headers | Helmet on the API and a Content-Security-Policy on the app (Vercel) that allows scripts only from the app's own origin; nosniff, frame protection, strict CORS allow-list, `x-powered-by` removed, HTTPS on Vercel and Render     |
+| Rate limiting         | per-client limits on the API and stricter limits on login and register, also counted per nearest proxy hop so a forged `X-Forwarded-For` cannot reset them; proxy hop count configurable (`TRUST_PROXY`)                          |
+| Data                  | money as integers; append-only payments with voids; audit log of every write; phone and UPI masked in admin views; secrets only in environment variables                                                                          |
+| Redirects             | post-login `next` accepts only same-app paths (no `//`, backslashes or control characters)                                                                                                                                        |
+| Dependencies          | `npm audit --omit=dev` reports 0 vulnerabilities and runs in CI                                                                                                                                                                   |
 
 ## 7. Testing
 
-| Suite                    | Tool                                                 | Count     | What it covers                                                                                                                                                                                                                               |
-| ------------------------ | ---------------------------------------------------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| API unit and integration | Jest, supertest, mongodb-memory-server (replica set) | 164 tests | every route, domain rules, money maths, concurrency races, idempotency, IST midnight boundary, CSV injection, tenant isolation matrix, auth flows, seed, backup and restore, API docs                                                        |
-| App components and pages | Vitest, Testing Library, MSW                         | 125 tests | API client (single-flight refresh, network errors), every page's behaviour, forms and validation, attendance draft and save, payment double-tap protection, colour contrast of the design tokens, tap-target sizes                           |
-| End to end               | Playwright with a production build                   | 10 tests  | the full contractor journey (sign up → site → workers → attendance → wages → payment → receipt), admin suspend and reactivate with the audit log, a 15-worker attendance speed test, phone layout, and axe accessibility scans of every page |
+| Suite                    | Tool                                                 | Count     | What it covers                                                                                                                                                                                                                                                                                                                   |
+| ------------------------ | ---------------------------------------------------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| API unit and integration | Jest, supertest, mongodb-memory-server (replica set) | 179 tests | every route, domain rules, money maths, concurrency races, idempotency, IST midnight boundary, CSV injection, tenant isolation matrix, auth flows, seed, backup and restore, API docs                                                                                                                                            |
+| App components and pages | Vitest, Testing Library, MSW                         | 126 tests | API client (single-flight refresh, network errors), every page's behaviour, forms and validation, attendance draft and save, payment double-tap protection, colour contrast of the design tokens, tap-target sizes                                                                                                               |
+| End to end               | Playwright with a production build                   | 13 runs   | the full contractor journey (sign up → site → workers → attendance → wages → payment → receipt), admin suspend and reactivate with the audit log, the demo admin's limits, the production Content-Security-Policy, a 15-worker attendance speed test, phone layouts at 412 and 360 px, and axe accessibility scans of every page |
 
-- **Coverage (API):** 98% of lines and 84% of branches; the CI gate requires 80% / 70%.
+- **Coverage (API):** 98% of lines and 85% of branches; the CI gate requires 80% / 70%.
 - **Accessibility:** axe finds 0 serious or critical issues on all 17 pages scanned (WCAG 2.1 A and AA rules).
-- **Usability:** marking 15 workers and saving takes 0.6 s of scripted interaction (requirement: under 30 s).
+- **Usability:** marking 15 workers and saving takes 0.6–0.7 s of scripted interaction (requirement: under 30 s).
 - **CI:** GitHub Actions runs lint, API tests with the coverage gate, app tests, the production build, the dependency audit and the Playwright suite on every push to `main`.
 
 Run locally:
@@ -131,16 +131,16 @@ Run locally:
 ```bash
 npm test                          # API and app tests
 npm run test:coverage -w server   # API tests with the coverage gate
-npm run test:e2e                  # Playwright (starts the API with demo data and a production build)
+npm run test:e2e                  # Playwright: its own API (port 5056, in-memory database) and production build (4174)
 ```
 
 ## 8. Performance
 
-**Lighthouse (mobile profile, live login page):** performance 96–98, accessibility 100, best practices 96, SEO 91. First contentful paint 1.9–2.2 s on Lighthouse's simulated slow 4G, total blocking time 0–20 ms, layout shift 0.
+**Lighthouse (mobile profile, live login page only):** performance 96–98, accessibility 100, best practices 96, SEO 91. First contentful paint 1.9–2.2 s on Lighthouse's simulated slow 4G, total blocking time 0–20 ms, layout shift 0. The signed-in pages need a login, which a plain Lighthouse run cannot do; the axe scans above cover their accessibility.
 
 **Bundle:** the first page loads about 149 kB of gzipped JavaScript; every page and the charting library load on demand. The font is self-hosted, so nothing blocks the first paint.
 
-**API load test** — autocannon, 20 concurrent connections for 15 s per endpoint, production mode, local machine (Apple M5) with the demo dataset in an in-memory MongoDB. Network latency to Atlas is not included.
+**API load test** — six read endpoints, autocannon, 20 concurrent connections for 15 s each, production mode, on a local machine (Apple M5) with the demo dataset in an in-memory MongoDB. It measures the API's own work: network latency to Atlas and the live free-tier hosts is not included, and writes were not load-tested.
 
 | Endpoint                           | req/s | p50 ms | p90 ms | p97.5 ms | p99 ms | errors |
 | ---------------------------------- | ----- | ------ | ------ | -------- | ------ | ------ |
@@ -151,7 +151,7 @@ npm run test:e2e                  # Playwright (starts the API with demo data an
 | GET /payments/dues                 | 913   | 20     | 27     | 33       | 38     | 0      |
 | GET /wages/summary (month, weekly) | 359   | 54     | 69     | 81       | 89     | 0      |
 
-Every endpoint's p99 is under 90 ms, well within the 300 ms p95 target. Reads use `.lean()`, list endpoints are paginated, and summaries are MongoDB aggregations rather than per-worker queries.
+All six endpoints kept p99 under 90 ms, well within the 300 ms p95 target. Reads use `.lean()`, list endpoints are paginated, and summaries are MongoDB aggregations rather than per-worker queries.
 
 ## 9. Scalability
 
@@ -164,14 +164,14 @@ Every endpoint's p99 is under 90 ms, well within the 300 ms p95 target. Reads us
 
 ### Environment variables (API)
 
-| Variable                                                                                              | Purpose                                                         |
-| ----------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| `MONGODB_URI`                                                                                         | Atlas connection string (database `mazdoorpay`)                 |
-| `JWT_ACCESS_SECRET`, `QR_SECRET`                                                                      | ≥ 32 characters in production (Render generates them)           |
-| `FRONTEND_ORIGIN`                                                                                     | comma-separated allowed browser origins                         |
-| `TRUST_PROXY`                                                                                         | proxy hops in front of the API (2 behind Vercel → Render)       |
-| `SEED_DEMO_IF_MISSING`                                                                                | `true` creates the demo accounts on first start when none exist |
-| `BCRYPT_COST`, `LOGIN_MAX_ATTEMPTS`, `LOGIN_LOCKOUT_MINUTES`, `RATE_LIMIT_MAX`, `AUTH_RATE_LIMIT_MAX` | tuning, with safe defaults                                      |
+| Variable                                                                                              | Purpose                                                                                                                                                    |
+| ----------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MONGODB_URI`                                                                                         | Atlas connection string (database `mazdoorpay`)                                                                                                            |
+| `JWT_ACCESS_SECRET`, `QR_SECRET`                                                                      | ≥ 32 characters in production (Render generates them)                                                                                                      |
+| `FRONTEND_ORIGIN`                                                                                     | comma-separated allowed browser origins                                                                                                                    |
+| `TRUST_PROXY`                                                                                         | proxy hops in front of the API (2 behind Vercel → Render)                                                                                                  |
+| `SEED_DEMO_IF_MISSING`                                                                                | `true` creates the demo accounts on start unless a finished demo seed is recorded; a database lock lets only one instance seed while a deploy overlaps two |
+| `BCRYPT_COST`, `LOGIN_MAX_ATTEMPTS`, `LOGIN_LOCKOUT_MINUTES`, `RATE_LIMIT_MAX`, `AUTH_RATE_LIMIT_MAX` | tuning, with safe defaults                                                                                                                                 |
 
 The API validates its environment on start and exits with one clear line if anything is wrong.
 
@@ -186,11 +186,14 @@ The API validates its environment on start and exits with one clear line if anyt
 Atlas M0 has no automated backups, so the project ships its own:
 
 ```bash
-npm run backup -w server                              # writes backups/mazdoorpay-<time>.json.gz
+npm run backup -w server                              # writes backups/mazdoorpay-<time>.jsonl.gz
 npm run restore -w server -- --file <file> --confirm  # replaces the collections in the backup
 ```
 
-The backup is Extended JSON (ObjectIds and dates keep their types), gzipped; the round trip is covered by a test.
+- The backup is one Extended JSON line per document (ObjectIds and dates keep their types), gzipped, and streamed in both directions, so memory use does not grow with the database.
+- Restore prints the target database, refuses a backup taken from a different database unless `--force` is passed, reads the whole file before deleting anything (a damaged file changes nothing), and saves the current data as a fresh backup first.
+- Stop the API while restoring, so nothing writes during the replacement.
+- Round trip, batching, the database check and the damaged-file case are covered by tests.
 
 ### Demo data
 
@@ -199,5 +202,5 @@ The backup is Extended JSON (ObjectIds and dates keep their types), gzipped; the
 ## 11. Known limitations
 
 - Render's free plan sleeps after 15 minutes without traffic; the first request then takes up to a minute (the app shows "Waking up the server…").
-- The demo admin's password is public on the login page for evaluation; rotate it afterwards.
+- The demo admin's password is public on the login page for evaluation. It sees only the demo accounts (platform totals still count everyone) and cannot suspend them; rotate it afterwards.
 - Hindi translations, QR attendance, WhatsApp messages, UPI pay-assist, worker statement links, offline use and dark mode are designed but not built; see the PRD's future enhancements.
