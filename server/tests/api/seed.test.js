@@ -3,7 +3,7 @@ import { Worker } from '../../src/models/Worker.js';
 import { Attendance } from '../../src/models/Attendance.js';
 import { Payment } from '../../src/models/Payment.js';
 import { config } from '../../src/config/env.js';
-import { runSeed } from '../../src/seed/runSeed.js';
+import { runSeed, seedDemoIfMissing } from '../../src/seed/runSeed.js';
 import { findAnomalies } from '../../src/services/admin.service.js';
 import { useTestDb } from '../helpers/db.js';
 import { registerContractor } from '../helpers/factory.js';
@@ -57,3 +57,17 @@ it('refuses to run in production without SEED_ALLOW_PROD', async () => {
     config.isProd = wasProd;
   }
 });
+
+it('seedDemoIfMissing seeds once, even in production, and then leaves the data alone', async () => {
+  const wasProd = config.isProd;
+  config.isProd = true;
+  try {
+    const first = await seedDemoIfMissing({ now: NOW });
+    expect(first).toMatchObject({ contractors: 2, workers: 30 });
+    const paymentsBefore = await Payment.countDocuments();
+    expect(await seedDemoIfMissing({ now: NOW })).toBeNull();
+    expect(await Payment.countDocuments()).toBe(paymentsBefore);
+  } finally {
+    config.isProd = wasProd;
+  }
+}, 120000);

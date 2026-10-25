@@ -64,8 +64,8 @@ async function removeDemoData() {
  * Everything is written through the services so every business rule holds.
  * `now` fixes the calendar of the demo data; it must not be in the future.
  */
-export async function runSeed({ now = new Date(), log = () => {} } = {}) {
-  if (config.isProd && process.env.SEED_ALLOW_PROD !== 'true') {
+export async function runSeed({ now = new Date(), log = () => {}, allowProd = false } = {}) {
+  if (config.isProd && !allowProd && process.env.SEED_ALLOW_PROD !== 'true') {
     throw new Error(
       'Refusing to seed production. Set SEED_ALLOW_PROD=true to replace the demo accounts.'
     );
@@ -263,4 +263,11 @@ export async function runSeed({ now = new Date(), log = () => {} } = {}) {
   };
   log(`Seeded ${JSON.stringify(counts)}`);
   return counts;
+}
+
+// For hosts without a shell (Render free tier): create the demo accounts on first start only.
+// Returns the counts when it seeded, or null when demo data already exists.
+export async function seedDemoIfMissing({ now = new Date(), log = () => {} } = {}) {
+  if (await User.exists({ isDemo: true })) return null;
+  return runSeed({ now, log, allowProd: true });
 }
