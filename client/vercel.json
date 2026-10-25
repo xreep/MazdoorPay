@@ -1,9 +1,9 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "installCommand": "npm ci --workspace client --workspace shared --include-workspace-root",
-  "buildCommand": "npm run build -w client",
-  "outputDirectory": "client/dist",
-  "framework": null,
+  "installCommand": "cd .. && npm ci --workspace client --workspace shared --include-workspace-root",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "framework": "vite",
   "rewrites": [
     {
       "source": "/api/:path*",
