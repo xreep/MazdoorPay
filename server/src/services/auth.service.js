@@ -122,11 +122,12 @@ export async function refresh(raw) {
   const current = await RefreshToken.findOne({ tokenHash: hashToken(raw) });
   if (!current) throw httpError(401, SESSION_EXPIRED);
 
-  // A rotated token coming back means it was copied: end that whole session.
-  if (current.revokedAt) {
-    if (current.replacedByHash && Date.now() - current.revokedAt.getTime() < REUSE_GRACE_MS) {
-      throw Object.assign(httpError(401, SESSION_EXPIRED), { keepCookie: true });
-    }
+  // A cookie replaced moments ago is the same browser (a lost response or a second tab), not a thief.
+  const recentlyRotated = (doc) =>
+    Boolean(doc.replacedByHash) && Date.now() - doc.revokedAt.getTime() < REUSE_GRACE_MS;
+
+  // An older rotated token coming back means it was copied: end that whole session.
+  if (current.revokedAt && !recentlyRotated(current)) {
     await revokeFamily(current.family);
     throw httpError(401, SESSION_EXPIRED);
   }
@@ -139,11 +140,19 @@ export async function refresh(raw) {
   }
 
   const next = newRefreshToken();
-  const claimed = await RefreshToken.findOneAndUpdate(
-    { _id: current._id, revokedAt: null },
-    { revokedAt: new Date(), replacedByHash: hashToken(next) }
-  );
-  if (!claimed) throw Object.assign(httpError(401, SESSION_EXPIRED), { keepCookie: true });
+  if (!current.revokedAt) {
+    const claimed = await RefreshToken.findOneAndUpdate(
+      { _id: current._id, revokedAt: null },
+      { revokedAt: new Date(), replacedByHash: hashToken(next) }
+    );
+    // Lost the race to a parallel refresh of the same cookie: treat it like the grace case below.
+    if (!claimed && !(await RefreshToken.exists({ family: current.family, revokedAt: null }))) {
+      throw httpError(401, SESSION_EXPIRED);
+    }
+  } else if (!(await RefreshToken.exists({ family: current.family, revokedAt: null }))) {
+    // Logged out (or the session was revoked) since the rotation: nothing to continue.
+    throw httpError(401, SESSION_EXPIRED);
+  }
 
   await RefreshToken.create({
     userId: user._id,

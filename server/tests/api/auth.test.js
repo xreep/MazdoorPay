@@ -101,7 +101,17 @@ describe('login and refresh', () => {
     const second = cookieValue(res);
     expect(second).toBeDefined();
     expect(second).not.toBe(first);
+    await RefreshToken.updateMany({ revokedAt: { $ne: null } }, { revokedAt: new Date(Date.now() - 60_000) });
     expect((await refreshWith(first)).status).toBe(401);
+  });
+
+  it('after logout even a recently rotated cookie is refused', async () => {
+    const { user } = await registerContractor();
+    const a = cookieValue(await login(user.email, DEFAULT_PASSWORD));
+    const b = cookieValue(await refreshWith(a));
+    await request(app()).post('/api/v1/auth/logout').set('Cookie', `mp_rt=${b}`);
+    expect((await refreshWith(a)).status).toBe(401);
+    expect((await refreshWith(b)).status).toBe(401);
   });
 
   it('reusing a rotated token after the grace window revokes the whole family', async () => {
@@ -116,14 +126,17 @@ describe('login and refresh', () => {
     expect((await refreshWith(b)).status).toBe(401);
   });
 
-  it('a stale cookie inside the grace window (two tabs) keeps the session alive', async () => {
+  it('a cookie replaced moments ago (lost response, second tab) still gets a fresh session', async () => {
     const { user } = await registerContractor();
     const a = cookieValue(await login(user.email, DEFAULT_PASSWORD));
     const b = cookieValue(await refreshWith(a));
     const late = await refreshWith(a);
-    expect(late.status).toBe(401);
-    expect(late.headers['set-cookie']).toBeUndefined();
+    expect(late.status).toBe(200);
+    const c = cookieValue(late);
+    expect(c).toBeDefined();
+    expect(c).not.toBe(b);
     expect((await refreshWith(b)).status).toBe(200);
+    expect((await refreshWith(c)).status).toBe(200);
   });
 
   it('sessions are independent families', async () => {

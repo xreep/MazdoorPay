@@ -18,8 +18,7 @@ export async function refresh(req, res) {
   try {
     sendSession(res, 200, await auth.refresh(req.cookies?.[REFRESH_COOKIE]));
   } catch (err) {
-    // A parallel request losing the rotation race must not wipe the winner's new cookie.
-    if (!err.keepCookie) clearRefreshCookie(res);
+    clearRefreshCookie(res);
     throw err;
   }
 }
