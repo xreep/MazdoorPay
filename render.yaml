@@ -1,0 +1,29 @@
+# Render Blueprint for the MazdoorPay API (New → Blueprint → pick this repo).
+services:
+  - type: web
+    name: mazdoorpay-api
+    runtime: node
+    region: singapore
+    plan: free
+    buildCommand: npm ci --omit=dev --workspace server --workspace shared
+    startCommand: npm start -w server
+    healthCheckPath: /api/v1/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: '22'
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: QR_SECRET
+        generateValue: true
+      - key: BCRYPT_COST
+        value: '12'
+      # Browser → Vercel rewrite → Render: two proxies in front of the API.
+      - key: TRUST_PROXY
+        value: '2'
+      - key: FRONTEND_ORIGIN
+        sync: false
