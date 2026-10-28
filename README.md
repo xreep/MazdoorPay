@@ -10,7 +10,7 @@
 
 ## Try it
 
-The login page has a **Use** button for each demo account. The demo data has 30 workers on four sites with 45 days of attendance, weekly payouts in cash and UPI, advances, pay raises and a voided payment.
+Log in with one of these demo accounts (they are listed here only, not on the website). The demo data has 30 workers on four sites with 45 days of attendance, weekly payouts in cash and UPI, advances, pay raises and a voided payment.
 
 | Role                                  | Email                        | Password     |
 | ------------------------------------- | ---------------------------- | ------------ |

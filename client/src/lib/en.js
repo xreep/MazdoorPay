@@ -22,12 +22,6 @@ export const en = {
     welcomeBody: 'Log in to mark today’s attendance.',
     newHere: 'Start keeping your site register',
     newHereBody: 'Free for contractors. You can add sites and workers right after.',
-    demoTitle: 'Try it with demo data',
-    demoBody: 'These accounts have 45 days of attendance and payments.',
-    use: 'Use',
-    demoContractor: 'Contractor · Bengaluru',
-    demoContractor2: 'Contractor · Pune and Mumbai',
-    demoAdmin: 'Platform admin',
     heroTitle: 'The site register, without the register.',
     heroBody:
       'Mark attendance in the morning, see what every worker has earned, and record each payment so nobody argues on Saturday.',

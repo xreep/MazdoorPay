@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useState } from 'react';
+import { forwardRef, useState } from 'react';
 import { Navigate, useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -14,12 +14,6 @@ import { LanguageToggle } from '../components/layout/LanguageToggle.jsx';
 import { ThemeToggle } from '../components/layout/ThemeToggle.jsx';
 import { Logo } from '../components/layout/Logo.jsx';
 import { applyServerErrors } from '../lib/forms.js';
-
-const DEMO = [
-  { key: 'demoContractor', email: 'ravi.kumar@mazdoorpay.in', password: 'Demo@2026' },
-  { key: 'demoContractor2', email: 'sunita.patil@mazdoorpay.in', password: 'Demo@2026' },
-  { key: 'demoAdmin', email: 'admin@mazdoorpay.in', password: 'Admin@2026' },
-];
 
 const PasswordInput = forwardRef(function PasswordInput(props, ref) {
   const t = useT();
@@ -39,7 +33,7 @@ const PasswordInput = forwardRef(function PasswordInput(props, ref) {
   );
 });
 
-function AuthForm({ mode, fill }) {
+function AuthForm({ mode }) {
   const t = useT();
   const { login, register: registerUser } = useAuth();
   const isLogin = mode === 'login';
@@ -50,14 +44,7 @@ function AuthForm({ mode, fill }) {
       ? { email: '', password: '' }
       : { name: '', email: '', password: '', phone: '' },
   });
-  const { register, handleSubmit, formState, setError, setValue } = form;
-
-  useEffect(() => {
-    if (fill && isLogin) {
-      setValue('email', fill.email, { shouldValidate: false });
-      setValue('password', fill.password, { shouldValidate: false });
-    }
-  }, [fill, isLogin, setValue]);
+  const { register, handleSubmit, formState, setError } = form;
 
   const onSubmit = handleSubmit(async (values) => {
     setServerError(null);
@@ -121,7 +108,6 @@ export default function LoginPage() {
   const { status, user } = useAuth();
   const [params] = useSearchParams();
   const [mode, setMode] = useState('login');
-  const [fill, setFill] = useState(null);
 
   if (status === 'authenticated') {
     const next = safeNext(params.get('next'));
@@ -190,38 +176,8 @@ export default function LoginPage() {
             <p className="mb-6 mt-1 text-ink-muted">
               {mode === 'login' ? t('auth.welcomeBody') : t('auth.newHereBody')}
             </p>
-            <AuthForm key={mode} mode={mode} fill={fill} />
+            <AuthForm key={mode} mode={mode} />
           </div>
-
-          {mode === 'login' && (
-            <section
-              className="mt-6 rounded-card border border-dashed border-border p-5"
-              aria-labelledby="demo-title"
-            >
-              <h3 id="demo-title" className="font-semibold">
-                {t('auth.demoTitle')}
-              </h3>
-              <p className="mt-1 text-sm text-ink-muted">{t('auth.demoBody')}</p>
-              <ul className="mt-4 space-y-2">
-                {DEMO.map((d) => (
-                  <li key={d.email} className="flex items-center justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium">{t(`auth.${d.key}`)}</p>
-                      <p className="truncate text-sm text-ink-muted">{d.email}</p>
-                    </div>
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => setFill({ email: d.email, password: d.password })}
-                      aria-label={`${t('auth.use')} ${d.email}`}
-                    >
-                      {t('auth.use')}
-                    </Button>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
         </div>
       </main>
     </div>

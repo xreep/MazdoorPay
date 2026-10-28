@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { uniqueEmail } from './helpers.js';
+import { DEMO, login, uniqueEmail } from './helpers.js';
 
 // The spec's contractor flow: Register → Create site → Add workers → Mark attendance → Track wages → Record payment.
 test('a new contractor goes from sign-up to a printed receipt', async ({ page }) => {
@@ -70,9 +70,7 @@ test('a new contractor goes from sign-up to a printed receipt', async ({ page })
 });
 
 test('a demo contractor sees 45 days of history on the dashboard', async ({ page }) => {
-  await page.goto('/login');
-  await page.getByRole('button', { name: 'Use ravi.kumar@mazdoorpay.in' }).click();
-  await page.getByRole('button', { name: 'Log in' }).click();
+  await login(page, DEMO.contractor);
   await expect(
     page.getByRole('heading', { name: /Good (morning|afternoon|evening), Ravi/ })
   ).toBeVisible();

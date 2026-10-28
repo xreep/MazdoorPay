@@ -9,6 +9,15 @@ const noSession = http.post(API('/auth/refresh'), () =>
 );
 
 describe('LoginPage', () => {
+  it('shows no demo accounts or passwords', async () => {
+    server.use(noSession);
+    const { container } = renderApp('/login');
+    await screen.findByRole('button', { name: 'Log in' });
+    expect(container.textContent).not.toMatch(/@mazdoorpay\.in|Demo@2026|Admin@2026|demo/i);
+    expect(screen.queryByRole('button', { name: /^Use / })).toBeNull();
+    expect(screen.getByLabelText('Email')).toHaveValue('');
+  });
+
   it('validates fields before calling the API', async () => {
     server.use(noSession);
     renderApp('/login');
