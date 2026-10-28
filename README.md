@@ -10,13 +10,7 @@
 
 ## Try it
 
-Log in with one of these demo accounts (they are listed here only, not on the website). The demo data has 30 workers on four sites with 45 days of attendance, weekly payouts in cash and UPI, advances, pay raises and a voided payment.
-
-| Role                                  | Email                        | Password     |
-| ------------------------------------- | ---------------------------- | ------------ |
-| Contractor — Bengaluru, 2 sites       | `ravi.kumar@mazdoorpay.in`   | `Demo@2026`  |
-| Contractor — Pune and Mumbai, 2 sites | `sunita.patil@mazdoorpay.in` | `Demo@2026`  |
-| Platform admin                        | `admin@mazdoorpay.in`        | `Admin@2026` |
+Demo accounts (two contractors and a platform admin) are shared with evaluators directly. The demo data has 30 workers on four sites with 45 days of attendance, weekly payouts in cash and UPI, advances, pay raises and a voided payment. You can also create your own contractor account on the login page.
 
 The demo admin sees only the demo accounts, and demo accounts cannot be suspended or locked out, so the logins keep working for everyone.
 

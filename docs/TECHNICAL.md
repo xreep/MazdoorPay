@@ -202,7 +202,7 @@ npm run restore -w server -- --file <file> --confirm  # replaces the collections
 ## 11. Known limitations
 
 - Render's free plan sleeps after 15 minutes without traffic; the first request then takes up to a minute (the app shows "Waking up the server…").
-- The demo logins are shared in the README for evaluation; the website itself does not show them. The demo admin sees only the demo accounts (platform totals still count everyone) and cannot suspend them; rotate its password afterwards.
+- The demo logins are given to evaluators directly; neither the website nor the README shows them. The demo admin sees only the demo accounts (platform totals still count everyone) and cannot suspend them; rotate its password afterwards.
 - Offline marking is designed but not built; see the PRD's future enhancements.
 - Dark mode: `.dark` on `<html>` swaps the colour tokens; `--on-ink`, `--on-brand` and `--on-solid` keep text readable on filled surfaces in both themes. `public/theme.js` applies the saved or system theme before the first paint (an external file, since the security policy allows no inline scripts), and the app follows the system setting until the reader picks. Printed sheets use `.theme-light`, so they stay black on white.
 - Installable app: `client/public/manifest.webmanifest` with regular and maskable icons, and a hand-written service worker (`client/public/sw.js`, about 60 lines) registered in production builds only. Pages are network-first with the cached shell as the offline fallback; content-hashed `/assets/` are cache-first, capped at 80 files; `/api/` is never cached. `sw.js` is served with `no-cache` so updates reach users on the next visit.
