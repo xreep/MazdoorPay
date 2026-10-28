@@ -1,4 +1,4 @@
-import { Suspense, lazy, useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { Link, useBlocker, useSearchParams } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { toast } from 'sonner';
@@ -33,9 +33,10 @@ import { AttendanceGrid } from '../features/attendance/AttendanceGrid.jsx';
 import { MonthHeatmap } from '../features/attendance/MonthHeatmap.jsx';
 import { AttendanceReports } from '../features/attendance/AttendanceReports.jsx';
 import { setUnsavedCount } from '../lib/unsaved.js';
+import { lazyWithReload } from '../lib/lazyWithReload.js';
 
 // The camera library loads only when someone starts scanning.
-const ScanDialog = lazy(() =>
+const ScanDialog = lazyWithReload(() =>
   import('../features/attendance/ScanDialog.jsx').then((m) => ({ default: m.ScanDialog }))
 );
 

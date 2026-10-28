@@ -106,6 +106,42 @@ const render = (route = '/payments') =>
   renderWithProviders(<PaymentsPage />, { path: '/payments', route });
 
 describe('PaymentsPage', () => {
+  // Walkthrough 28 Oct: Payments must load the first time, every time.
+  it.each([
+    ['', 'Everyone is paid up'],
+    ['?tab=advances', 'No advances outstanding'],
+    ['?tab=history', 'No payments in this period'],
+  ])('loads with nothing recorded yet (tab %s)', async (query, emptyTitle) => {
+    server.use(
+      http.get(API('/sites'), () => HttpResponse.json({ sites: [] })),
+      http.get(API('/workers'), () => HttpResponse.json(page([]))),
+      http.get(API('/payments/dues'), () =>
+        HttpResponse.json({
+          dues: [],
+          advances: [],
+          totals: { pending: 0, advance: 0, workersWithDues: 0 },
+        })
+      ),
+      http.get(API('/payments'), () => HttpResponse.json(page([])))
+    );
+    render(`/payments${query}`);
+    expect(await screen.findByText(emptyTitle)).toBeInTheDocument();
+    expect(screen.queryByText('This screen ran into a problem')).toBeNull();
+  });
+
+  it('renders while its data is still loading', async () => {
+    const never = () => new Promise(() => {});
+    server.use(
+      http.get(API('/sites'), never),
+      http.get(API('/workers'), never),
+      http.get(API('/payments/dues'), never),
+      http.get(API('/payments'), never)
+    );
+    render();
+    expect(await screen.findByRole('heading', { name: 'Payments' })).toBeInTheDocument();
+    expect(screen.queryByText('This screen ran into a problem')).toBeNull();
+  });
+
   it('lists dues with the total and pays a worker from the list', async () => {
     server.use(...handlers());
     render();

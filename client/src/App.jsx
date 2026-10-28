@@ -1,4 +1,4 @@
-import { Suspense, lazy } from 'react';
+import { Suspense } from 'react';
 import { Outlet } from 'react-router-dom';
 import { RequireAuth, RequireRole } from './auth/guards.jsx';
 import { ServerWakeBanner } from './components/layout/ServerWakeBanner.jsx';
@@ -6,26 +6,29 @@ import { FullPageSkeleton } from './components/ui/Skeleton.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import NotFoundPage from './pages/NotFoundPage.jsx';
 import { RouteError } from './components/layout/ErrorBoundary.jsx';
+import { lazyWithReload } from './lib/lazyWithReload.js';
 
-const AppShell = lazy(() =>
+const AppShell = lazyWithReload(() =>
   import('./components/layout/AppShell.jsx').then((m) => ({ default: m.AppShell }))
 );
-const DashboardPage = lazy(() => import('./pages/DashboardPage.jsx'));
-const SitesPage = lazy(() => import('./pages/SitesPage.jsx'));
-const WorkersPage = lazy(() => import('./pages/WorkersPage.jsx'));
-const WorkerProfilePage = lazy(() => import('./pages/WorkerProfilePage.jsx'));
-const AttendancePage = lazy(() => import('./pages/AttendancePage.jsx'));
-const WagesPage = lazy(() => import('./pages/WagesPage.jsx'));
-const WageRegisterPrint = lazy(() => import('./pages/print/WageRegisterPrint.jsx'));
-const PaymentsPage = lazy(() => import('./pages/PaymentsPage.jsx'));
-const ReceiptPrint = lazy(() => import('./pages/print/ReceiptPrint.jsx'));
-const WageSlipPrint = lazy(() => import('./pages/print/WageSlipPrint.jsx'));
-const IdCardsPrint = lazy(() => import('./pages/print/IdCardsPrint.jsx'));
-const PaymentsReportPrint = lazy(() => import('./pages/print/PaymentsReportPrint.jsx'));
-const AdminPage = lazy(() => import('./pages/AdminPage.jsx'));
-const MusterRollPrint = lazy(() => import('./pages/print/MusterRollPrint.jsx'));
-const AttendanceReportPrint = lazy(() => import('./pages/print/AttendanceReportPrint.jsx'));
-const StatementPage = lazy(() => import('./pages/StatementPage.jsx'));
+const DashboardPage = lazyWithReload(() => import('./pages/DashboardPage.jsx'));
+const SitesPage = lazyWithReload(() => import('./pages/SitesPage.jsx'));
+const WorkersPage = lazyWithReload(() => import('./pages/WorkersPage.jsx'));
+const WorkerProfilePage = lazyWithReload(() => import('./pages/WorkerProfilePage.jsx'));
+const AttendancePage = lazyWithReload(() => import('./pages/AttendancePage.jsx'));
+const WagesPage = lazyWithReload(() => import('./pages/WagesPage.jsx'));
+const WageRegisterPrint = lazyWithReload(() => import('./pages/print/WageRegisterPrint.jsx'));
+const PaymentsPage = lazyWithReload(() => import('./pages/PaymentsPage.jsx'));
+const ReceiptPrint = lazyWithReload(() => import('./pages/print/ReceiptPrint.jsx'));
+const WageSlipPrint = lazyWithReload(() => import('./pages/print/WageSlipPrint.jsx'));
+const IdCardsPrint = lazyWithReload(() => import('./pages/print/IdCardsPrint.jsx'));
+const PaymentsReportPrint = lazyWithReload(() => import('./pages/print/PaymentsReportPrint.jsx'));
+const AdminPage = lazyWithReload(() => import('./pages/AdminPage.jsx'));
+const MusterRollPrint = lazyWithReload(() => import('./pages/print/MusterRollPrint.jsx'));
+const AttendanceReportPrint = lazyWithReload(
+  () => import('./pages/print/AttendanceReportPrint.jsx')
+);
+const StatementPage = lazyWithReload(() => import('./pages/StatementPage.jsx'));
 
 function RootLayout() {
   return (

@@ -1,13 +1,14 @@
-import { Suspense, lazy } from 'react';
+import { Suspense } from 'react';
 import { Smartphone } from 'lucide-react';
 import { formatINR } from '@mazdoorpay/shared';
 import { useT } from '../../lib/i18n.jsx';
 import { useMediaQuery } from '../../lib/hooks.js';
 import { upiPayLink } from '../../lib/upi.js';
 import { Skeleton } from '../../components/ui/Skeleton.jsx';
+import { lazyWithReload } from '../../lib/lazyWithReload.js';
 
 // Only computers show the QR code, so only they load the QR library.
-const QrCode = lazy(() => import('../../components/ui/QrCode.jsx'));
+const QrCode = lazyWithReload(() => import('../../components/ui/QrCode.jsx'));
 
 // UPI pay-assist, not a payment integration: hands the payment to the contractor's own UPI app.
 export function UpiPayAssist({ worker, amount, type }) {

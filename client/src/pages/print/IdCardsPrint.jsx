@@ -1,4 +1,4 @@
-import { Suspense, lazy } from 'react';
+import { Suspense } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
 import { api } from '../../lib/api.js';
@@ -7,8 +7,9 @@ import { PrintLayout } from '../../components/layout/PrintLayout.jsx';
 import { Logo } from '../../components/layout/Logo.jsx';
 import { SkeletonRows } from '../../components/ui/Skeleton.jsx';
 import { QueryError } from '../../components/ui/QueryError.jsx';
+import { lazyWithReload } from '../../lib/lazyWithReload.js';
 
-const QrCode = lazy(() => import('../../components/ui/QrCode.jsx'));
+const QrCode = lazyWithReload(() => import('../../components/ui/QrCode.jsx'));
 
 // Credit-card-sized worker ID cards (85.6 × 54 mm), ten to an A4 sheet, to cut out and laminate.
 export default function IdCardsPrint() {
