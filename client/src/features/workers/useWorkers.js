@@ -1,4 +1,5 @@
-import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { refreshAfterSave, useCurrentQuery } from '../../lib/query.js';
 import { api } from '../../lib/api.js';
 
 // What the Workers page asks for when it opens.
@@ -9,11 +10,10 @@ export const workersQuery = (filters) => ({
   queryFn: () => api.get('/workers', { query: filters }),
 });
 
-export const useWorkers = (filters) =>
-  useQuery({ ...workersQuery(filters), placeholderData: keepPreviousData });
+export const useWorkers = (filters) => useCurrentQuery({ ...workersQuery(filters) });
 
 export const useWorkerSummary = (id) =>
-  useQuery({
+  useCurrentQuery({
     queryKey: ['worker', id],
     queryFn: () => api.get(`/workers/${id}/summary`),
     enabled: Boolean(id),
@@ -24,7 +24,7 @@ function useWorkerMutation(fn) {
   return useMutation({
     mutationFn: fn,
     onSuccess: () => {
-      for (const key of [
+      refreshAfterSave(queryClient, [
         'workers',
         'worker',
         'sites',
@@ -32,9 +32,9 @@ function useWorkerMutation(fn) {
         'dues',
         'attendance-sheet',
         'wages',
-      ]) {
-        queryClient.invalidateQueries({ queryKey: [key] });
-      }
+        'wage-slip',
+        'worker-cards',
+      ]);
     },
   });
 }
@@ -58,13 +58,16 @@ export const useReplaceCard = () =>
 const linkKey = (id) => ['statement-link', id];
 
 export const useStatementLink = (id) =>
-  useQuery({ queryKey: linkKey(id), queryFn: () => api.get(`/workers/${id}/statement-link`) });
+  useCurrentQuery({
+    queryKey: linkKey(id),
+    queryFn: () => api.get(`/workers/${id}/statement-link`),
+  });
 
 function useLinkMutation(fn) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: fn,
-    onSuccess: (_result, id) => queryClient.invalidateQueries({ queryKey: linkKey(id) }),
+    onSuccess: () => refreshAfterSave(queryClient, ['statement-link']),
   });
 }
 

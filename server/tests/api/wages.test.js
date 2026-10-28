@@ -60,6 +60,20 @@ describe('wage summary', () => {
     });
   });
 
+  it('the all-time balance covers every worker who has one, even with nothing in the period', async () => {
+    // 1–7 Sept: no attendance or payments, yet both workers are still owed money.
+    const res = await summary('from=2026-09-01&to=2026-09-07');
+    expect(res.body.workers.map((w) => [w.name, w.earned, w.paidInPeriod, w.balance])).toEqual([
+      ['Ramesh Yadav', 0, 0, 197500],
+      ['Suresh Patil', 0, 0, 60000],
+    ]);
+    expect(res.body.totals.balance).toBe(257500);
+    // A site filter keeps only that site's workers.
+    const site = await summary(`from=2026-09-01&to=2026-09-07&siteId=${fx.s2._id}`);
+    expect(site.body.workers.map((w) => w.name)).toEqual(['Suresh Patil']);
+    expect(site.body.totals.balance).toBe(60000);
+  });
+
   it('splits what was paid in the period into wages and advances', async () => {
     const res = await summary('from=2026-10-15&to=2026-10-31');
     const ramesh = res.body.workers.find((w) => w.name === 'Ramesh Yadav');

@@ -116,6 +116,8 @@ export const hi = {
     addFirstSite: 'पहली साइट जोड़ें',
   },
   sites: {
+    viewList: 'सूची देखें',
+    forSite: '({name})',
     title: 'साइटें',
     subtitle: 'जहाँ आपके मज़दूर काम करते हैं',
     addTitle: 'साइट जोड़ें',
@@ -123,6 +125,7 @@ export const hi = {
     name: 'साइट का नाम',
     nameHint: 'वह नाम जो आपके मज़दूर बोलते हैं, जैसे “सोभा टावर – हेब्बल”',
     location: 'पता या इलाका (ज़रूरी नहीं)',
+    workerCountsOne: '{total} में से {active} मज़दूर चालू',
     workerCounts: '{total} में से {active} मज़दूर चालू',
     markInactive: 'बंद करें',
     markActive: 'चालू करें',
@@ -151,6 +154,7 @@ export const hi = {
   },
   workers: {
     title: 'मज़दूर',
+    countOne: '{n} मज़दूर',
     count: '{n} मज़दूर',
     addTitle: 'मज़दूर जोड़ें',
     addFirst: 'पहला मज़दूर जोड़ें',
@@ -272,6 +276,11 @@ export const hi = {
     print: 'छापें',
   },
   wages: {
+    madeUpTitle: 'बाकी कैसे बना',
+    madeUpBefore: 'इस समय से पहले का बाकी',
+    madeUpEarned: 'इस समय में कमाई',
+    madeUpPaid: 'इस समय में दिया',
+    madeUpAfter: 'इस समय के बाद का',
     paidSplit: 'मज़दूरी {wages} · एडवांस {advances}',
     dueAllTime: 'बाकी देना है (अब तक कुल)',
     advanceAllTime: 'बाकी एडवांस (अब तक कुल)',
@@ -298,7 +307,7 @@ export const hi = {
     paidInPeriod: 'इस समय में दिया',
     paidHint: 'मज़दूरी और एडवांस',
     dueNow: 'आज तक बाकी',
-    dueHint: 'इन मज़दूरों का कुल बाकी',
+    dueHint: 'अब तक का सारा काम और भुगतान, हर उस मज़दूर का जिसका कुछ बाकी है',
     perDay: 'रोज़ की कमाई',
     perWeek: 'हफ़्ते की कमाई',
     chartSummary: '{n} हिस्सों में कुल {total} कमाई',
@@ -540,6 +549,10 @@ export const hi = {
     total: 'कुल',
   },
   payments: {
+    upiMissingTitle: '{name} की UPI ID दर्ज नहीं है',
+    upiMissingBody:
+      'सेव करने से पहले जाँच लें कि आपने किस UPI नंबर पर भेजा, और नीचे UPI ऐप से UTR लिखें।',
+    upiMissingLink: '{name} की UPI ID जोड़ें',
     subtitle: 'किसे देना है, एडवांस, और अब तक के सारे भुगतान',
     tabDues: 'देना है',
     tabAdvances: 'एडवांस',
@@ -571,7 +584,6 @@ export const hi = {
     scanToPay: '{upiId} को {amount} देने के लिए फ़ोन के UPI ऐप से इसे स्कैन करें।',
     upiConfirmHint:
       'भुगतान हुआ या नहीं, MazdoorPay नहीं देख सकता। भुगतान के बाद UPI ऐप से 12 अंकों का UTR नीचे लिखें।',
-    upiMissing: 'यहाँ से भुगतान के लिए {name} की प्रोफ़ाइल में UPI ID जोड़ें।',
     utrHint: '12 अंक, भुगतान के बाद UPI ऐप में दिखते हैं',
     utrShort: 'UTR {ref}',
     bankRef: 'बैंक रेफ़रेंस (ज़रूरी नहीं)',

@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useCurrentQuery } from '../../lib/query.js';
 import { useSearchParams } from 'react-router-dom';
 import { formatINR } from '@mazdoorpay/shared';
 import { api } from '../../lib/api.js';
@@ -22,7 +22,7 @@ export default function AttendanceReportPrint() {
     to: params.get('to'),
     siteId: params.get('siteId') ?? undefined,
   };
-  const { data, isPending, isError, error } = useQuery({
+  const { data, isPending, isError, error } = useCurrentQuery({
     queryKey: ['attendance-report', query],
     queryFn: () => api.get('/reports/attendance', { query }),
   });

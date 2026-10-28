@@ -164,3 +164,24 @@ describe('demo passwords', () => {
     expect((await login('ravi.kumar@mazdoorpay.in', saved)).status).toBe(200);
   }, 120000);
 });
+
+it('the dashboard 30 days and Wages for the same dates agree, across two months of demo data', async () => {
+  await runSeed(); // 45 days up to today, so the 30-day window spans two calendar months
+  const res = await request(app())
+    .post('/api/v1/auth/login')
+    .send({ email: 'ravi.kumar@mazdoorpay.in', password: config.demoPassword });
+  const token = res.body.accessToken;
+  const get = (path) => request(app()).get(path).set('Authorization', `Bearer ${token}`);
+  const { trend } = (await get('/api/v1/dashboard')).body;
+  const from = trend[0].day;
+  const to = trend.at(-1).day;
+  expect(from.slice(0, 7)).not.toBe(to.slice(0, 7));
+  const sum = (key) => trend.reduce((total, d) => total + d[key], 0);
+  const wages = (await get(`/api/v1/wages/summary?from=${from}&to=${to}`)).body.totals;
+  expect(wages).toMatchObject({
+    present: sum('present'),
+    halfDay: sum('halfDay'),
+    earned: sum('earned'),
+  });
+  expect(sum('present')).toBeGreaterThan(100);
+}, 120000);

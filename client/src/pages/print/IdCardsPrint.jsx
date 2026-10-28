@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useCurrentQuery } from '../../lib/query.js';
 import { useSearchParams } from 'react-router-dom';
 import { api } from '../../lib/api.js';
 import { useT } from '../../lib/i18n.jsx';
@@ -19,7 +19,7 @@ export default function IdCardsPrint() {
     siteId: params.get('siteId') ?? undefined,
     workerId: params.get('workerId') ?? undefined,
   };
-  const { data, isPending, isError, error } = useQuery({
+  const { data, isPending, isError, error } = useCurrentQuery({
     queryKey: ['worker-cards', query],
     queryFn: () => api.get('/workers/cards', { query }),
   });

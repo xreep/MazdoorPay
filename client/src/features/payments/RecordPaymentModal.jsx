@@ -16,6 +16,7 @@ import { SelectField } from '../../components/ui/Select.jsx';
 import { SegmentedControl } from '../../components/ui/SegmentedControl.jsx';
 import { Button } from '../../components/ui/Button.jsx';
 import { useWorkerSummary, useWorkers } from '../workers/useWorkers.js';
+import { refreshAfterSave } from '../../lib/query.js';
 import { useRecordPayment } from './usePayments.js';
 import { UpiPayAssist } from './UpiPayAssist.jsx';
 
@@ -89,8 +90,7 @@ export function RecordPaymentModal({ open, workerId: initialWorkerId, onClose })
       // No answer (network) or "key already used" (a retry after a lost answer): the first try may have been saved.
       if (err.status === 0 || err.status === 409) {
         setMaybeSaved(true);
-        queryClient.invalidateQueries({ queryKey: ['payments'] });
-        queryClient.invalidateQueries({ queryKey: ['dues'] });
+        refreshAfterSave(queryClient, ['payments', 'dues', 'wages', 'dashboard', 'worker']);
         return;
       }
       const aboveDues =
@@ -194,7 +194,8 @@ export function RecordPaymentModal({ open, workerId: initialWorkerId, onClose })
           />
         </div>
 
-        <Field label={t('payments.amount')} error={e.amount?.message}>
+        {/* The amount box shows its own single message. */}
+        <Field label={t('payments.amount')}>
           <MoneyField name="amount" control={control} />
         </Field>
 

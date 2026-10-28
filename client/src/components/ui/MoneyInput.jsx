@@ -1,10 +1,11 @@
-import { forwardRef, useEffect, useState } from 'react';
+import { forwardRef, useEffect, useId, useState } from 'react';
 import { Controller } from 'react-hook-form';
 import { useT } from '../../lib/i18n.jsx';
 import { paiseToInput, parseRupeesInput } from '../../lib/format.js';
 import { controlClass } from './Input.jsx';
 
 // A rupee text box that reports integer paise (or null while the text is not a valid amount).
+// It shows exactly one message: what is wrong with the text typed, else the form's own error.
 export const MoneyInput = forwardRef(function MoneyInput(
   { value, onChange, onBlur, error, className = '', ...rest },
   ref
@@ -20,9 +21,11 @@ export const MoneyInput = forwardRef(function MoneyInput(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
 
+  const errorId = useId();
   const parsed = parseRupeesInput(text);
-  const ownError = touched && parsed.error ? t(parsed.error) : null;
-  const shown = error ?? ownError;
+  const typedError = touched && text.trim() && parsed.error ? t(parsed.error) : null;
+  const shown = typedError ?? error ?? (touched && parsed.error ? t(parsed.error) : null);
+  const describedBy = [rest['aria-describedby'], shown && errorId].filter(Boolean).join(' ');
 
   return (
     <div>
@@ -47,9 +50,14 @@ export const MoneyInput = forwardRef(function MoneyInput(
             onBlur?.(event);
           }}
           {...rest}
+          aria-describedby={describedBy || undefined}
         />
       </div>
-      {ownError && !error && <p className="mt-1.5 text-sm font-medium text-absent">{ownError}</p>}
+      {shown && (
+        <p id={errorId} className="mt-1.5 text-sm font-medium text-absent">
+          {shown}
+        </p>
+      )}
     </div>
   );
 });
@@ -60,12 +68,13 @@ export function MoneyField({ control, name, ...rest }) {
     <Controller
       name={name}
       control={control}
-      render={({ field }) => (
+      render={({ field, fieldState }) => (
         <MoneyInput
           ref={field.ref}
           value={field.value}
           onChange={field.onChange}
           onBlur={field.onBlur}
+          error={fieldState.error?.message}
           {...rest}
         />
       )}

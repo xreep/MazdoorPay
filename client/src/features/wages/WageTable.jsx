@@ -1,6 +1,6 @@
 import { Fragment, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useCurrentQuery } from '../../lib/query.js';
 import { ChevronDown } from 'lucide-react';
 import { formatINR } from '@mazdoorpay/shared';
 import { api } from '../../lib/api.js';
@@ -23,16 +23,59 @@ export function MoneyHeading({ label, basis }) {
 // Day by day, as on the wage slip; shares its data (and cache) with the printable slip.
 function WorkerDays({ worker, from, to }) {
   const t = useT();
-  const { formatDay } = useFormat();
   const query = { from, to };
-  const { data, isPending, isError, error, refetch } = useQuery({
+  const { data, isPending, isError, error, refetch } = useCurrentQuery({
     queryKey: ['wage-slip', worker.workerId, query],
     queryFn: () => api.get(`/workers/${worker.workerId}/slip`, { query }),
   });
   if (isPending) return <SkeletonRows n={3} />;
   if (isError) return <QueryError error={error} onRetry={refetch} />;
-  if (data.days.length === 0) return <p className="text-sm text-ink-muted">{t('slip.noDays')}</p>;
   const cell = 'px-3 py-1.5';
+  return (
+    <div className="flex flex-wrap items-start gap-x-10 gap-y-4">
+      {data.days.length === 0 ? (
+        <p className="text-sm text-ink-muted">{t('slip.noDays')}</p>
+      ) : (
+        <DaysTable worker={worker} days={data.days} cell={cell} />
+      )}
+      <BalanceMadeUp worker={worker} slip={data} />
+    </div>
+  );
+}
+
+const signed = (paise) => `${paise < 0 ? '−' : '+'} ${formatINR(Math.abs(paise))}`;
+
+// Why the all-time balance differs from this period's figures: what was owed before the period,
+// the period itself, and anything earned or paid after it.
+function BalanceMadeUp({ worker, slip }) {
+  const t = useT();
+  const paid = slip.totals.wagesPaid + slip.totals.advancesPaid;
+  const after = worker.balance - slip.closingBalance;
+  const rows = [
+    [t('wages.madeUpBefore'), formatINR(slip.openingBalance)],
+    [t('wages.madeUpEarned'), signed(slip.totals.earned)],
+    [t('wages.madeUpPaid'), `− ${formatINR(paid)}`],
+    ...(after !== 0 ? [[t('wages.madeUpAfter'), signed(after)]] : []),
+  ];
+  return (
+    <ul aria-label={t('wages.madeUpTitle')} className="w-full max-w-xs text-sm">
+      {rows.map(([label, value]) => (
+        <li key={label} className="flex justify-between gap-4 py-1">
+          <span className="text-ink-muted">{label}</span>
+          <span className="num">{value}</span>
+        </li>
+      ))}
+      <li className="mt-1 flex justify-between gap-4 border-t border-border pt-2 font-semibold">
+        <span>{t('wages.dueAllTime')}</span>
+        <span className="num">{formatINR(worker.balance)}</span>
+      </li>
+    </ul>
+  );
+}
+
+function DaysTable({ worker, days, cell }) {
+  const t = useT();
+  const { formatDay } = useFormat();
   return (
     <table
       aria-label={t('wages.breakdownFor', { name: worker.name })}
@@ -47,7 +90,7 @@ function WorkerDays({ worker, from, to }) {
         </tr>
       </thead>
       <tbody className="divide-y divide-border">
-        {data.days.map((d) => (
+        {days.map((d) => (
           <tr key={d.day}>
             <td className={cell}>{formatDay(d.day)}</td>
             <td className={cell}>{t(`status.${STATUS_KEY[d.status]}`)}</td>

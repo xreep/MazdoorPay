@@ -57,6 +57,9 @@ describe('WageTable', () => {
             { day: '2026-10-26', status: 'present', rate: 88000, earned: 88000 },
             { day: '2026-10-27', status: 'half-day', rate: 88000, earned: 44000 },
           ],
+          totals: { earned: 132000, wagesPaid: 0, advancesPaid: 0 },
+          openingBalance: 0,
+          closingBalance: 132000,
         });
       })
     );
@@ -75,6 +78,48 @@ describe('WageTable', () => {
     ).toEqual([
       ['26 Oct, Mon', 'Present', '₹880', '₹880'],
       ['27 Oct, Tue', 'Half-day', '₹880', '₹440'],
+    ]);
+  });
+
+  it('explains how the period figures lead to the all-time balance', async () => {
+    // The tester's row: 27 Oct only, earned ₹600, nothing paid that day, balance ₹700. The other
+    // ₹100 is from 28 Oct, after the chosen period.
+    const one = {
+      ...row,
+      present: 1,
+      earned: 60000,
+      paidInPeriod: 0,
+      wagesPaidInPeriod: 0,
+      advancesInPeriod: 0,
+      balance: 70000,
+    };
+    server.use(
+      http.get(API('/workers/w1/slip'), () =>
+        HttpResponse.json({
+          days: [{ day: '2026-10-27', status: 'present', rate: 60000, earned: 60000 }],
+          totals: { earned: 60000, wagesPaid: 0, advancesPaid: 0 },
+          openingBalance: 0,
+          closingBalance: 60000,
+        })
+      )
+    );
+    renderWithProviders(
+      <WageTable
+        data={{ ...data, from: '2026-10-27', to: '2026-10-27', workers: [one], totals: one }}
+      />
+    );
+    await userEvent.click(screen.getByRole('button', { name: 'Show breakdown for Ramesh Yadav' }));
+    const sum = await screen.findByRole('list', { name: 'How the balance due is made up' });
+    expect(
+      within(sum)
+        .getAllByRole('listitem')
+        .map((li) => li.textContent)
+    ).toEqual([
+      'Owed before this period₹0',
+      'Earned in this period+ ₹600',
+      'Paid in this period− ₹0',
+      'From after this period+ ₹100',
+      'Balance due (all time)₹700',
     ]);
   });
 });

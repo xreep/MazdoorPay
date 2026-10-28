@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useCurrentQuery } from '../../lib/query.js';
 import { useSearchParams } from 'react-router-dom';
 import { formatINR } from '@mazdoorpay/shared';
 import { api } from '../../lib/api.js';
@@ -13,7 +13,7 @@ export default function MusterRollPrint() {
   const [params] = useSearchParams();
   const month = params.get('month');
   const siteId = params.get('siteId');
-  const { data, isPending, isError, error } = useQuery({
+  const { data, isPending, isError, error } = useCurrentQuery({
     queryKey: ['muster-roll', month, siteId],
     queryFn: () => api.get('/reports/muster-roll', { query: { month, siteId } }),
   });

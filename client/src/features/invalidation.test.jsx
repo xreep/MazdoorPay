@@ -8,7 +8,8 @@ import { useUpdateSite } from './sites/useSites.js';
 
 const setup = (hook) => {
   const client = createQueryClient();
-  const spy = vi.spyOn(client, 'invalidateQueries');
+  // Saves clear affected data (resetQueries), so no screen can show the old figures.
+  const spy = vi.spyOn(client, 'resetQueries');
   const { result } = renderHook(hook, {
     wrapper: ({ children }) => (
       <QueryClientProvider client={client}>{children}</QueryClientProvider>
@@ -18,7 +19,7 @@ const setup = (hook) => {
   return { result, keys };
 };
 
-describe('cache invalidation', () => {
+describe('after a save', () => {
   it('a rate change refreshes wages, dues and the dashboard', async () => {
     server.use(
       http.post(API('/workers/w1/rate'), () => HttpResponse.json({ worker: {}, repricedDays: 2 }))
@@ -26,7 +27,9 @@ describe('cache invalidation', () => {
     const { result, keys } = setup(() => useChangeRate());
     await result.current.mutateAsync({ id: 'w1', dailyRate: 60000 });
     await waitFor(() =>
-      expect(keys()).toEqual(expect.arrayContaining(['wages', 'dues', 'dashboard', 'worker']))
+      expect(keys()).toEqual(
+        expect.arrayContaining(['wages', 'dues', 'dashboard', 'worker', 'wage-slip'])
+      )
     );
   });
 

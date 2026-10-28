@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useCurrentQuery } from '../../lib/query.js';
 import { useSearchParams } from 'react-router-dom';
 import { formatINR } from '@mazdoorpay/shared';
 import { api } from '../../lib/api.js';
@@ -12,7 +12,7 @@ export default function PaymentsReportPrint() {
   const { formatDay } = useFormat();
   const [params] = useSearchParams();
   const query = Object.fromEntries(params);
-  const { data, isPending, isError, error } = useQuery({
+  const { data, isPending, isError, error } = useCurrentQuery({
     queryKey: ['payments-report', query],
     queryFn: () => api.get('/reports/payments', { query }),
   });

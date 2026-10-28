@@ -51,8 +51,17 @@ function SiteCard({ site, onEdit, onDelete }) {
         className="mt-4 inline-flex items-center gap-2 self-start rounded-full bg-surface-2 px-3 py-1.5 text-sm font-medium hover:bg-ink/10"
       >
         <Users className="h-4 w-4" aria-hidden="true" />
-        <span className="num">
-          {t('sites.workerCounts', { active: site.activeWorkers, total: site.totalWorkers })}
+        {/* The filtered Workers list, not a site page: the words say so. */}
+        <span>
+          <span className="num">
+            {t(site.totalWorkers === 1 ? 'sites.workerCountsOne' : 'sites.workerCounts', {
+              active: site.activeWorkers,
+              total: site.totalWorkers,
+            })}
+          </span>
+          {` · ${t('sites.viewList')} `}
+          <span className="sr-only">{t('sites.forSite', { name: site.name })}</span>
+          <span aria-hidden="true">{' →'}</span>
         </span>
       </Link>
       <div className="mt-5 flex items-center gap-2 border-t border-border pt-4">

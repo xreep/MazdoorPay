@@ -64,7 +64,12 @@ export default function WorkersPage() {
   const { data: sites } = useSites('all');
   const siteNames = useMemo(() => new Map((sites ?? []).map((s) => [s._id, s.name])), [sites]);
   const filters = { q: search, siteId, role, status, page: pageNo };
-  const { data, isPending, isError, error, refetch, isFetching } = useWorkers(filters);
+  const workers = useWorkers(filters);
+  const { isError, error, refetch, isFetching } = workers;
+  // While a search is still being typed, the list on screen is for the old text: show loading.
+  const typing = q.trim() !== search;
+  const data = typing ? undefined : workers.data;
+  const isPending = typing || workers.isPending;
   const formOpen = params.get('new') === '1';
   const filtered = Boolean(search || siteId || role || status !== 'active');
 
@@ -88,7 +93,9 @@ export default function WorkersPage() {
     <>
       <PageHeader
         title={t('workers.title')}
-        subtitle={data ? t('workers.count', { n: data.total }) : ' '}
+        subtitle={
+          data ? t(data.total === 1 ? 'workers.countOne' : 'workers.count', { n: data.total }) : ' '
+        }
         actions={
           <Button onClick={openNew}>
             <Plus className="h-5 w-5" aria-hidden="true" />

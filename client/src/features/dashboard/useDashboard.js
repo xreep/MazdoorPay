@@ -1,5 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
+import { useCurrentQuery } from '../../lib/query.js';
 import { api } from '../../lib/api.js';
 
 export const useDashboard = () =>
-  useQuery({ queryKey: ['dashboard'], queryFn: () => api.get('/dashboard') });
+  useCurrentQuery({ queryKey: ['dashboard'], queryFn: () => api.get('/dashboard') });

@@ -85,6 +85,14 @@ export async function getWageSummary(contractorId, { from, to, groupBy, siteId, 
     add(buckets[i], _id.status, earned);
   }
   for (const id of paidBy.keys()) workerRow(id);
+  // The all-time balance is about every worker who has one, not only those active in the period,
+  // so a quiet week still shows what is owed.
+  const scope = { contractorId };
+  if (siteId) scope.siteId = siteId;
+  if (workerId) scope._id = workerId;
+  const inScope = await Worker.find(scope).select('_id').lean();
+  const owed = await getBalances(contractorId, { workerIds: inScope.map((w) => w._id) });
+  for (const [id, b] of owed) if (b.balance !== 0) workerRow(id);
 
   const ids = [...perWorker.keys()];
   const [workers, balances] = await Promise.all([

@@ -1,5 +1,6 @@
 import { Suspense } from 'react';
-import { Smartphone } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { AlertTriangle, Smartphone } from 'lucide-react';
 import { formatINR } from '@mazdoorpay/shared';
 import { useT } from '../../lib/i18n.jsx';
 import { useMediaQuery } from '../../lib/hooks.js';
@@ -14,11 +15,26 @@ const QrCode = lazyWithReload(() => import('../../components/ui/QrCode.jsx'));
 export function UpiPayAssist({ worker, amount, type }) {
   const t = useT();
   const touch = useMediaQuery('(pointer: coarse)');
+  // Recording a UPI payment for someone with no UPI ID on file is allowed (they may have been
+  // paid on a UPI-linked number), but it must not go unnoticed.
   if (!worker.upiId)
     return (
-      <p className="rounded-control bg-surface-2 px-3.5 py-3 text-sm text-ink-muted sm:col-span-2">
-        {t('payments.upiMissing', { name: worker.name })}
-      </p>
+      <div
+        role="alert"
+        className="flex gap-3 rounded-control border border-half bg-half-soft p-4 text-ink sm:col-span-2"
+      >
+        <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-half" aria-hidden="true" />
+        <div className="space-y-1">
+          <p className="font-semibold">{t('payments.upiMissingTitle', { name: worker.name })}</p>
+          <p className="text-sm">{t('payments.upiMissingBody')}</p>
+          <Link
+            to={`/workers/${worker._id}`}
+            className="inline-flex min-h-12 items-center text-sm font-semibold text-brand-ink underline"
+          >
+            {t('payments.upiMissingLink', { name: worker.name })}
+          </Link>
+        </div>
+      </div>
     );
   if (!(amount > 0)) return null;
 

@@ -115,6 +115,8 @@ export const en = {
     addFirstSite: 'Add your first site',
   },
   sites: {
+    viewList: 'View list',
+    forSite: 'for {name}',
     title: 'Sites',
     subtitle: 'Where your workers are working',
     addTitle: 'Add site',
@@ -122,6 +124,7 @@ export const en = {
     name: 'Site name',
     nameHint: 'The name your workers use, like “Sobha Tower – Hebbal”',
     location: 'Address or area (optional)',
+    workerCountsOne: '{active} active of {total} worker',
     workerCounts: '{active} active of {total} workers',
     markInactive: 'Mark inactive',
     markActive: 'Mark active',
@@ -150,6 +153,7 @@ export const en = {
   },
   workers: {
     title: 'Workers',
+    countOne: '{n} worker',
     count: '{n} workers',
     addTitle: 'Add worker',
     addFirst: 'Add your first worker',
@@ -271,6 +275,11 @@ export const en = {
     print: 'Print',
   },
   wages: {
+    madeUpTitle: 'How the balance due is made up',
+    madeUpBefore: 'Owed before this period',
+    madeUpEarned: 'Earned in this period',
+    madeUpPaid: 'Paid in this period',
+    madeUpAfter: 'From after this period',
     paidSplit: 'Wages {wages} · advances {advances}',
     dueAllTime: 'Balance due (all time)',
     advanceAllTime: 'Advance outstanding (all time)',
@@ -298,7 +307,7 @@ export const en = {
     paidInPeriod: 'Paid in this period',
     paidHint: 'Wages and advances',
     dueNow: 'Due today',
-    dueHint: 'All-time balance of these workers',
+    dueHint: 'All work and payments to date, for every worker with a balance',
     perDay: 'Earnings per day',
     perWeek: 'Earnings per week',
     chartSummary: '{total} earned across {n} periods',
@@ -541,6 +550,10 @@ export const en = {
     total: 'Total',
   },
   payments: {
+    upiMissingTitle: '{name} has no UPI ID on file',
+    upiMissingBody:
+      'Check the UPI number you paid before saving, and type the UTR from your UPI app below.',
+    upiMissingLink: "Add {name}'s UPI ID",
     subtitle: 'Who to pay, advances, and every payment so far',
     tabDues: 'To pay',
     tabAdvances: 'Advances',
@@ -572,7 +585,6 @@ export const en = {
     scanToPay: "Scan this with your phone's UPI app to pay {amount} to {upiId}.",
     upiConfirmHint:
       'MazdoorPay cannot see whether the payment went through. After paying, type the 12-digit UTR from your UPI app below.',
-    upiMissing: "Add {name}'s UPI ID on their profile to pay from here.",
     utrHint: '12 digits, shown in the UPI app after paying',
     utrShort: 'UTR {ref}',
     bankRef: 'Bank reference (optional)',

@@ -81,6 +81,14 @@ const render = (route = `/attendance?siteId=${S1}`) =>
 afterEach(() => vi.useRealTimers());
 
 describe('AttendancePage', () => {
+  it('a future day in the address is replaced with today, so address and page agree', async () => {
+    server.use(...handlers());
+    const { router } = render(`/attendance?siteId=${S1}&day=${addDays(todayIST(), 1)}`);
+    await screen.findByRole('group', { name: 'Ramesh Kumar' });
+    await waitFor(() => expect(router.state.location.search).not.toMatch(/day=/));
+    expect(router.state.location.search).toMatch(`siteId=${S1}`);
+  });
+
   it("offers card scanning for today and the site's ID cards to print", async () => {
     server.use(...handlers());
     render();

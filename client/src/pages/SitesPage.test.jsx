@@ -3,6 +3,7 @@ import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { API, HttpResponse, http, server } from '../test/server.js';
 import { renderWithProviders } from '../test/render.jsx';
+import { sitesResponse } from '../test/fixtures.js';
 import SitesPage from './SitesPage.jsx';
 
 const sites = [
@@ -29,6 +30,18 @@ const listHandler = (list = sites) =>
 const card = (name) => screen.getByRole('article', { name });
 
 describe('SitesPage', () => {
+  it("labels the worker count as a link to the site's worker list", async () => {
+    server.use(http.get(API('/sites'), () => HttpResponse.json(sitesResponse)));
+    renderWithProviders(<SitesPage />, { path: '/sites', route: '/sites' });
+    const site = sitesResponse.sites[0];
+    // Visible: the counts and "View list"; screen readers also hear which site.
+    await waitFor(() => expect(screen.getAllByRole('link').length).toBeGreaterThan(1));
+    const link = await screen.findByRole('link', {
+      name: `${site.activeWorkers} active of ${site.totalWorkers} workers · View list for ${site.name}`,
+    });
+    expect(link).toHaveAttribute('href', `/workers?siteId=${site._id}`);
+  });
+
   it('lists active then inactive sites with counts', async () => {
     server.use(listHandler());
     renderWithProviders(<SitesPage />, { path: '/sites', route: '/sites' });

@@ -1,4 +1,5 @@
-import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { refreshAfterSave, useCurrentQuery } from '../../lib/query.js';
 import { api } from '../../lib/api.js';
 
 export const duesQuery = (siteId) => ({
@@ -7,27 +8,31 @@ export const duesQuery = (siteId) => ({
 });
 
 // Changing the site filter keeps the current list on screen until the new one arrives.
-export const useDues = (siteId) =>
-  useQuery({ ...duesQuery(siteId), placeholderData: keepPreviousData });
+export const useDues = (siteId) => useCurrentQuery({ ...duesQuery(siteId) });
 
 export const usePaymentHistory = (filters) =>
-  useQuery({
+  useCurrentQuery({
     queryKey: ['payments', filters],
     queryFn: () => api.get('/payments', { query: filters }),
-    placeholderData: keepPreviousData,
   });
 
 export const usePayment = (id) =>
-  useQuery({ queryKey: ['payment', id], queryFn: () => api.get(`/payments/${id}`) });
+  useCurrentQuery({ queryKey: ['payment', id], queryFn: () => api.get(`/payments/${id}`) });
 
 function usePaymentMutation(fn) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: fn,
-    onSuccess: () => {
-      for (const key of ['dues', 'payments', 'payment', 'dashboard', 'worker', 'wages'])
-        queryClient.invalidateQueries({ queryKey: [key] });
-    },
+    onSuccess: () =>
+      refreshAfterSave(queryClient, [
+        'dues',
+        'payments',
+        'payment',
+        'dashboard',
+        'worker',
+        'wages',
+        'wage-slip',
+      ]),
   });
 }
 

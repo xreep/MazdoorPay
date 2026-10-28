@@ -69,6 +69,38 @@ describe('RecordPaymentModal', () => {
     expect(within(dialog).getByText('Pending: ₹1,400')).toBeInTheDocument();
   });
 
+  it('asks for a worker in plain words when none is chosen', async () => {
+    server.use(...handlers());
+    renderWithProviders(<Harness />, { path: '/payments', route: '/payments' });
+    const dialog = await screen.findByRole('dialog', { name: 'Record payment' });
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Save payment' }));
+    await waitFor(() =>
+      expect(within(dialog).getByLabelText('Worker')).toHaveAccessibleDescription('Choose a worker')
+    );
+    expect(within(dialog).queryByText('Invalid id')).toBeNull();
+  });
+
+  it.each([
+    ['-100', 'Enter an amount in rupees, like 450 or 450.50'],
+    ['0', 'Amount must be more than ₹0'],
+    ['', 'Enter an amount'],
+  ])('shows one message for the amount "%s"', async (typed, message) => {
+    server.use(...handlers());
+    render();
+    const dialog = await screen.findByRole('dialog', { name: 'Record payment' });
+    const amount = within(dialog).getByLabelText('Amount');
+    await waitFor(() => expect(amount).toHaveValue('1400'));
+    await userEvent.clear(amount);
+    if (typed) await userEvent.type(amount, typed);
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Save payment' }));
+    expect(await within(dialog).findByText(message)).toBeInTheDocument();
+    const amountMessages = within(dialog)
+      .queryAllByText(/^(Enter an amount|Amount must)/)
+      .map((el) => el.textContent);
+    expect(amountMessages).toEqual([message]);
+    expect(amount).toHaveAccessibleDescription(message);
+  });
+
   it('UPI needs a 12-digit UTR; cash has no reference field', async () => {
     const posts = [];
     server.use(...handlers({ posts }));
@@ -137,9 +169,11 @@ describe('RecordPaymentModal', () => {
       render(W2);
       const dialog = await screen.findByRole('dialog', { name: 'Record payment' });
       await userEvent.click(within(dialog).getByRole('radio', { name: 'UPI' }));
+      const warning = await within(dialog).findByRole('alert');
+      expect(warning).toHaveTextContent('Kishan Lal has no UPI ID on file');
       expect(
-        await within(dialog).findByText(/Add Kishan Lal's UPI ID on their profile/)
-      ).toBeInTheDocument();
+        within(warning).getByRole('link', { name: "Add Kishan Lal's UPI ID" })
+      ).toHaveAttribute('href', `/workers/${W2}`);
       expect(within(dialog).queryByRole('img', { name: /UPI QR code/ })).toBeNull();
     });
   });

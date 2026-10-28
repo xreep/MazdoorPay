@@ -1,17 +1,18 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { refreshAfterSave, useCurrentQuery } from '../../lib/query.js';
 import { api } from '../../lib/api.js';
 
 export const sheetKey = (siteId, day) => ['attendance-sheet', siteId, day];
 
 export const useAttendanceSheet = (siteId, day) =>
-  useQuery({
+  useCurrentQuery({
     queryKey: sheetKey(siteId, day),
     queryFn: () => api.get('/attendance/sheet', { query: { siteId, day } }),
     enabled: Boolean(siteId && day),
   });
 
 export const useAttendanceCalendar = (siteId, month) =>
-  useQuery({
+  useCurrentQuery({
     queryKey: ['attendance-calendar', siteId, month],
     queryFn: () => api.get('/attendance/calendar', { query: { siteId, month } }),
     enabled: Boolean(month),
@@ -38,15 +39,16 @@ export function useMarkAttendance(siteId) {
             }
           : sheet
       );
-      for (const k of [
-        key,
-        ['attendance-calendar'],
-        ['dashboard'],
-        ['worker'],
-        ['dues'],
-        ['wages'],
-      ])
-        queryClient.invalidateQueries({ queryKey: k });
+      // The register already shows the saved marks; it refreshes quietly from the server.
+      queryClient.invalidateQueries({ queryKey: key });
+      refreshAfterSave(queryClient, [
+        'attendance-calendar',
+        'dashboard',
+        'worker',
+        'dues',
+        'wages',
+        'wage-slip',
+      ]);
     },
   });
 }
@@ -57,15 +59,16 @@ export function useScanCard() {
   return useMutation({
     mutationFn: (code) => api.post('/attendance/scan', { code }),
     onSuccess: () => {
-      for (const k of [
-        ['attendance-sheet'],
-        ['attendance-calendar'],
-        ['dashboard'],
-        ['worker'],
-        ['dues'],
-        ['wages'],
-      ])
-        queryClient.invalidateQueries({ queryKey: k });
+      // The register behind the scanner refreshes quietly, so unsaved marks there are kept.
+      queryClient.invalidateQueries({ queryKey: ['attendance-sheet'] });
+      refreshAfterSave(queryClient, [
+        'attendance-calendar',
+        'dashboard',
+        'worker',
+        'dues',
+        'wages',
+        'wage-slip',
+      ]);
     },
   });
 }

@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useCurrentQuery } from '../../lib/query.js';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { formatINR } from '@mazdoorpay/shared';
 import { api } from '../../lib/api.js';
@@ -25,7 +25,7 @@ export default function WageSlipPrint() {
   const { id } = useParams();
   const [params] = useSearchParams();
   const query = { from: params.get('from'), to: params.get('to') };
-  const { data, isPending, isError, error } = useQuery({
+  const { data, isPending, isError, error } = useCurrentQuery({
     queryKey: ['wage-slip', id, query],
     queryFn: () => api.get(`/workers/${id}/slip`, { query }),
   });

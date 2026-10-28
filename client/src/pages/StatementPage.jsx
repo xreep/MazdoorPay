@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useCurrentQuery } from '../lib/query.js';
 import { useParams } from 'react-router-dom';
 import { LinkIcon } from 'lucide-react';
 import { formatINR } from '@mazdoorpay/shared';
@@ -18,7 +18,7 @@ const sum = (rows, pick) => rows.reduce((total, row) => total + pick(row), 0);
 export default function StatementPage() {
   const t = useT();
   const { token } = useParams();
-  const { data, isPending, isError, error, refetch } = useQuery({
+  const { data, isPending, isError, error, refetch } = useCurrentQuery({
     queryKey: ['statement', token],
     queryFn: () => api.get(`/statements/${encodeURIComponent(token)}`),
     retry: (count, err) => err.status !== 404 && count < 2,

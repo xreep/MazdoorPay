@@ -1,4 +1,5 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { refreshAfterSave, useCurrentQuery } from '../../lib/query.js';
 import { api } from '../../lib/api.js';
 
 export const sitesQuery = (status = 'all') => ({
@@ -6,7 +7,7 @@ export const sitesQuery = (status = 'all') => ({
   queryFn: () => api.get('/sites', { query: { status } }).then((r) => r.sites),
 });
 
-export const useSites = (status = 'all') => useQuery(sitesQuery(status));
+export const useSites = (status = 'all') => useCurrentQuery(sitesQuery(status));
 
 // Active sites as select options, for filters and forms across the app.
 export function useSiteOptions() {
@@ -20,7 +21,7 @@ function useSiteMutation(fn) {
     mutationFn: fn,
     onSuccess: () => {
       // Site names appear on most screens.
-      for (const key of [
+      refreshAfterSave(queryClient, [
         'sites',
         'dashboard',
         'workers',
@@ -28,9 +29,8 @@ function useSiteMutation(fn) {
         'dues',
         'attendance-sheet',
         'wages',
-      ]) {
-        queryClient.invalidateQueries({ queryKey: [key] });
-      }
+        'wage-slip',
+      ]);
     },
   });
 }

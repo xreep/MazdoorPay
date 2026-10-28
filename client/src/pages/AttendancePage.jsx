@@ -233,6 +233,19 @@ export default function AttendancePage() {
   const siteId = params.get('siteId') || siteOptions[0]?.value || '';
   const dayParam = params.get('day');
   const day = isValidDay(dayParam) && dayParam <= today ? dayParam : today;
+  // A future or invalid day in the address shows today; correct the address to match.
+  useEffect(() => {
+    if (dayParam && dayParam !== day) {
+      setParams(
+        (p) => {
+          const next = new URLSearchParams(p);
+          next.delete('day');
+          return next;
+        },
+        { replace: true }
+      );
+    }
+  }, [dayParam, day, setParams]);
   const tab = params.get('tab') ?? 'mark';
   const [dirty, setDirty] = useState(0);
   const [pendingSwitch, setPendingSwitch] = useState(null);

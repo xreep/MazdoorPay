@@ -1,4 +1,4 @@
-import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { useCurrentQuery } from '../../lib/query.js';
 import { api } from '../../lib/api.js';
 
 export const wageSummaryQuery = (query) => ({
@@ -6,5 +6,4 @@ export const wageSummaryQuery = (query) => ({
   queryFn: () => api.get('/wages/summary', { query }),
 });
 
-export const useWageSummary = (query) =>
-  useQuery({ ...wageSummaryQuery(query), placeholderData: keepPreviousData });
+export const useWageSummary = (query) => useCurrentQuery({ ...wageSummaryQuery(query) });

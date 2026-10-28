@@ -21,7 +21,7 @@ const optionalText = (max) =>
 
 export const paymentCreateSchema = z
   .object({
-    workerId: objectIdSchema,
+    workerId: z.string({ error: 'Choose a worker' }).regex(/^[a-f\d]{24}$/i, 'Choose a worker'),
     amount: paiseSchema(1, LIMITS.PAYMENT_MAX_PAISE),
     type: z.enum(PAYMENT_TYPES, { error: 'Pick wage or advance' }),
     method: z.enum(PAYMENT_METHODS, { error: 'Pick cash, UPI or bank' }),

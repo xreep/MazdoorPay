@@ -91,11 +91,7 @@ export function WorkerForm({ open, worker, defaultSiteId, onClose, onSaved }) {
           />
         </Field>
         {!editing && (
-          <Field
-            label={t('workers.dailyRate')}
-            hint={t('workers.dailyRateHint')}
-            error={e.dailyRate?.message}
-          >
+          <Field label={t('workers.dailyRate')} hint={t('workers.dailyRateHint')}>
             <MoneyField name="dailyRate" control={control} />
           </Field>
         )}
