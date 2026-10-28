@@ -83,11 +83,11 @@ npm install
 The quickest start needs no database: the API runs on an in-memory MongoDB filled with demo data.
 
 ```bash
-npm run dev:memory -w server   # API on http://localhost:5055
+npm run dev:memory -w server   # API on http://localhost:5055; prints local demo logins
 npm run dev:client             # app on http://localhost:5173
 ```
 
-With a real database, copy `server/.env.example` to `server/.env`, set `MONGODB_URI` (a replica set, such as Atlas, because payments use transactions) and the two secrets, then:
+With a real database, copy `server/.env.example` to `server/.env`, set `MONGODB_URI` (a replica set, such as Atlas, because payments use transactions), the two secrets and the demo passwords (`DEMO_PASSWORD`, `DEMO_ADMIN_PASSWORD`), then:
 
 ```bash
 npm run seed         # replaces only the demo accounts; real users are never touched
@@ -109,7 +109,7 @@ npm run create-admin -w server -- --name "Asha Rao" --email asha@example.com --p
 ## Deployment
 
 - **Database:** MongoDB Atlas. Network access must allow Render (`0.0.0.0/0` on the free tier, whose IPs change), with a database user that can read and write.
-- **API:** Render Blueprint from [`render.yaml`](render.yaml) — Node 22, Singapore region, health check `/api/v1/health`. Set `MONGODB_URI` and `FRONTEND_ORIGIN` in the Render dashboard; Render generates the secrets. With `SEED_DEMO_IF_MISSING=true` the API creates the demo accounts on its first start.
+- **API:** Render Blueprint from [`render.yaml`](render.yaml) — Node 22, Singapore region, health check `/api/v1/health`. Set `MONGODB_URI` and `FRONTEND_ORIGIN` in the Render dashboard; Render generates the secrets. With `SEED_DEMO_IF_MISSING=true` the API creates the demo accounts on its first start. Their passwords come from `DEMO_PASSWORD` and `DEMO_ADMIN_PASSWORD`, set in the Render dashboard; changing them there gives the demo accounts the new passwords on the next start and ends their sessions.
 - **App:** Vercel project with root directory `client`. [`client/vercel.json`](client/vercel.json) builds the app and rewrites `/api/*` to Render, so the app and API share one address and the login cookie stays first-party.
 
 ## Requirements

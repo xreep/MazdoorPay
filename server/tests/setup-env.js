@@ -7,3 +7,6 @@ process.env.BCRYPT_COST = '4';
 process.env.RATE_LIMIT_MAX = '100000';
 process.env.AUTH_RATE_LIMIT_MAX = '100000';
 process.env.FRONTEND_ORIGIN = 'http://localhost:5173';
+// Throwaway demo passwords for the tests; real ones are set only on the server.
+process.env.DEMO_PASSWORD = 'Test-demo-2026';
+process.env.DEMO_ADMIN_PASSWORD = 'Test-admin-2026';

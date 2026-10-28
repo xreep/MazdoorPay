@@ -164,14 +164,15 @@ All six endpoints kept p99 under 90 ms, well within the 300 ms p95 target. Reads
 
 ### Environment variables (API)
 
-| Variable                                                                                              | Purpose                                                                                                                                                    |
-| ----------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `MONGODB_URI`                                                                                         | Atlas connection string (database `mazdoorpay`)                                                                                                            |
-| `JWT_ACCESS_SECRET`, `QR_SECRET`                                                                      | ≥ 32 characters in production (Render generates them)                                                                                                      |
-| `FRONTEND_ORIGIN`                                                                                     | comma-separated allowed browser origins                                                                                                                    |
-| `TRUST_PROXY`                                                                                         | proxy hops in front of the API (2 behind Vercel → Render)                                                                                                  |
-| `SEED_DEMO_IF_MISSING`                                                                                | `true` creates the demo accounts on start unless a finished demo seed is recorded; a database lock lets only one instance seed while a deploy overlaps two |
-| `BCRYPT_COST`, `LOGIN_MAX_ATTEMPTS`, `LOGIN_LOCKOUT_MINUTES`, `RATE_LIMIT_MAX`, `AUTH_RATE_LIMIT_MAX` | tuning, with safe defaults                                                                                                                                 |
+| Variable                                                                                              | Purpose                                                                                                                                                                                        |
+| ----------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MONGODB_URI`                                                                                         | Atlas connection string (database `mazdoorpay`)                                                                                                                                                |
+| `JWT_ACCESS_SECRET`, `QR_SECRET`                                                                      | ≥ 32 characters in production (Render generates them)                                                                                                                                          |
+| `FRONTEND_ORIGIN`                                                                                     | comma-separated allowed browser origins                                                                                                                                                        |
+| `TRUST_PROXY`                                                                                         | proxy hops in front of the API (2 behind Vercel → Render)                                                                                                                                      |
+| `SEED_DEMO_IF_MISSING`                                                                                | `true` creates the demo accounts on start unless a finished demo seed is recorded; a database lock lets only one instance seed while a deploy overlaps two                                     |
+| `DEMO_PASSWORD`, `DEMO_ADMIN_PASSWORD`                                                                | passwords of the demo contractors and the demo admin; never in the code. Applied to the demo accounts on every start, so changing them rotates the passwords and ends those accounts' sessions |
+| `BCRYPT_COST`, `LOGIN_MAX_ATTEMPTS`, `LOGIN_LOCKOUT_MINUTES`, `RATE_LIMIT_MAX`, `AUTH_RATE_LIMIT_MAX` | tuning, with safe defaults                                                                                                                                                                     |
 
 The API validates its environment on start and exits with one clear line if anything is wrong.
 
@@ -197,7 +198,7 @@ npm run restore -w server -- --file <file> --confirm  # replaces the collections
 
 ### Demo data
 
-`npm run seed` replaces only the demo accounts (`isDemo: true`): an admin, two contractors, four sites in Bengaluru, Pune and Mumbai, 30 workers, 45 days of attendance, Saturday payouts in cash and UPI, four advances, three pay raises and one voided payment. It is deterministic and refuses to run against production unless explicitly allowed.
+`npm run seed` replaces only the demo accounts (`isDemo: true`), with passwords from `DEMO_PASSWORD` and `DEMO_ADMIN_PASSWORD` (it refuses to run without them): an admin, two contractors, four sites in Bengaluru, Pune and Mumbai, 30 workers, 45 days of attendance, Saturday payouts in cash and UPI, four advances, three pay raises and one voided payment. It is deterministic and refuses to run against production unless explicitly allowed.
 
 ## 11. Known limitations
 

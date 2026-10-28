@@ -1,5 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
-import { OPS_ADMIN } from './e2e/accounts.js';
+import { DEMO, OPS_ADMIN } from './e2e/accounts.js';
 
 // End-to-end tests run the real app: the API on an in-memory MongoDB seeded with demo data,
 // and the production build of the client served by `vite preview` (which proxies /api).
@@ -38,6 +38,8 @@ export default defineConfig({
         PORT: String(API_PORT),
         AUTH_RATE_LIMIT_MAX: '1000',
         RATE_LIMIT_MAX: '100000',
+        DEMO_PASSWORD: DEMO.contractor.password,
+        DEMO_ADMIN_PASSWORD: DEMO.admin.password,
         DEV_ADMIN_EMAIL: OPS_ADMIN.email,
         DEV_ADMIN_PASSWORD: OPS_ADMIN.password,
       },

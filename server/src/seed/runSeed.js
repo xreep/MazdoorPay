@@ -16,14 +16,7 @@ import { changeRate, createWorker } from '../services/worker.service.js';
 import { markAttendance } from '../services/attendance.service.js';
 import { recordPayment, voidPayment } from '../services/payment.service.js';
 import { getBalances } from '../services/ledger.service.js';
-import {
-  ADMIN,
-  ADVANCE_NOTES,
-  CONTRACTORS,
-  DEMO_PASSWORD,
-  PAYMENT_NOTES,
-  WORKERS,
-} from './data.js';
+import { ADMIN, ADVANCE_NOTES, CONTRACTORS, PAYMENT_NOTES, WORKERS } from './data.js';
 
 const SEED = 20261025;
 const HISTORY_DAYS = 45;
@@ -76,6 +69,9 @@ export async function runSeed({ now = new Date(), log = () => {}, allowProd = fa
       'Refusing to seed production. Set SEED_ALLOW_PROD=true to replace the demo accounts.'
     );
   }
+  if (!config.demoPassword || !config.demoAdminPassword) {
+    throw new Error('Set DEMO_PASSWORD and DEMO_ADMIN_PASSWORD to create the demo accounts.');
+  }
   const random = prng(SEED);
   const pickIndex = (n) => Math.floor(random() * n);
   const uuid = () => {
@@ -98,11 +94,11 @@ export async function runSeed({ now = new Date(), log = () => {}, allowProd = fa
 
   await User.create({
     ...ADMIN,
-    passwordHash: await bcrypt.hash(ADMIN.password, config.bcryptCost),
+    passwordHash: await bcrypt.hash(config.demoAdminPassword, config.bcryptCost),
     role: 'admin',
     isDemo: true,
   });
-  const passwordHash = await bcrypt.hash(DEMO_PASSWORD, config.bcryptCost);
+  const passwordHash = await bcrypt.hash(config.demoPassword, config.bcryptCost);
 
   let workerCursor = 0;
   const tenants = [];
@@ -312,4 +308,24 @@ export async function seedDemoIfMissing({ now = new Date(), log = () => {} } = {
   } finally {
     await seedMarker().deleteOne({ _id: LOCK_ID });
   }
+}
+
+// Changing DEMO_PASSWORD or DEMO_ADMIN_PASSWORD on the host takes effect on the next start: the
+// existing demo accounts get the new passwords and their sessions end. Real accounts are untouched.
+// Returns how many accounts changed.
+export async function syncDemoPasswords({ log = () => {} } = {}) {
+  if (!config.demoPassword || !config.demoAdminPassword) return 0;
+  const demo = await User.find({ isDemo: true }).select('+passwordHash role email');
+  let changed = 0;
+  for (const user of demo) {
+    const wanted = user.role === 'admin' ? config.demoAdminPassword : config.demoPassword;
+    if (await bcrypt.compare(wanted, user.passwordHash)) continue;
+    user.passwordHash = await bcrypt.hash(wanted, config.bcryptCost);
+    await user.save();
+    await RefreshToken.updateMany({ userId: user._id, revokedAt: null }, { revokedAt: new Date() });
+    await LoginAttempt.deleteOne({ email: user.email });
+    changed += 1;
+  }
+  if (changed) log(`New password set on ${changed} demo account(s)`);
+  return changed;
 }

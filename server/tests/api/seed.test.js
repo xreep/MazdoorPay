@@ -4,7 +4,8 @@ import { Worker } from '../../src/models/Worker.js';
 import { Attendance } from '../../src/models/Attendance.js';
 import { Payment } from '../../src/models/Payment.js';
 import { config } from '../../src/config/env.js';
-import { runSeed, seedDemoIfMissing } from '../../src/seed/runSeed.js';
+import { runSeed, seedDemoIfMissing, syncDemoPasswords } from '../../src/seed/runSeed.js';
+import { RefreshToken } from '../../src/models/RefreshToken.js';
 import { findAnomalies } from '../../src/services/admin.service.js';
 import { useTestDb } from '../helpers/db.js';
 import { registerContractor } from '../helpers/factory.js';
@@ -41,11 +42,11 @@ it('creates realistic demo data, keeps real users and passes every data check', 
 
   const login = await request(app())
     .post('/api/v1/auth/login')
-    .send({ email: 'ravi.kumar@mazdoorpay.in', password: 'Demo@2026' });
+    .send({ email: 'ravi.kumar@mazdoorpay.in', password: config.demoPassword });
   expect(login.status).toBe(200);
   const admin = await request(app())
     .post('/api/v1/auth/login')
-    .send({ email: 'admin@mazdoorpay.in', password: 'Admin@2026' });
+    .send({ email: 'admin@mazdoorpay.in', password: config.demoAdminPassword });
   expect(admin.body.user.role).toBe('admin');
 }, 120000);
 
@@ -108,3 +109,58 @@ it('seedDemoIfMissing waits out a live lock but takes over an abandoned one', as
   expect(await seedDemoIfMissing({ now: NOW })).toMatchObject({ contractors: 2 });
   expect(await state.findOne({ _id: 'demo-seed-lock' })).toBeNull();
 }, 120000);
+
+describe('demo passwords', () => {
+  const login = (email, password) =>
+    request(app()).post('/api/v1/auth/login').send({ email, password });
+
+  it('the seed refuses to run without them', async () => {
+    const saved = config.demoPassword;
+    config.demoPassword = undefined;
+    try {
+      await expect(runSeed({ now: NOW })).rejects.toThrow(/DEMO_PASSWORD/);
+      expect(await User.countDocuments({ isDemo: true })).toBe(0);
+    } finally {
+      config.demoPassword = saved;
+    }
+  });
+
+  it('new ones replace the old on the existing demo accounts, ending their sessions', async () => {
+    await runSeed({ now: NOW });
+    const real = await registerContractor();
+    const before = await login('ravi.kumar@mazdoorpay.in', config.demoPassword);
+    expect(before.status).toBe(200);
+    expect(await syncDemoPasswords()).toBe(0); // already current
+
+    const saved = { demo: config.demoPassword, admin: config.demoAdminPassword };
+    config.demoPassword = 'Rotated-demo-2026';
+    config.demoAdminPassword = 'Rotated-admin-2026';
+    try {
+      expect(await syncDemoPasswords()).toBe(3);
+      expect((await login('ravi.kumar@mazdoorpay.in', saved.demo)).status).toBe(401);
+      expect((await login('admin@mazdoorpay.in', saved.admin)).status).toBe(401);
+      expect((await login('sunita.patil@mazdoorpay.in', 'Rotated-demo-2026')).status).toBe(200);
+      expect((await login('admin@mazdoorpay.in', 'Rotated-admin-2026')).status).toBe(200);
+      // The session that logged in with the old password is over.
+      const ravi = await User.findOne({ email: 'ravi.kumar@mazdoorpay.in' });
+      expect(await RefreshToken.countDocuments({ userId: ravi._id, revokedAt: null })).toBe(0);
+      // Real accounts are never touched.
+      expect((await login(real.user.email, real.password)).status).toBe(200);
+    } finally {
+      config.demoPassword = saved.demo;
+      config.demoAdminPassword = saved.admin;
+    }
+  }, 120000);
+
+  it('leaves the accounts alone when none are set', async () => {
+    await runSeed({ now: NOW });
+    const saved = config.demoPassword;
+    config.demoPassword = undefined;
+    try {
+      expect(await syncDemoPasswords()).toBe(0);
+    } finally {
+      config.demoPassword = saved;
+    }
+    expect((await login('ravi.kumar@mazdoorpay.in', saved)).status).toBe(200);
+  }, 120000);
+});

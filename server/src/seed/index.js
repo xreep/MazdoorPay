@@ -1,4 +1,5 @@
-// CLI: npm run seed — replaces the demo accounts (see README for logins).
+// CLI: npm run seed — replaces the demo accounts, with passwords from DEMO_PASSWORD and
+// DEMO_ADMIN_PASSWORD.
 async function main() {
   const { config } = await import('../config/env.js');
   const { connectDB, disconnectDB } = await import('../db.js');

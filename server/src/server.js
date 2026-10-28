@@ -9,13 +9,17 @@ async function start() {
     console.log(`MazdoorPay API listening on port ${config.port} (${config.env})`);
   });
 
-  // Opt-in: fill an empty database with the demo accounts once (the API is already serving).
-  if (process.env.SEED_DEMO_IF_MISSING === 'true') {
-    const { seedDemoIfMissing } = await import('./seed/runSeed.js');
-    seedDemoIfMissing({ log: (line) => console.log(`[seed] ${line}`) })
-      .then((counts) => console.log(counts ? '[seed] demo data created' : '[seed] nothing to do'))
-      .catch((err) => console.error(`[seed] failed: ${err.message}`));
-  }
+  // Demo accounts (the API is already serving): opt-in creation of the demo data on an empty
+  // database, then the passwords from DEMO_PASSWORD / DEMO_ADMIN_PASSWORD applied to them.
+  const { seedDemoIfMissing, syncDemoPasswords } = await import('./seed/runSeed.js');
+  const log = (line) => console.log(`[seed] ${line}`);
+  (async () => {
+    if (process.env.SEED_DEMO_IF_MISSING === 'true') {
+      const counts = await seedDemoIfMissing({ log });
+      log(counts ? 'demo data created' : 'nothing to do');
+    }
+    await syncDemoPasswords({ log });
+  })().catch((err) => console.error(`[seed] failed: ${err.message}`));
 }
 
 start().catch((err) => {

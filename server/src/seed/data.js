@@ -1,10 +1,9 @@
 // Demo data for MazdoorPay. Names, places and rates are realistic for Indian construction sites (2026).
 
-export const DEMO_PASSWORD = 'Demo@2026';
+// The demo passwords are not here: they come from DEMO_PASSWORD and DEMO_ADMIN_PASSWORD.
 export const ADMIN = {
   name: 'Asha Rao',
   email: 'admin@mazdoorpay.in',
-  password: 'Admin@2026',
   phone: '9845012345',
 };
 

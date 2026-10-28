@@ -27,6 +27,11 @@ services:
         value: '2'
       - key: FRONTEND_ORIGIN
         sync: false
+      # Demo account passwords: set in the Render dashboard, applied on every start.
+      - key: DEMO_PASSWORD
+        sync: false
+      - key: DEMO_ADMIN_PASSWORD
+        sync: false
       # Creates the demo accounts on first start when none exist (no shell on the free plan).
       - key: SEED_DEMO_IF_MISSING
         value: "true"

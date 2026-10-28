@@ -13,7 +13,7 @@ describe('LoginPage', () => {
     server.use(noSession);
     const { container } = renderApp('/login');
     await screen.findByRole('button', { name: 'Log in' });
-    expect(container.textContent).not.toMatch(/@mazdoorpay\.in|Demo@2026|Admin@2026|demo/i);
+    expect(container.textContent).not.toMatch(/@mazdoorpay\.in|demo/i);
     expect(screen.queryByRole('button', { name: /^Use / })).toBeNull();
     expect(screen.getByLabelText('Email')).toHaveValue('');
   });
@@ -63,7 +63,7 @@ describe('LoginPage', () => {
     );
     renderApp('/login?next=/workers');
     await userEvent.type(await screen.findByLabelText('Email'), 'ravi@example.com');
-    await userEvent.type(screen.getByLabelText('Password'), 'Demo@2026');
+    await userEvent.type(screen.getByLabelText('Password'), 'Passw0rd123');
     await userEvent.click(screen.getByRole('button', { name: 'Log in' }));
     await waitFor(() => expect(screen.getByTestId('location')).toHaveTextContent('/workers'));
   });
@@ -77,7 +77,7 @@ describe('LoginPage', () => {
     );
     renderApp('/login');
     await userEvent.type(await screen.findByLabelText('Email'), 'admin@mazdoorpay.in');
-    await userEvent.type(screen.getByLabelText('Password'), 'Admin@2026');
+    await userEvent.type(screen.getByLabelText('Password'), 'Passw0rd123');
     await userEvent.click(screen.getByRole('button', { name: 'Log in' }));
     await waitFor(() => expect(screen.getByTestId('location')).toHaveTextContent('/admin'));
   });

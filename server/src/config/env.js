@@ -1,5 +1,9 @@
 import 'dotenv/config';
 import { z } from 'zod';
+import { passwordSchema } from '@mazdoorpay/shared';
+
+// An empty value (as in .env.example) means not set.
+const optionalPassword = z.preprocess((v) => (v === '' ? undefined : v), passwordSchema.optional());
 
 const intFrom = (fallback) => z.coerce.number().int().positive().default(fallback);
 
@@ -18,6 +22,9 @@ const schema = z.object({
   AUTH_RATE_LIMIT_MAX: intFrom(30),
   TRUST_PROXY: z.coerce.number().int().min(0).default(1),
   QR_SECRET: z.string().min(16, 'QR_SECRET must be at least 16 characters'),
+  // Passwords of the shared demo accounts; kept out of the code so they can be changed.
+  DEMO_PASSWORD: optionalPassword,
+  DEMO_ADMIN_PASSWORD: optionalPassword,
 });
 
 const productionRules = (env, ctx) => {
@@ -28,6 +35,15 @@ const productionRules = (env, ctx) => {
         code: 'custom',
         path: [key],
         message: `${key} must be at least 32 characters in production`,
+      });
+    }
+  }
+  for (const key of ['DEMO_PASSWORD', 'DEMO_ADMIN_PASSWORD']) {
+    if (env[key] !== undefined && env[key].length < 12) {
+      ctx.addIssue({
+        code: 'custom',
+        path: [key],
+        message: `${key} must be at least 12 characters in production`,
       });
     }
   }
@@ -66,6 +82,8 @@ export function loadConfig(source = process.env) {
     authRateLimitMax: env.AUTH_RATE_LIMIT_MAX,
     qrSecret: env.QR_SECRET,
     trustProxy: env.TRUST_PROXY,
+    demoPassword: env.DEMO_PASSWORD,
+    demoAdminPassword: env.DEMO_ADMIN_PASSWORD,
   };
 }
 
