@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Calculator, Download, Printer } from 'lucide-react';
-import { formatINR } from '@mazdoorpay/shared';
+import { dateRangeSchema, formatINR } from '@mazdoorpay/shared';
 import { useFormat, useT } from '../lib/i18n.jsx';
 import { downloadCsv } from '../lib/download.js';
 import { PageHeader } from '../components/layout/PageHeader.jsx';
@@ -26,10 +26,14 @@ import { BucketChart } from '../features/wages/BucketChart.jsx';
 export default function WagesPage() {
   const t = useT();
   const { formatDay } = useFormat();
-  const [period, setPeriod] = useState(() => ({
-    preset: 'this-week',
-    ...periodRange('this-week'),
-  }));
+  const [params] = useSearchParams();
+  // A link from another screen (the dashboard's 30 days) can open Wages at its exact dates.
+  const [period, setPeriod] = useState(() => {
+    const linked = { from: params.get('from'), to: params.get('to') };
+    return dateRangeSchema.safeParse(linked).success
+      ? { preset: 'custom', ...linked }
+      : { preset: 'this-week', ...periodRange('this-week') };
+  });
   const [groupBy, setGroupBy] = useState('week');
   const [siteId, setSiteId] = useState('');
   const [downloading, setDownloading] = useState(false);
@@ -81,6 +85,7 @@ export default function WagesPage() {
 
       <Card className="mb-6 space-y-4 p-4 sm:p-5">
         <PeriodPicker value={period} onChange={setPeriod} />
+        <p className="text-sm text-ink-muted">{t('wages.halfDayRule')}</p>
         <div className="flex flex-wrap items-end gap-3">
           <Field label={t('workers.site')} className="min-w-[14rem] flex-1 sm:max-w-xs">
             <Select
@@ -127,10 +132,13 @@ export default function WagesPage() {
             <Stat
               label={t('wages.paidInPeriod')}
               value={formatINR(data.totals.paidInPeriod)}
-              hint={t('wages.paidHint')}
+              hint={t('wages.paidSplit', {
+                wages: formatINR(data.totals.wagesPaidInPeriod),
+                advances: formatINR(data.totals.advancesInPeriod),
+              })}
             />
             <Stat
-              label={data.totals.balance >= 0 ? t('wages.dueNow') : t('workers.advanceOutstanding')}
+              label={data.totals.balance >= 0 ? t('wages.dueAllTime') : t('wages.advanceAllTime')}
               value={formatINR(Math.abs(data.totals.balance))}
               hint={t('wages.dueHint')}
               tone={data.totals.balance >= 0 ? 'plain' : 'brand'}
@@ -157,6 +165,7 @@ export default function WagesPage() {
               <Card className="overflow-hidden">
                 {narrow ? <WageCards data={data} /> : <WageTable data={data} />}
               </Card>
+              <p className="text-sm text-ink-muted">{t('wages.basisNote')}</p>
             </>
           )}
         </div>

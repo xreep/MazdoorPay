@@ -38,13 +38,19 @@ export function WageCards({ data }) {
           </Link>
           <dl className="mt-2 grid grid-cols-2 gap-2 text-sm">
             <div className="rounded-control bg-surface-2 px-3 py-2">
-              <dt className="text-ink-muted">{t('wages.paid')}</dt>
+              <dt className="text-ink-muted">{`${t('wages.colWagesPaid')} ${t('wages.thisPeriod')}`}</dt>
               <dd>
-                <Money paise={w.paidInPeriod} className="font-semibold" />
+                <Money paise={w.wagesPaidInPeriod} className="font-semibold" />
               </dd>
             </div>
             <div className="rounded-control bg-surface-2 px-3 py-2">
-              <dt className="text-ink-muted">{t('wages.balanceNow')}</dt>
+              <dt className="text-ink-muted">{`${t('wages.colAdvances')} ${t('wages.thisPeriod')}`}</dt>
+              <dd>
+                <Money paise={w.advancesInPeriod} className="font-semibold" />
+              </dd>
+            </div>
+            <div className="col-span-2 rounded-control bg-surface-2 px-3 py-2">
+              <dt className="text-ink-muted">{`${t('wages.colBalance')} ${t('wages.allTime')}`}</dt>
               <dd>
                 <Money paise={w.balance} tone="auto" className="font-semibold" />
               </dd>

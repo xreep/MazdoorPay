@@ -29,13 +29,14 @@ test('Payments loads when it is the first page opened after signing in', async (
 });
 
 test('after a deploy, an open tab still opens Payments instead of crashing', async ({ page }) => {
-  await login(page, DEMO.contractor);
-  // The deploy happened: the Payments code this tab knows about is gone.
+  // The deploy happened: the Payments code this tab knows about is gone, for the background
+  // download after sign-in as well as for the click.
   let blocked = 0;
   await page.route(/\/assets\/PaymentsPage-[\w-]+\.js$/, async (route) => {
     if (blocked++ === 0) return route.fulfill({ status: 404, body: 'Not found' });
     return route.continue();
   });
+  await login(page, DEMO.contractor);
   await openPaymentsFromNav(page);
   await expect(page.getByRole('heading', { name: 'Payments' })).toBeVisible({ timeout: 15_000 });
   await expect(crashScreen(page)).toHaveCount(0);
@@ -45,14 +46,14 @@ test('after a deploy, an open tab still opens Payments instead of crashing', asy
 test('a page whose code really is missing shows the error screen, not endless reloads', async ({
   page,
 }) => {
+  await page.route(/\/assets\/PaymentsPage-[\w-]+\.js$/, (route) =>
+    route.fulfill({ status: 404, body: 'Not found' })
+  );
   await login(page, DEMO.contractor);
-  let requests = 0;
-  await page.route(/\/assets\/PaymentsPage-[\w-]+\.js$/, (route) => {
-    requests += 1;
-    return route.fulfill({ status: 404, body: 'Not found' });
-  });
+  let reloads = 0;
+  page.on('load', () => (reloads += 1));
   await openPaymentsFromNav(page);
   await expect(crashScreen(page)).toBeVisible({ timeout: 15_000 });
-  await page.waitForTimeout(2000);
-  expect(requests).toBeLessThanOrEqual(3);
+  await page.waitForTimeout(3000);
+  expect(reloads).toBeLessThanOrEqual(1); // one attempt at the new version, then the error
 });

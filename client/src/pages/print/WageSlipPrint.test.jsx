@@ -59,6 +59,8 @@ describe('WageSlipPrint', () => {
       '+ ₹750'
     );
     expect(within(summary).getByText('Wages paid').nextSibling).toHaveTextContent('− ₹300');
+    // Advances are always listed, even when none were given, so the sum is visible in full.
+    expect(within(summary).getByText('Advances paid').nextSibling).toHaveTextContent('− ₹0');
     expect(within(summary).getByText('Balance due').nextSibling).toHaveTextContent('₹1,575');
 
     const days = screen.getByRole('table', { name: 'Attendance' });

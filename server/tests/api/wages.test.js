@@ -54,8 +54,22 @@ describe('wage summary', () => {
       absent: 2,
       earned: 252500,
       paidInPeriod: 30000,
+      wagesPaidInPeriod: 30000,
+      advancesInPeriod: 0,
       balance: 257500,
     });
+  });
+
+  it('splits what was paid in the period into wages and advances', async () => {
+    const res = await summary('from=2026-10-15&to=2026-10-31');
+    const ramesh = res.body.workers.find((w) => w.name === 'Ramesh Yadav');
+    // The voided ₹50 on 21 Oct is not counted; the ₹100 advance on 29 Oct is.
+    expect(ramesh).toMatchObject({
+      paidInPeriod: 40000,
+      wagesPaidInPeriod: 30000,
+      advancesInPeriod: 10000,
+    });
+    expect(res.body.totals).toMatchObject({ wagesPaidInPeriod: 30000, advancesInPeriod: 10000 });
   });
 
   it('daily grouping returns one bucket per day', async () => {

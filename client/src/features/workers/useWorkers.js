@@ -1,12 +1,16 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../lib/api.js';
 
+// What the Workers page asks for when it opens.
+export const DEFAULT_WORKER_FILTERS = { q: '', siteId: '', role: '', status: 'active', page: 1 };
+
+export const workersQuery = (filters) => ({
+  queryKey: ['workers', filters],
+  queryFn: () => api.get('/workers', { query: filters }),
+});
+
 export const useWorkers = (filters) =>
-  useQuery({
-    queryKey: ['workers', filters],
-    queryFn: () => api.get('/workers', { query: filters }),
-    placeholderData: keepPreviousData,
-  });
+  useQuery({ ...workersQuery(filters), placeholderData: keepPreviousData });
 
 export const useWorkerSummary = (id) =>
   useQuery({

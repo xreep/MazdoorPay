@@ -78,6 +78,14 @@ export const en = {
   },
   notFound: { body: 'This page does not exist.', home: 'Go to home' },
   dashboard: {
+    oneWorker: '{n} worker',
+    manyWorkers: '{n} workers',
+    oneSite: '{n} site',
+    manySites: '{n} sites',
+    trendTotals: '{present} full days, {halfDay} half days · {earned} earned',
+    trendNote:
+      'A rolling 30 days up to today. The Wages page counts the dates you pick there, so open these same days to compare.',
+    trendLink: 'See these days in Wages',
     morning: 'Good morning, {name}',
     afternoon: 'Good afternoon, {name}',
     evening: 'Good evening, {name}',
@@ -263,6 +271,19 @@ export const en = {
     print: 'Print',
   },
   wages: {
+    paidSplit: 'Wages {wages} · advances {advances}',
+    dueAllTime: 'Balance due (all time)',
+    advanceAllTime: 'Advance outstanding (all time)',
+    halfDayRule:
+      'Present earns the full daily wage, half-day earns half of it, absent earns nothing.',
+    basisNote:
+      'Payments in a period can be for work done earlier, so they need not match that period’s earnings. Balance due counts all work and all payments to date; an advance lowers it by exactly its amount.',
+    colEarned: 'Earned',
+    colWagesPaid: 'Wages paid',
+    colAdvances: 'Advances given',
+    colBalance: 'Balance due',
+    thisPeriod: '(this period)',
+    allTime: '(all time)',
     period: 'Period',
     thisWeek: 'This week',
     lastWeek: 'Last week',

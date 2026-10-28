@@ -44,6 +44,38 @@ const dashboard = {
 };
 
 describe('DashboardPage', () => {
+  it('shows how many workers and sites there are, from live data', async () => {
+    server.use(http.get(API('/dashboard'), () => HttpResponse.json(dashboard)));
+    renderWithProviders(<DashboardPage />);
+    expect(await screen.findByText('16 workers · 2 sites')).toBeInTheDocument();
+  });
+
+  it('says "1 worker · 1 site" for one of each', async () => {
+    server.use(
+      http.get(API('/dashboard'), () =>
+        HttpResponse.json({ ...dashboard, counts: { activeSites: 1, activeWorkers: 1 } })
+      )
+    );
+    renderWithProviders(<DashboardPage />);
+    expect(await screen.findByText('1 worker · 1 site')).toBeInTheDocument();
+  });
+
+  it('gives the 30 days their dates and totals, and opens the same days in Wages', async () => {
+    server.use(http.get(API('/dashboard'), () => HttpResponse.json(dashboard)));
+    renderWithProviders(<DashboardPage />);
+    expect(await screen.findByText('1 Oct, Thu – 30 Oct, Fri')).toBeInTheDocument();
+    expect(screen.getByText('300 full days, 30 half days · ₹2,70,000 earned')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /A rolling 30 days up to today\. The Wages page counts the dates you pick there/
+      )
+    ).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'See these days in Wages' })).toHaveAttribute(
+      'href',
+      '/wages?from=2026-10-01&to=2026-10-30'
+    );
+  });
+
   it("shows today's progress per site with a link to mark attendance", async () => {
     server.use(http.get(API('/dashboard'), () => HttpResponse.json(dashboard)));
     renderWithProviders(<DashboardPage />);

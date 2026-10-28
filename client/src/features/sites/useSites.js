@@ -1,11 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../lib/api.js';
 
-export const useSites = (status = 'all') =>
-  useQuery({
-    queryKey: ['sites', status],
-    queryFn: () => api.get('/sites', { query: { status } }).then((r) => r.sites),
-  });
+export const sitesQuery = (status = 'all') => ({
+  queryKey: ['sites', status],
+  queryFn: () => api.get('/sites', { query: { status } }).then((r) => r.sites),
+});
+
+export const useSites = (status = 'all') => useQuery(sitesQuery(status));
 
 // Active sites as select options, for filters and forms across the app.
 export function useSiteOptions() {

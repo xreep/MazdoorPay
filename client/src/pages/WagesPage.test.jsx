@@ -1,149 +1,85 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
-import { screen, waitFor, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { describe, expect, it } from 'vitest';
+import { screen } from '@testing-library/react';
 import { API, HttpResponse, http, server } from '../test/server.js';
 import { renderWithProviders } from '../test/render.jsx';
-import { S1, sitesResponse } from '../test/fixtures.js';
+import { sitesResponse } from '../test/fixtures.js';
 import WagesPage from './WagesPage.jsx';
 
-const summary = (groupBy) => ({
-  from: '2026-10-19',
-  to: '2026-10-25',
-  groupBy,
-  buckets: [
-    { start: '2026-10-19', end: '2026-10-25', present: 9, halfDay: 1, absent: 4, earned: 712500 },
-  ],
+const summary = (from, to) => ({
+  from,
+  to,
+  groupBy: 'week',
+  buckets: [{ start: from, end: to, present: 17, halfDay: 1, absent: 0, earned: 1540000 }],
   workers: [
     {
       workerId: 'w1',
-      name: 'Ramesh Kumar',
+      name: 'Ramesh Yadav',
       role: 'mason',
-      siteId: S1,
-      present: 5,
+      present: 17,
       halfDay: 1,
-      absent: 1,
-      earned: 522500,
-      paidInPeriod: 400000,
-      balance: 122500,
-      buckets: [{ start: '2026-10-19', present: 5, halfDay: 1, absent: 1, earned: 522500 }],
-    },
-    {
-      workerId: 'w2',
-      name: 'Kishan Lal',
-      role: 'helper',
-      siteId: S1,
-      present: 4,
-      halfDay: 0,
-      absent: 3,
-      earned: 190000,
-      paidInPeriod: 240000,
-      balance: -50000,
-      buckets: [{ start: '2026-10-19', present: 4, halfDay: 0, absent: 3, earned: 190000 }],
+      absent: 0,
+      earned: 1540000,
+      paidInPeriod: 1050000,
+      wagesPaidInPeriod: 1000000,
+      advancesInPeriod: 50000,
+      balance: 490000,
+      buckets: [{ start: from, present: 17, halfDay: 1, absent: 0, earned: 1540000 }],
     },
   ],
   totals: {
-    present: 9,
+    present: 17,
     halfDay: 1,
-    absent: 4,
-    earned: 712500,
-    paidInPeriod: 640000,
-    balance: 72500,
+    absent: 0,
+    earned: 1540000,
+    paidInPeriod: 1050000,
+    wagesPaidInPeriod: 1000000,
+    advancesInPeriod: 50000,
+    balance: 490000,
   },
 });
 
-function handlers(requests) {
-  return [
+const render = (route = '/wages', requests = []) => {
+  server.use(
     http.get(API('/sites'), () => HttpResponse.json(sitesResponse)),
     http.get(API('/wages/summary'), ({ request }) => {
       const params = new URL(request.url).searchParams;
       requests.push(params);
-      return HttpResponse.json(summary(params.get('groupBy')));
-    }),
-  ];
-}
-
-const render = () => renderWithProviders(<WagesPage />, { path: '/wages', route: '/wages' });
+      return HttpResponse.json(summary(params.get('from'), params.get('to')));
+    })
+  );
+  renderWithProviders(<WagesPage />, { path: '/wages', route });
+};
 
 describe('WagesPage', () => {
-  it('shows totals and per-worker earnings for the week', async () => {
-    const requests = [];
-    server.use(...handlers(requests));
+  it('says which figures cover the period and which cover all time', async () => {
     render();
-    await screen.findByRole('row', { name: /Ramesh Kumar/ });
+    expect(await screen.findByText('Earned in this period')).toBeInTheDocument();
+    expect(screen.getByText('Paid in this period')).toBeInTheDocument();
+    expect(screen.getByText('Wages ₹10,000 · advances ₹500')).toBeInTheDocument();
+    expect(screen.getByText('Balance due (all time)')).toBeInTheDocument();
     expect(
-      within(screen.getByRole('region', { name: 'Earned in this period' })).getByText('₹7,125')
-    ).toBeInTheDocument();
-    expect(
-      within(screen.getByRole('region', { name: 'Paid in this period' })).getByText('₹6,400')
-    ).toBeInTheDocument();
-    expect(requests[0].get('groupBy')).toBe('week');
-    const ramesh = screen.getByRole('row', { name: /Ramesh Kumar/ });
-    expect(within(ramesh).getByText('₹5,225')).toBeInTheDocument();
-    expect(
-      within(screen.getByRole('row', { name: /Kishan Lal/ })).getByText('₹500 advance')
+      screen.getByText(/Payments in a period can be for work done earlier/)
     ).toBeInTheDocument();
   });
 
-  it('daily / weekly toggle changes the grouping', async () => {
-    const requests = [];
-    server.use(...handlers(requests));
+  it('states the half-day rule', async () => {
     render();
-    await screen.findByRole('row', { name: /Ramesh Kumar/ });
-    await userEvent.click(screen.getByRole('radio', { name: 'Daily' }));
-    await waitFor(() => expect(requests.at(-1).get('groupBy')).toBe('day'));
+    expect(
+      await screen.findByText(
+        'Present earns the full daily wage, half-day earns half of it, absent earns nothing.'
+      )
+    ).toBeInTheDocument();
   });
 
-  it('a worker row expands to show each period', async () => {
-    server.use(...handlers([]));
-    render();
-    await screen.findByRole('row', { name: /Ramesh Kumar/ });
-    await userEvent.click(screen.getByRole('button', { name: 'Show breakdown for Ramesh Kumar' }));
-    const list = await screen.findByRole('list', { name: 'Breakdown for Ramesh Kumar' });
-    expect(within(list).getByText('19 Oct, Mon – 25 Oct, Sun')).toBeInTheDocument();
-  });
-
-  it('site filter, register download and print use the same range', async () => {
+  it('opens at the dates given in the link, so other screens can point to the same days', async () => {
     const requests = [];
-    const downloads = [];
-    server.use(
-      ...handlers(requests),
-      http.get(API('/reports/wage-register'), ({ request }) => {
-        downloads.push(new URL(request.url).searchParams);
-        return new HttpResponse('Name\r\n', { headers: { 'Content-Type': 'text/csv' } });
-      })
+    render('/wages?from=2026-09-29&to=2026-10-28', requests);
+    await screen.findByText('Earned in this period');
+    expect(requests.at(-1).get('from')).toBe('2026-09-29');
+    expect(requests.at(-1).get('to')).toBe('2026-10-28');
+    expect(screen.getByRole('radio', { name: 'Choose dates' })).toHaveAttribute(
+      'aria-checked',
+      'true'
     );
-    render();
-    await screen.findByRole('row', { name: /Ramesh Kumar/ });
-    await userEvent.selectOptions(screen.getByLabelText('Site'), S1);
-    await waitFor(() => expect(requests.at(-1).get('siteId')).toBe(S1));
-    const { from, to } = Object.fromEntries(requests.at(-1));
-    await userEvent.click(screen.getByRole('button', { name: 'Download wage register (CSV)' }));
-    await waitFor(() => expect(downloads).toHaveLength(1));
-    expect(Object.fromEntries(downloads[0])).toMatchObject({ from, to, siteId: S1, format: 'csv' });
-    expect(screen.getByRole('link', { name: 'Print wage register' })).toHaveAttribute(
-      'href',
-      `/print/wage-register?from=${from}&to=${to}&siteId=${S1}`
-    );
-  });
-
-  it('on a phone shows each worker as a card with the money visible', async () => {
-    const original = window.matchMedia;
-    window.matchMedia = vi.fn((query) => ({
-      matches: query.includes('max-width'),
-      media: query,
-      addEventListener() {},
-      removeEventListener() {},
-    }));
-    server.use(...handlers([]));
-    render();
-    const list = await screen.findByRole('list', { name: 'Wages per worker' });
-    expect(screen.queryByRole('table')).toBeNull();
-    const card = within(list).getAllByRole('listitem')[0];
-    expect(within(card).getByText('Ramesh Kumar')).toBeInTheDocument();
-    expect(within(card).getByText('₹5,225')).toBeInTheDocument();
-    expect(within(card).getByText('₹1,225')).toBeInTheDocument();
-    window.matchMedia = original;
   });
 });
-
-afterEach(() => vi.restoreAllMocks());

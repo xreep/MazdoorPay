@@ -76,9 +76,7 @@ function WageSlip({ data }) {
             </Line>
             <Line label={t('slip.earned')}>+ {formatINR(totals.earned)}</Line>
             <Line label={t('print.wagesPaid')}>− {formatINR(totals.wagesPaid)}</Line>
-            {totals.advancesPaid > 0 && (
-              <Line label={t('slip.advancesPaid')}>− {formatINR(totals.advancesPaid)}</Line>
-            )}
+            <Line label={t('slip.advancesPaid')}>− {formatINR(totals.advancesPaid)}</Line>
             <Line strong label={closingBalance < 0 ? t('slip.advanceAfter') : t('slip.due')}>
               {formatINR(Math.abs(closingBalance))}
             </Line>

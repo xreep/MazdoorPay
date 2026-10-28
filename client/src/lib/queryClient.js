@@ -7,7 +7,8 @@ const retry = (failureCount, error) =>
 export const createQueryClient = () =>
   new QueryClient({
     defaultOptions: {
-      queries: { staleTime: 30_000, retry, refetchOnWindowFocus: false },
+      // Pages revisited within 30 minutes show their last data at once, then refresh quietly.
+      queries: { staleTime: 30_000, gcTime: 30 * 60_000, retry, refetchOnWindowFocus: false },
       mutations: { retry: false },
     },
   });

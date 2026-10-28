@@ -51,14 +51,21 @@ export async function getWageSummary(contractorId, { from, to, groupBy, siteId, 
     ]),
     Payment.aggregate([
       { $match: { ...match, voidedAt: null } },
-      { $group: { _id: '$workerId', total: { $sum: '$amount' } } },
+      { $group: { _id: { workerId: '$workerId', type: '$type' }, total: { $sum: '$amount' } } },
     ]),
   ]);
 
   const buckets = buildBuckets(from, to, groupBy).map((b) => ({ ...b, ...emptyCounts() }));
   const bucketIndex = new Map(buckets.map((b, i) => [b.start, i]));
   const keyOf = bucketKeyFor(groupBy, from);
-  const paidBy = new Map(paid.map((p) => [String(p._id), p.total]));
+  // What was paid in the period, split into wages and advances (voided payments left out).
+  const paidBy = new Map();
+  for (const { _id, total } of paid) {
+    const id = String(_id.workerId);
+    const entry = paidBy.get(id) ?? { wage: 0, advance: 0 };
+    entry[_id.type] += total;
+    paidBy.set(id, entry);
+  }
 
   const perWorker = new Map();
   const workerRow = (id) => {
@@ -96,14 +103,22 @@ export async function getWageSummary(contractorId, { from, to, groupBy, siteId, 
         role: w.role,
         siteId: w.siteId ? String(w.siteId) : null,
         ...counts,
-        paidInPeriod: paidBy.get(id) ?? 0,
+        paidInPeriod: (paidBy.get(id)?.wage ?? 0) + (paidBy.get(id)?.advance ?? 0),
+        wagesPaidInPeriod: paidBy.get(id)?.wage ?? 0,
+        advancesInPeriod: paidBy.get(id)?.advance ?? 0,
         balance: balances.get(id).balance,
         buckets: wb,
       };
     })
     .sort((x, y) => x.name.localeCompare(y.name));
 
-  const totals = { ...emptyCounts(), paidInPeriod: 0, balance: 0 };
+  const totals = {
+    ...emptyCounts(),
+    paidInPeriod: 0,
+    wagesPaidInPeriod: 0,
+    advancesInPeriod: 0,
+    balance: 0,
+  };
   for (const w of workerRows) {
     for (const k of Object.keys(totals)) totals[k] += w[k];
   }

@@ -1,11 +1,14 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../lib/api.js';
 
+export const duesQuery = (siteId) => ({
+  queryKey: ['dues', siteId ?? ''],
+  queryFn: () => api.get('/payments/dues', { query: { siteId } }),
+});
+
+// Changing the site filter keeps the current list on screen until the new one arrives.
 export const useDues = (siteId) =>
-  useQuery({
-    queryKey: ['dues', siteId ?? ''],
-    queryFn: () => api.get('/payments/dues', { query: { siteId } }),
-  });
+  useQuery({ ...duesQuery(siteId), placeholderData: keepPreviousData });
 
 export const usePaymentHistory = (filters) =>
   useQuery({

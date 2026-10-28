@@ -79,6 +79,14 @@ export const hi = {
   },
   notFound: { body: 'यह पन्ना मौजूद नहीं है।', home: 'होम पर जाएँ' },
   dashboard: {
+    oneWorker: '{n} मज़दूर',
+    manyWorkers: '{n} मज़दूर',
+    oneSite: '{n} साइट',
+    manySites: '{n} साइटें',
+    trendTotals: '{present} पूरे दिन, {halfDay} आधे दिन · {earned} कमाई',
+    trendNote:
+      'आज तक के पिछले 30 दिन। मज़दूरी पन्ना वही तारीख़ें गिनता है जो आप वहाँ चुनते हैं, इसलिए मिलान के लिए यही दिन वहाँ खोलें।',
+    trendLink: 'यही दिन मज़दूरी में देखें',
     morning: 'सुप्रभात, {name}',
     afternoon: 'नमस्ते, {name}',
     evening: 'शुभ संध्या, {name}',
@@ -264,6 +272,18 @@ export const hi = {
     print: 'छापें',
   },
   wages: {
+    paidSplit: 'मज़दूरी {wages} · एडवांस {advances}',
+    dueAllTime: 'बाकी देना है (अब तक कुल)',
+    advanceAllTime: 'बाकी एडवांस (अब तक कुल)',
+    halfDayRule: 'हाज़िर पर पूरी रोज़ की मज़दूरी, आधे दिन पर उसकी आधी, ग़ैरहाज़िर पर कुछ नहीं।',
+    basisNote:
+      'किसी समय में दिया गया भुगतान पहले के काम का भी हो सकता है, इसलिए उसका उस समय की कमाई से मिलना ज़रूरी नहीं। बाकी में अब तक का सारा काम और सारे भुगतान गिने जाते हैं; एडवांस उसे ठीक अपनी रकम जितना घटाता है।',
+    colEarned: 'कमाई',
+    colWagesPaid: 'दी गई मज़दूरी',
+    colAdvances: 'दिया गया एडवांस',
+    colBalance: 'बाकी देना है',
+    thisPeriod: '(इस समय में)',
+    allTime: '(अब तक कुल)',
     period: 'समय',
     thisWeek: 'यह हफ़्ता',
     lastWeek: 'पिछला हफ़्ता',

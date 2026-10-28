@@ -1,8 +1,52 @@
+import crypto from 'node:crypto';
 import { useTestDb } from '../helpers/db.js';
 import { authed, registerContractor } from '../helpers/factory.js';
 import { ledgerFixture } from '../helpers/ledgerFixture.js';
 
 useTestDb();
+
+describe('an advance', () => {
+  // Worked example: an advance of ₹150 lowers what the worker is owed by exactly ₹150, on the
+  // Wages page, the wage slip and the dues list alike.
+  it('reduces the balance due by exactly its amount everywhere it is shown', async () => {
+    const fx = await ledgerFixture();
+    const id = fx.w1._id;
+    // The whole of October, so the fixture's payments (up to 29 Oct) are all inside it.
+    const range = 'from=2026-10-01&to=2026-10-31';
+    const read = async () => {
+      const [wages, slip, dues] = await Promise.all([
+        fx.api.get(`/api/v1/wages/summary?${range}`),
+        fx.api.get(`/api/v1/workers/${id}/slip?${range}`),
+        fx.api.get('/api/v1/payments/dues'),
+      ]);
+      return {
+        wages: wages.body.workers.find((w) => w.workerId === id).balance,
+        slip: slip.body.closingBalance,
+        slipAdvances: slip.body.totals.advancesPaid,
+        dues: dues.body.dues.find((d) => d.workerId === id).balance,
+      };
+    };
+    const before = await read();
+    expect(before.wages).toBe(before.slip);
+    expect(before.dues).toBe(before.slip);
+
+    const res = await fx.api.post('/api/v1/payments', {
+      workerId: id,
+      amount: 15000,
+      type: 'advance',
+      method: 'cash',
+      day: '2026-10-20',
+      idempotencyKey: crypto.randomUUID(),
+    });
+    expect(res.status).toBe(201);
+
+    const after = await read();
+    expect(before.wages - after.wages).toBe(15000);
+    expect(before.slip - after.slip).toBe(15000);
+    expect(before.dues - after.dues).toBe(15000);
+    expect(after.slipAdvances - before.slipAdvances).toBe(15000);
+  });
+});
 
 describe('GET /workers/:id/slip', () => {
   it("adds up one worker's period from the previous balance to the closing balance", async () => {

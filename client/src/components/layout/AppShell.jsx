@@ -15,7 +15,9 @@ import {
   Users,
   Wallet,
 } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../../auth/AuthProvider.jsx';
+import { warmUpContractorPages } from '../../lib/warmUp.js';
 import { useT } from '../../lib/i18n.jsx';
 import { initials } from '../../lib/format.js';
 import { Modal } from '../ui/Modal.jsx';
@@ -118,6 +120,11 @@ export function AppShell() {
   const { pathname } = useLocation();
   const [moreOpen, setMoreOpen] = useState(false);
   const nav = user?.role === 'admin' ? ADMIN_NAV : CONTRACTOR_NAV;
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (user?.role === 'contractor') warmUpContractorPages(queryClient);
+  }, [user?.role, queryClient]);
 
   useEffect(() => setMoreOpen(false), [pathname]);
 

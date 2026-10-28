@@ -1,19 +1,69 @@
 import { Fragment, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { ChevronDown } from 'lucide-react';
+import { formatINR } from '@mazdoorpay/shared';
+import { api } from '../../lib/api.js';
 import { useFormat, useT } from '../../lib/i18n.jsx';
 import { Money } from '../../components/ui/Money.jsx';
+import { QueryError } from '../../components/ui/QueryError.jsx';
+import { SkeletonRows } from '../../components/ui/Skeleton.jsx';
 
-const bucketLabel = (bucket, groupBy, formatDay) =>
-  groupBy === 'day'
-    ? formatDay(bucket.start)
-    : `${formatDay(bucket.start)} – ${formatDay(bucket.end)}`;
+const STATUS_KEY = { present: 'present', 'half-day': 'halfDay', absent: 'absent' };
+
+// A money column's name, with the period it covers underneath.
+export function MoneyHeading({ label, basis }) {
+  return (
+    <>
+      {label} <span className="block font-normal">{basis}</span>
+    </>
+  );
+}
+
+// Day by day, as on the wage slip; shares its data (and cache) with the printable slip.
+function WorkerDays({ worker, from, to }) {
+  const t = useT();
+  const { formatDay } = useFormat();
+  const query = { from, to };
+  const { data, isPending, isError, error, refetch } = useQuery({
+    queryKey: ['wage-slip', worker.workerId, query],
+    queryFn: () => api.get(`/workers/${worker.workerId}/slip`, { query }),
+  });
+  if (isPending) return <SkeletonRows n={3} />;
+  if (isError) return <QueryError error={error} onRetry={refetch} />;
+  if (data.days.length === 0) return <p className="text-sm text-ink-muted">{t('slip.noDays')}</p>;
+  const cell = 'px-3 py-1.5';
+  return (
+    <table
+      aria-label={t('wages.breakdownFor', { name: worker.name })}
+      className="w-full max-w-xl text-sm"
+    >
+      <thead className="text-left text-xs text-ink-muted">
+        <tr>
+          <th className={cell}>{t('print.date')}</th>
+          <th className={cell}>{t('print.status')}</th>
+          <th className={`${cell} text-right`}>{t('print.rate')}</th>
+          <th className={`${cell} text-right`}>{t('print.earned')}</th>
+        </tr>
+      </thead>
+      <tbody className="divide-y divide-border">
+        {data.days.map((d) => (
+          <tr key={d.day}>
+            <td className={cell}>{formatDay(d.day)}</td>
+            <td className={cell}>{t(`status.${STATUS_KEY[d.status]}`)}</td>
+            <td className={`num ${cell} text-right`}>{formatINR(d.rate)}</td>
+            <td className={`num ${cell} text-right`}>{formatINR(d.earned)}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
 
 const slipHref = (workerId, data) => `/print/wage-slip/${workerId}?from=${data.from}&to=${data.to}`;
 
 export function WageTable({ data }) {
   const t = useT();
-  const { formatDay } = useFormat();
   const [open, setOpen] = useState(() => new Set());
   const toggle = (id) =>
     setOpen((s) => {
@@ -27,16 +77,25 @@ export function WageTable({ data }) {
 
   return (
     <div className="overflow-x-auto">
-      <table className="w-full min-w-[44rem] border-collapse">
+      <table className="w-full min-w-[54rem] border-collapse">
         <thead className="border-b border-border bg-surface-2/60">
           <tr>
             <th className={`${th} pl-5`}>{t('wages.worker')}</th>
             <th className={`${th} text-right`}>{t('status.present')}</th>
             <th className={`${th} text-right`}>{t('status.halfDay')}</th>
             <th className={`${th} text-right`}>{t('status.absent')}</th>
-            <th className={`${th} text-right`}>{t('wages.earned')}</th>
-            <th className={`${th} text-right`}>{t('wages.paid')}</th>
-            <th className={`${th} text-right`}>{t('wages.balanceNow')}</th>
+            <th className={`${th} text-right`}>
+              <MoneyHeading label={t('wages.colEarned')} basis={t('wages.thisPeriod')} />
+            </th>
+            <th className={`${th} text-right`}>
+              <MoneyHeading label={t('wages.colWagesPaid')} basis={t('wages.thisPeriod')} />
+            </th>
+            <th className={`${th} text-right`}>
+              <MoneyHeading label={t('wages.colAdvances')} basis={t('wages.thisPeriod')} />
+            </th>
+            <th className={`${th} text-right`}>
+              <MoneyHeading label={t('wages.colBalance')} basis={t('wages.allTime')} />
+            </th>
             <th className="w-12" aria-hidden="true" />
           </tr>
         </thead>
@@ -68,7 +127,10 @@ export function WageTable({ data }) {
                     <Money paise={w.earned} />
                   </td>
                   <td className={num}>
-                    <Money paise={w.paidInPeriod} />
+                    <Money paise={w.wagesPaidInPeriod} />
+                  </td>
+                  <td className={num}>
+                    <Money paise={w.advancesInPeriod} />
                   </td>
                   <td className={`${num} font-semibold`}>
                     <Money paise={w.balance} tone="auto" />
@@ -90,32 +152,8 @@ export function WageTable({ data }) {
                 </tr>
                 {expanded && (
                   <tr className="bg-surface-2/40">
-                    <td colSpan={8} className="px-5 py-3">
-                      <ul
-                        aria-label={t('wages.breakdownFor', { name: w.name })}
-                        className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3"
-                      >
-                        {w.buckets.map((b, i) => (
-                          <li
-                            key={b.start}
-                            className="flex items-center justify-between gap-3 rounded-control bg-surface px-3 py-2 text-sm"
-                          >
-                            <span>
-                              <span className="block font-medium">
-                                {bucketLabel(data.buckets[i], data.groupBy, formatDay)}
-                              </span>
-                              <span className="num text-ink-muted">
-                                {t('wages.bucketCounts', {
-                                  present: b.present,
-                                  halfDay: b.halfDay,
-                                  absent: b.absent,
-                                })}
-                              </span>
-                            </span>
-                            <Money paise={b.earned} className="font-semibold" />
-                          </li>
-                        ))}
-                      </ul>
+                    <td colSpan={9} className="px-5 py-3">
+                      <WorkerDays worker={w} from={data.from} to={data.to} />
                     </td>
                   </tr>
                 )}
@@ -133,7 +171,10 @@ export function WageTable({ data }) {
               <Money paise={data.totals.earned} />
             </td>
             <td className={num}>
-              <Money paise={data.totals.paidInPeriod} />
+              <Money paise={data.totals.wagesPaidInPeriod} />
+            </td>
+            <td className={num}>
+              <Money paise={data.totals.advancesInPeriod} />
             </td>
             <td className={num}>
               <Money paise={data.totals.balance} tone="auto" />

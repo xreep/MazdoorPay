@@ -111,17 +111,32 @@ function DashboardSkeleton() {
 
 export default function DashboardPage() {
   const t = useT();
-  const { formatDayLong } = useFormat();
+  const { formatDay, formatDayLong } = useFormat();
   const { user } = useAuth();
   const { data, isPending, isError, error, refetch } = useDashboard();
   const firstName = user?.name?.split(' ')[0] ?? '';
+  // Live counts, so the contractor never has to add up the sites.
+  const headline =
+    data &&
+    `${t(data.counts.activeWorkers === 1 ? 'dashboard.oneWorker' : 'dashboard.manyWorkers', { n: data.counts.activeWorkers })} · ${t(data.counts.activeSites === 1 ? 'dashboard.oneSite' : 'dashboard.manySites', { n: data.counts.activeSites })}`;
+  const trendFrom = data?.trend[0]?.day;
+  const trendTo = data?.trend.at(-1)?.day;
+  const trendSum = (key) => (data ? data.trend.reduce((total, d) => total + d[key], 0) : 0);
 
   return (
     <>
       <PageHeader
         title={t(greetingKey(), { name: firstName })}
         documentTitle={t('nav.home')}
-        subtitle={data ? formatDayLong(data.today) : ' '}
+        subtitle={
+          data ? (
+            <>
+              <span>{formatDayLong(data.today)}</span> · <span>{headline}</span>
+            </>
+          ) : (
+            ' '
+          )
+        }
         actions={
           data?.sites.length ? (
             <>
@@ -212,7 +227,10 @@ export default function DashboardPage() {
 
           <Card className="p-5">
             <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
-              <h2 className="text-lg font-bold">{t('dashboard.trendTitle')}</h2>
+              <div>
+                <h2 className="text-lg font-bold">{t('dashboard.trendTitle')}</h2>
+                <p className="text-sm text-ink-muted">{`${formatDay(trendFrom)} – ${formatDay(trendTo)}`}</p>
+              </div>
               <ul className="flex gap-4 text-sm text-ink-muted">
                 <li className="flex items-center gap-1.5">
                   <span className="h-2.5 w-2.5 rounded-sm bg-present" />
@@ -233,6 +251,22 @@ export default function DashboardPage() {
               </ul>
             </div>
             <TrendChart data={data.trend} />
+            <p className="num mt-3 font-semibold">
+              {t('dashboard.trendTotals', {
+                present: trendSum('present'),
+                halfDay: trendSum('halfDay'),
+                earned: formatINR(trendSum('earned')),
+              })}
+            </p>
+            <p className="mt-1 text-sm text-ink-muted">
+              {t('dashboard.trendNote')}{' '}
+              <Link
+                to={`/wages?from=${trendFrom}&to=${trendTo}`}
+                className="font-semibold text-brand-ink hover:underline"
+              >
+                {t('dashboard.trendLink')}
+              </Link>
+            </p>
           </Card>
         </div>
       )}
